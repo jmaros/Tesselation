@@ -94,8 +94,7 @@ namespace Nessie {
     {
         for (size_t row = 0; row < m_tableLayout.NumRows(); ++row) {
             for (size_t col = 0; col < m_tableLayout.NumCols(); ++col) {
-				m_tableShape[row].SetValue(col, m_tableLayout[row][col]);	// TODO
-				cout << " " << m_tableLayout[row][col];
+				m_tableShape[row].SetValue(col, m_tableLayout[row][col]);
             }
         }
     }
