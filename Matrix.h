@@ -22,86 +22,86 @@ namespace LinAlg {
     class Row {
     public:
     // constructors
-        explicit Row (size_t	numCols,
-					  const T	& initialValue = T{});
+        explicit Row (size_t    numCols,
+                      const T    & initialValue = T{});
 
     // accessors
-        inline const T	Value	(size_t	numCol) const;
-        inline size_t	Size	()				const;
+        inline const T    Value  (size_t    numCol) const;
+        inline size_t    Size    ()                 const;
         // operators
-        const T& operator [] (size_t	index) const;
+        const T& operator []     (size_t    index)  const;
 
     // modifyers
-		inline bool SetValue(size_t		col,
-							 T			value);
+        inline bool SetValue (size_t        col,
+                              T            value);
 
-		inline void PushBack (const T		element);
-			// operators
-        T& operator [] (size_t	index);
+        inline void PushBack (const T        element);
+            // operators
+        T& operator [] (size_t    index);
     private:
-        vector<T>		m_row;
+        vector<T>        m_row;
     };
 
     template <typename T> 
     class Matrix {
     public:
-        Matrix<T>(size_t		numRows,
-                  size_t		numCols,
-                  const		T&	initialValue = T{});
+        Matrix<T>(size_t        numRows,
+                  size_t        numCols,
+                  const T       & initialValue = T{});
 
     // accessors
-        constexpr size_t MinRow () const;
-        constexpr size_t MinCol () const;
-        inline size_t RowSize () const;
-        inline size_t ColSize () const;
+        constexpr size_t MinRow ()     const;
+        constexpr size_t MinCol ()     const;
+        inline size_t RowSize ()       const;
+        inline size_t ColSize ()       const;
         inline size_t RowUpperLimit () const;
         inline size_t ColUpperLimit () const;
 
-        inline const T&	DataCRef (size_t		rowIndex,
-                                  size_t		colIndex) const;
+        inline const T&    DataCRef (size_t        rowIndex,
+                                     size_t        colIndex) const;
 
-        inline const T	Value (size_t		rowIndex,
-                               size_t		colIndex) const;
+        inline const T    Value (size_t        rowIndex,
+                                 size_t        colIndex) const;
 
-        inline size_t	Size () const;
+        inline size_t    Size () const;
 
         Matrix<T> CreateTransposed () const;
 
     // operators
-        const Row<T>& operator [] (size_t	index) const;
+        const Row<T>& operator [] (size_t    index) const;
 
     // modifiers
-		inline bool SetValue(size_t		col,
-							 T			value);
+        inline bool SetValue(size_t        col,
+                             T            value);
 
-		inline void PushBack (const Row<T>		& row);
-		
-		inline T& DataRef (size_t		rowIndex,
-                           size_t		colIndex);
+        inline void PushBack (const Row<T>        & row);
+        
+        inline T& DataRef (size_t        rowIndex,
+                           size_t        colIndex);
 
     // operators
-        Row<T>& operator [] (size_t	index);
+        Row<T>& operator [] (size_t    index);
 
     private:
-        vector<Row<T>>		m_rows;
+        vector<Row<T>>        m_rows;
     };
 
 
 // definitions
     // constructors
     template <typename T>
-    Row<T>::Row (size_t		numCols,
-                 const T	& initialValue)
-        : m_row			(numCols,
-                         initialValue)
+    Row<T>::Row (size_t     numCols,
+                 const T    & initialValue)
+        : m_row   (numCols,
+                   initialValue)
     {
     }
 
     template <typename T>
-    Matrix<T>::Matrix (size_t	numRows,
-                       size_t	numCols,
-                       const T	& initialValue)
-        : m_rows	(numRows,
+    Matrix<T>::Matrix (size_t    numRows,
+                       size_t    numCols,
+                       const T   & initialValue)
+        : m_rows    (numRows,
                      Row<T> (numCols,
                              initialValue))
     {
@@ -109,7 +109,7 @@ namespace LinAlg {
 
     // accessors
     template <typename T>
-    inline const T Row<T>::Value (size_t		numCol) const
+    inline const T Row<T>::Value (size_t        numCol) const
     {
         return m_row[numCol];
     }
@@ -158,28 +158,28 @@ namespace LinAlg {
 
     // preferred data access for non POD typenames
     template <typename T>
-    inline const T& Matrix<T>::DataCRef(size_t		rowIndex,
-                                        size_t		colIndex) const
+    inline const T& Matrix<T>::DataCRef(size_t        rowIndex,
+                                        size_t        colIndex) const
     {
         return m_rows[rowIndex][colIndex];
     }
 
     template <typename T>
-    inline const T	Matrix<T>::Value (size_t		rowIndex,
-                                      size_t		colIndex) const
+    inline const T    Matrix<T>::Value (size_t        rowIndex,
+                                        size_t        colIndex) const
     {
         return m_rows[rowIndex][colIndex];
     }
 
     // operators
     template <typename T>
-    const T& Row<T>::operator [] (size_t	index) const
+    const T& Row<T>::operator [] (size_t    index) const
     {
         return m_row[index];
     }
 
     template <typename T>
-    const Row<T>& Matrix<T>::operator [] (size_t	rowIndex) const
+    const Row<T>& Matrix<T>::operator [] (size_t    rowIndex) const
     {
         return m_rows[rowIndex];
     }
@@ -198,37 +198,37 @@ namespace LinAlg {
     }
 
 // modifiers
-	template <typename T>
-	inline bool Row<T>::SetValue (size_t	col,
-								  T			value)
-	{
-		bool succ = col < Size();
-		if (succ) {
-			this->m_row[col] = value;
-		}
-		return succ;
-	}
+    template <typename T>
+    inline bool Row<T>::SetValue (size_t    col,
+                                  T            value)
+    {
+        bool succ = col < Size();
+        if (succ) {
+            this->m_row[col] = value;
+        }
+        return succ;
+    }
 
-	template <typename T>
-	inline void Row<T>::PushBack (const T		element)
-	{
-		m_row.push_back(element);
-	}
-	template <typename T>
-	inline void Matrix<T>::PushBack (const Row<T>		& row)
-	{
-		m_rows.push_back(row);
-	}
+    template <typename T>
+    inline void Row<T>::PushBack (const T        element)
+    {
+        m_row.push_back(element);
+    }
+    template <typename T>
+    inline void Matrix<T>::PushBack (const Row<T>        & row)
+    {
+        m_rows.push_back(row);
+    }
 
     // operators
     template <typename T>
-    T& Row<T>::operator [] (size_t	index)
+    T& Row<T>::operator [] (size_t    index)
     {
         return m_row[index];
     }
 
     template <typename T>
-    Row<T>& Matrix<T>::operator [] (size_t	rowIndex)
+    Row<T>& Matrix<T>::operator [] (size_t    rowIndex)
     {
         return m_rows[rowIndex];
     }

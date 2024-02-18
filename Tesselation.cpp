@@ -17,40 +17,40 @@ namespace Nessie {
     using std::map;
 
     const map<MonthEnum, int> MonthDays {
-        { MonthEnum::January,	31 },
-        { MonthEnum::LeapFebr,	29 },
-        { MonthEnum::February,	28 },
-        { MonthEnum::March,		31 },
-        { MonthEnum::April,		30 },
-        { MonthEnum::May,		31 },
-        { MonthEnum::June,		30 },
-        { MonthEnum::July,		31 },
-        { MonthEnum::August,	31 },
-        { MonthEnum::September,	30 },
-        { MonthEnum::October,	31 },
-        { MonthEnum::November,	30 },
-        { MonthEnum::December,	31 }
+        { MonthEnum::January,    31 },
+        { MonthEnum::LeapFebr,    29 },
+        { MonthEnum::February,    28 },
+        { MonthEnum::March,        31 },
+        { MonthEnum::April,        30 },
+        { MonthEnum::May,        31 },
+        { MonthEnum::June,        30 },
+        { MonthEnum::July,        31 },
+        { MonthEnum::August,    31 },
+        { MonthEnum::September,    30 },
+        { MonthEnum::October,    31 },
+        { MonthEnum::November,    30 },
+        { MonthEnum::December,    31 }
     };
 
     const map<MonthEnum, string> MonthNames {
-        { MonthEnum::Unknown,	"Undisclosed"	},
-        { MonthEnum::January,	"January"		},
-        { MonthEnum::LeapFebr,	"February"		},
-        { MonthEnum::February,	"February"		},
-        { MonthEnum::March,		"March"			},
-        { MonthEnum::April,		"April"			},
-        { MonthEnum::May,		"May"			},
-        { MonthEnum::June,		"June"			},
-        { MonthEnum::July,		"July"			},
-        { MonthEnum::August,	"August"		},
-        { MonthEnum::September,	"September"		},
-        { MonthEnum::October,	"October"		},
-        { MonthEnum::November,	"November"		},
-        { MonthEnum::December,	"December"		}
+        { MonthEnum::Unknown,    "Undisclosed"    },
+        { MonthEnum::January,    "January"        },
+        { MonthEnum::LeapFebr,    "February"        },
+        { MonthEnum::February,    "February"        },
+        { MonthEnum::March,        "March"            },
+        { MonthEnum::April,        "April"            },
+        { MonthEnum::May,        "May"            },
+        { MonthEnum::June,        "June"            },
+        { MonthEnum::July,        "July"            },
+        { MonthEnum::August,    "August"        },
+        { MonthEnum::September,    "September"        },
+        { MonthEnum::October,    "October"        },
+        { MonthEnum::November,    "November"        },
+        { MonthEnum::December,    "December"        }
     };
 
     // standalone helper functions
-    string NameOfMonth (MonthEnum	month)
+    string NameOfMonth (MonthEnum    month)
     {
         string mnStr;
         auto mnmCit = MonthNames.find(month);
@@ -62,16 +62,16 @@ namespace Nessie {
         return mnStr;
     }
 
-    string DateStr (MonthEnum	month,
-                    int		day)
+    string DateStr (MonthEnum    month,
+                    int        day)
     {
         stringstream dateStream;
         dateStream << NameOfMonth(month) << " " << day;
         return dateStream.str();
     }
 
-    bool IsValidDate (MonthEnum		month,
-                      int		day)
+    bool IsValidDate (MonthEnum        month,
+                      int        day)
     {
         bool isValid{};
         auto mldCit = MonthDays.find(month);
@@ -81,30 +81,30 @@ namespace Nessie {
         return isValid;
     }
 
-    Tesselation::Tesselation (const TableLayout			& table,
-                              const ShapeCollection		& shapes,
-                              MonthEnum					month,
-                              int						day)
-     : m_tableLayout	(table)
-     , m_shapes			(shapes)
-     , m_month			(month)
-     , m_day			(day)
-     , m_tableShape		(table.NumRows(),
+    Tesselation::Tesselation (const TableLayout            & table,
+                              const ShapeCollection        & shapes,
+                              MonthEnum                    month,
+                              int                        day)
+     : m_tableLayout    (table)
+     , m_shapes            (shapes)
+     , m_month            (month)
+     , m_day            (day)
+     , m_tableShape        (table.NumRows(),
                          table.NumCols())
     {
         for (size_t row = 0; row < m_tableLayout.NumRows(); ++row) {
             for (size_t col = 0; col < m_tableLayout.NumCols(); ++col) {
-				m_tableShape[row].SetValue(col, m_tableLayout[row][col]);
+                m_tableShape[row].SetValue(col, m_tableLayout[row][col]);
             }
         }
     }
 
-    MonthEnum Tesselation::Month ()	const
+    MonthEnum Tesselation::Month ()    const
     {
         return m_month;
     }
 
-    int Tesselation::Day ()	const
+    int Tesselation::Day ()    const
     {
         return m_day;
     }
@@ -137,13 +137,13 @@ int main ()
     };
 
     //const TableShape tableShape = {
-    //	{ 0, 0, 0, 0, 0, 0, 1 },
-    //	{ 0, 0, 0, 0, 0, 0, 1 },
-    //	{ 0, 0, 0, 0, 0, 0, 0 },
-    //	{ 0, 0, 0, 0, 0, 0, 0 },
-    //	{ 0, 0, 0, 0, 0, 0, 0 },
-    //	{ 0, 0, 0, 0, 0, 0, 0 },
-    //	{ 0, 0, 0, 1, 1, 1, 1 }
+    //    { 0, 0, 0, 0, 0, 0, 1 },
+    //    { 0, 0, 0, 0, 0, 0, 1 },
+    //    { 0, 0, 0, 0, 0, 0, 0 },
+    //    { 0, 0, 0, 0, 0, 0, 0 },
+    //    { 0, 0, 0, 0, 0, 0, 0 },
+    //    { 0, 0, 0, 0, 0, 0, 0 },
+    //    { 0, 0, 0, 1, 1, 1, 1 }
     //};
 
 
@@ -176,9 +176,9 @@ int main ()
          { 1, 0, 0, 0 }}
     };
 
-    MonthEnum	month		= MonthEnum::February;
-    int		day			= 17;
-    bool	isLeapYear	= true;
+    MonthEnum    month        = MonthEnum::February;
+    int        day            = 17;
+    bool    isLeapYear    = true;
 
     if (isLeapYear && month == MonthEnum::February) {
         month = MonthEnum::LeapFebr;
