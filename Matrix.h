@@ -4,6 +4,7 @@
 //
 
 #include <iostream>
+#include <iomanip>
 #include <memory>
 #include <vector>
 
@@ -22,17 +23,20 @@ namespace LinAlg {
     public:
     // constructors
         explicit Row (size_t	numCols,
-                      const T	& initialValue);
+					  const T	& initialValue = T{});
 
     // accessors
-        inline const T& CRefVal (size_t	numCol) const;
         inline const T	Value	(size_t	numCol) const;
         inline size_t	Size	()				const;
         // operators
         const T& operator [] (size_t	index) const;
 
     // modifyers
-        // operators
+		inline bool SetValue(size_t		col,
+							 T			value);
+
+		inline void PushBack (const T		element);
+			// operators
         T& operator [] (size_t	index);
     private:
         vector<T>		m_row;
@@ -67,7 +71,12 @@ namespace LinAlg {
         const Row<T>& operator [] (size_t	index) const;
 
     // modifiers
-        inline T& DataRef (size_t		rowIndex,
+		inline bool SetValue(size_t		col,
+							 T			value);
+
+		inline void PushBack (const Row<T>		& row);
+		
+		inline T& DataRef (size_t		rowIndex,
                            size_t		colIndex);
 
     // operators
@@ -99,12 +108,6 @@ namespace LinAlg {
     }
 
     // accessors
-    template <typename T>
-    inline const T& Row<T>::CRefVal (size_t		numCol) const
-    {
-        return m_row[numCol];
-    }
-
     template <typename T>
     inline const T Row<T>::Value (size_t		numCol) const
     {
@@ -195,12 +198,27 @@ namespace LinAlg {
     }
 
 // modifiers
-    template <typename T>
-    inline T& Matrix<T>::DataRef (size_t		rowIndex,
-                                  size_t		colIndex)
-    {
-        return m_rows[rowIndex][colIndex];
-    }
+	template <typename T>
+	inline bool Row<T>::SetValue (size_t	col,
+								  T			value)
+	{
+		bool succ = col < Size();
+		if (succ) {
+			this->m_row[col] = value;
+		}
+		return succ;
+	}
+
+	template <typename T>
+	inline void Row<T>::PushBack (const T		element)
+	{
+		m_row.push_back(element);
+	}
+	template <typename T>
+	inline void Matrix<T>::PushBack (const Row<T>		& row)
+	{
+		m_rows.push_back(row);
+	}
 
     // operators
     template <typename T>

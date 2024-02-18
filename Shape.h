@@ -11,7 +11,8 @@ namespace geom {
     using std::cout;
     using std::endl;
     using std::initializer_list;
-    using std::string;
+	using std::setw;
+	using std::string;
 
     template <typename T>
     class Shape {
@@ -33,8 +34,8 @@ namespace geom {
         const LinAlg::Row<T>& operator [] (size_t	index) const;
 
     // modifiers
-        inline T& DataRef (size_t		rowIndex,
-                           size_t		colIndex);
+        inline T DataRef (size_t		rowIndex,
+                          size_t		colIndex);
 
         // operators
         LinAlg::Row<T>& operator [] (size_t	index);
@@ -55,28 +56,48 @@ namespace geom {
     {
     }
 
+#if defined (VERBOSE)
+	namespace {
+		int shapeNumber{};
+	}
+#endif
+
     template <typename T>
     Shape<T>::Shape (initializer_list<initializer_list<T>>	ili)
         : m_matrix (0,0)
     {
-        vector<vector<T>> init;
+		size_t roi{};
+		for (auto it1 = ili.begin(); it1 != ili.end(); ++roi, ++it1) {
+			m_matrix.PushBack(LinAlg::Row<T>(0));
+			size_t coi{};
+			for (auto it2 = it1->begin(); it2 != it1->end(); ++coi, ++it2) {
+				m_matrix[roi].PushBack(*it2);
+			}
+		}
+		vector<vector<T>> init;
         size_t r{};
         for (auto it1 = ili.begin(); it1 != ili.end(); ++r, ++it1) {
-            init.push_back(vector<T>{});
+            init.push_back(vector<T>{});         
             size_t c{};
             for (auto it2 = it1->begin(); it2 != it1->end(); ++c, ++it2) {
                 init[r].push_back(*it2);
             }
         }
 #if defined (VERBOSE)
-        static int shapeNumber{};
         cout << "Shape " << shapeNumber++;
         string prep{ " = " };
+		size_t ps0{prep.size()};
         for (auto row : init) {
             cout << prep;
-            prep = "          ";
+			if (prep.size() == ps0) {
+				prep = "          ";
+			}
             for (auto element : row) {
-                cout << element;
+				if (element) {
+					cout << setw(3) << element;
+				} else {
+					cout << setw(3) << " ";
+				}
             }
             cout << endl;
         }
@@ -115,7 +136,7 @@ namespace geom {
 
     // modifiers
         template <typename T>
-        inline T& Shape<T>::DataRef (size_t		rowIndex,
+        inline T Shape<T>::DataRef (size_t		rowIndex,
                                      size_t		colIndex)
         {
             return m_matrix.DataRef(rowIndex, colIndex);
