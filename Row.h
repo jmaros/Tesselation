@@ -36,9 +36,10 @@ namespace LinAlg {
     template <typename T>
     Row<T>::Row (size_t     numCols,
                  const T    & initialValue)
-        : m_row   (numCols,
-                   initialValue)
+        : m_row   ()
     {
+        m_row.resize(numCols,
+                     initialValue);
     }
 
     // accessors

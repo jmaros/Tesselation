@@ -50,10 +50,10 @@ namespace LinAlg {
     Matrix<T>::Matrix (size_t    numRows,
                        size_t    numCols,
                        const T   & initialValue)
-        : m_rows    (numRows,
-                     Row<T> (numCols,
-                             initialValue))
+        : m_rows      ()
     {
+        Row<T> defRow(numCols, initialValue);
+        m_rows.resize(numRows, defRow);
     }
 
     // accessors

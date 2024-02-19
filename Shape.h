@@ -20,6 +20,7 @@ namespace Geom {
     class Shape {
     public:
     // constructors
+        Shape () = delete;
         Shape (size_t    numCols,
                size_t    numRows);
 
@@ -47,7 +48,7 @@ namespace Geom {
     private:
     // data members
         LinAlg::Matrix<T>   m_matrix;
-        bool                m_showZeros;
+        bool                m_showZeros{};
     };
 
 // definitions
@@ -58,7 +59,7 @@ namespace Geom {
                      size_t    numRows)
      : m_matrix         (numCols,
                          numRows)
-     , m_showZeros      ()
+        , m_showZeros   ()
     {
     }
 
@@ -70,7 +71,8 @@ namespace Geom {
 
     template <typename T>
     Shape<T>::Shape (initializer_list<initializer_list<T>>    ili)
-        : m_matrix (0,0)
+     : m_matrix         (0u,0u)
+     , m_showZeros      ()
     {
         size_t roi{};
         for (auto it1 = ili.begin(); it1 != ili.end(); ++roi, ++it1) {
@@ -129,7 +131,11 @@ namespace Geom {
     template <typename T>
     inline bool     Shape<T>::ShowZeros ()                          const
     {
-        return m_showZeros;
+        if (m_showZeros) {
+            return m_showZeros;
+        } else {
+            return m_showZeros;
+        }
     }
 
     // operators
@@ -174,7 +180,7 @@ namespace Geom {
             sos << prep;
             for (auto element : row.Elements()) {
                 if (shape.ShowZeros() || element) {
-                    sos << setw(3) << element;
+                             sos << setw(3) << element;
                 } else {
                     sos << setw(3) << " ";
                 }
