@@ -4,8 +4,6 @@
 //
 #include "Shape.h"
 
-#include <map>
-
 namespace Nessie {
 
     enum class MonthEnum : int {
@@ -25,19 +23,19 @@ namespace Nessie {
         December,   // = 12, 31 days
     };
 
-    using TableLayout        = geom::Shape<int>;
-    using TableShape        = geom::Shape<bool>;
-    using ShapeCollection    = vector<geom::Shape<bool>>;
+    using TableLayout        = Geom::Shape<int>;
+    using TableShape        = Geom::Shape<bool>;
+    using ShapeCollection    = vector<Geom::Shape<bool>>;
 
     class Tesselation {
     public:
     // constructors
-        Tesselation (const TableLayout        & tableLayout,
-                     const ShapeCollection    & shapes,
-                     enum MonthEnum           month,
-                     int                      day);
+        Tesselation (const TableLayout      & tableLayout,
+                     const ShapeCollection  & shapes,
+                     MonthEnum              month,
+                     int                    day);
 
-    // accessors
+        // accessors
         MonthEnum    Month ()    const;
         int            Day ()    const;
 

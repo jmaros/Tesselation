@@ -4,15 +4,17 @@
 //
 #include "Matrix.h"
 
-#include <string>
-
-namespace geom {
+namespace Nessie {
+namespace Geom {
 // declarations
-    using std::cout;
-    using std::endl;
-    using std::initializer_list;
-    using std::setw;
-    using std::string;
+    // forward declarations
+    template <typename T>
+    class Shape;
+
+    // global operators
+    template <typename T>
+    ostream& operator << (ostream            & os,
+                          const Shape<T>     & shape);
 
     template <typename T>
     class Shape {
@@ -24,25 +26,30 @@ namespace geom {
         Shape (initializer_list< initializer_list<T> >    ili);
 
     // accessors
-        size_t NumCols ()    const;
-        size_t NumRows ()    const;
+        size_t                              NumCols ()                  const;
+        size_t                              NumRows ()                  const;
 
-        inline const T    Value (size_t        rowIndex,
-                                 size_t        colIndex) const;
+        inline const T                      Value (size_t   rowIndex,
+                                                   size_t   colIndex)   const;
 
+        inline const LinAlg::Matrix<T>    & Matrix ()                   const;
+        inline bool                         ShowZeroValues ()           const;
         // operators
-        const LinAlg::Row<T>& operator [] (size_t    index) const;
+        const LinAlg::Row<T>              & operator [] (size_t index)  const;
 
     // modifiers
-        inline T DataRef (size_t        rowIndex,
-                          size_t        colIndex);
+        inline T                DataRef         (size_t         rowIndex,
+                                                 size_t         colIndex);
+
+        inline bool             ShowZeroValues  (bool           bShow);
 
         // operators
         LinAlg::Row<T>& operator [] (size_t    index);
 
     private:
     // data members
-        LinAlg::Matrix<T>    m_matrix;
+        LinAlg::Matrix<T>   m_matrix;
+        bool                m_showZeroValues {};
     };
 
 // definitions
@@ -52,7 +59,7 @@ namespace geom {
     Shape<T>::Shape (size_t    numCols,
                      size_t    numRows)
      : m_matrix    (numCols,
-                 numRows)
+                    numRows)
     {
     }
 
@@ -84,52 +91,53 @@ namespace geom {
             }
         }
 #if defined (VERBOSE)
-        cout << "Shape " << shapeNumber++;
-        string prep{ " = " };
-        size_t ps0{prep.size()};
-        for (auto row : init) {
-            cout << prep;
-            if (prep.size() == ps0) {
-                prep = "          ";
-            }
-            for (auto element : row) {
-                if (element) {
-                    cout << setw(3) << element;
-                } else {
-                    cout << setw(3) << " ";
-                }
-            }
-            cout << endl;
+        if (shapeNumber == 0) {
+            cout << "Extended Table";
+        } else {
+            cout << shapeNumber << '.';
         }
-        cout << endl;
+        ++shapeNumber;
+        cout << *this;
 #endif
     }
 
     // accessors
 
     template <typename T>
-    size_t Shape<T>::NumRows ()    const
+    size_t Shape<T>::NumRows ()                                     const
     {
         return m_matrix.RowSize();
     }
 
     template <typename T>
-    size_t Shape<T>::NumCols ()    const
+    size_t Shape<T>::NumCols ()                                     const
     {
         return m_matrix.ColSize();
     }
 
     template <typename T>
     inline const T    Shape<T>::Value (size_t      rowIndex,
-                                       size_t      colIndex) const
+                                       size_t      colIndex)        const
     {
         return m_matrix.Value(rowIndex,
                               colIndex);
     }
 
+    template <typename T>
+    inline const LinAlg::Matrix<T> &    Shape<T>::Matrix  ()        const
+    {
+        return m_matrix;
+    }
+
+    template <typename T>
+    inline bool     Shape<T>::ShowZeroValues ()                     const
+    {
+        return m_showZeroValues;
+    }
+
     // operators
     template <typename T>
-    const LinAlg::Row<T>& Shape<T>::operator [] (size_t    index) const
+    const LinAlg::Row<T>   & Shape<T>::operator [] (size_t  index)  const
     {
         return m_matrix[index];
     }
@@ -141,10 +149,45 @@ namespace geom {
         {
             return m_matrix.DataRef(rowIndex, colIndex);
         }
-    // operators
+
+        template <typename T>
+        inline bool     Shape<T>::ShowZeroValues  (bool     bShow)
+        {
+            bool bPrev{ m_showZeroValues };
+            m_showZeroValues = bShow;
+            return bPrev;
+        }
+
+        // operators
     template <typename T>
     LinAlg::Row<T>& Shape<T>::operator [] (size_t    index)
     {
         return m_matrix[index];
     }
-} // namespace geom
+
+    // global operators
+    template <typename T>
+    ostream& operator << (ostream            & os,
+                          const Shape<T>     & shape)
+    {
+        stringstream sos;
+        sos << "Shape = \n";
+        string prep{ "          " };
+        for (auto& row : shape.Matrix().Rows()) {
+            sos << prep;
+            for (auto element : row.Elements()) {
+                if (shape.ShowZeroValues() || element) {
+                    sos << setw(3) << element;
+                } else {
+                    sos << setw(3) << " ";
+                }
+            }
+            sos << endl;
+        }
+        sos << endl;
+        os << sos.str();
+        return os;
+    }
+
+} // namespace Geom
+} // namespace Nessie

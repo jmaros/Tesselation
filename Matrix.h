@@ -5,15 +5,28 @@
 
 #include <iostream>
 #include <iomanip>
+#include <map>
 #include <memory>
+#include <string>
+#include <sstream>
 #include <vector>
 
-using std::size_t;
-using std::vector;
+namespace Nessie {
+
+    using std::cout;
+    using std::endl;
+    using std::map;
+    using std::ostream;
+    using std::size_t;
+    using std::initializer_list;
+    using std::setw;
+//    using std::shared_ptr;
+    using std::string;
+    using std::stringstream;
+    using std::vector;
 
 namespace LinAlg {
     
-    using std::shared_ptr;
 
 // declarations
 
@@ -26,20 +39,17 @@ namespace LinAlg {
                       const T    & initialValue = T{});
 
     // accessors
-        inline const T    Value  (size_t    numCol) const;
-        inline size_t    Size    ()                 const;
-        // operators
-        const T& operator []     (size_t    index)  const;
+        inline const T      Value       (size_t    numCol)  const;
+        inline size_t       Size        ()                  const;
+        const vector<T>     & Elements  ()                  const;
 
-    // modifyers
+    // modifiers
         inline bool SetValue (size_t        col,
-                              T            value);
+                              T             value);
 
-        inline void PushBack (const T        element);
-            // operators
-        T& operator [] (size_t    index);
+        inline void PushBack (const T       element);
     private:
-        vector<T>        m_row;
+        vector<T>   m_row;
     };
 
     template <typename T> 
@@ -50,37 +60,35 @@ namespace LinAlg {
                   const T       & initialValue = T{});
 
     // accessors
-        constexpr size_t MinRow ()     const;
-        constexpr size_t MinCol ()     const;
-        inline size_t RowSize ()       const;
-        inline size_t ColSize ()       const;
-        inline size_t RowUpperLimit () const;
-        inline size_t ColUpperLimit () const;
+        constexpr size_t MinRow ()                  const;
+        constexpr size_t MinCol ()                  const;
+        inline size_t RowSize ()                    const;
+        inline size_t ColSize ()                    const;
+        inline size_t RowUpperLimit ()              const;
+        inline size_t ColUpperLimit ()              const;
 
-        inline const T&    DataCRef (size_t        rowIndex,
-                                     size_t        colIndex) const;
+        inline const T  Value (size_t   rowIndex,
+                               size_t   colIndex)   const;
 
-        inline const T    Value (size_t        rowIndex,
-                                 size_t        colIndex) const;
+        inline size_t                   Size ()     const;
+        inline const vector<Row<T>>     & Rows ()   const;
 
-        inline size_t    Size () const;
-
-        Matrix<T> CreateTransposed () const;
+        Matrix<T> CreateTransposed ()               const;
 
     // operators
         const Row<T>& operator [] (size_t    index) const;
 
     // modifiers
-        inline bool SetValue(size_t        col,
-                             T            value);
+        inline bool SetValue(size_t         col,
+                             T              value);
 
-        inline void PushBack (const Row<T>        & row);
+        inline void PushBack (const Row<T>  & row);
         
-        inline T& DataRef (size_t        rowIndex,
-                           size_t        colIndex);
+        inline T& DataRef (size_t           rowIndex,
+                           size_t           colIndex);
 
     // operators
-        Row<T>& operator [] (size_t    index);
+        Row<T>& operator [] (size_t         index);
 
     private:
         vector<Row<T>>        m_rows;
@@ -121,6 +129,12 @@ namespace LinAlg {
     }
 
     template <typename T>
+    inline const vector<T> & Row<T>::Elements  () const
+    {
+        return m_row;
+    }
+
+    template <typename T>
     constexpr size_t  Matrix<T>::MinRow () const
     {
         return 0u;
@@ -145,6 +159,12 @@ namespace LinAlg {
     }
 
     template <typename T>
+    inline const vector<Row<T>>     & Matrix<T>::Rows ()   const
+    {
+        return m_rows;
+    }
+
+    template <typename T>
     inline size_t  Matrix<T>::RowUpperLimit () const
     {
         return RowSize() + MinRow();
@@ -156,26 +176,11 @@ namespace LinAlg {
         return ColSize() + MinCol();
     }
 
-    // preferred data access for non POD typenames
-    template <typename T>
-    inline const T& Matrix<T>::DataCRef(size_t        rowIndex,
-                                        size_t        colIndex) const
-    {
-        return m_rows[rowIndex][colIndex];
-    }
-
     template <typename T>
     inline const T    Matrix<T>::Value (size_t        rowIndex,
                                         size_t        colIndex) const
     {
-        return m_rows[rowIndex][colIndex];
-    }
-
-    // operators
-    template <typename T>
-    const T& Row<T>::operator [] (size_t    index) const
-    {
-        return m_row[index];
+        return m_rows[rowIndex].Value(colIndex);
     }
 
     template <typename T>
@@ -200,7 +205,7 @@ namespace LinAlg {
 // modifiers
     template <typename T>
     inline bool Row<T>::SetValue (size_t    col,
-                                  T            value)
+                                  T         value)
     {
         bool succ = col < Size();
         if (succ) {
@@ -220,13 +225,6 @@ namespace LinAlg {
         m_rows.push_back(row);
     }
 
-    // operators
-    template <typename T>
-    T& Row<T>::operator [] (size_t    index)
-    {
-        return m_row[index];
-    }
-
     template <typename T>
     Row<T>& Matrix<T>::operator [] (size_t    rowIndex)
     {
@@ -234,4 +232,4 @@ namespace LinAlg {
     }
 
 } // namespace LinAlg
-
+} // namespace Nessie

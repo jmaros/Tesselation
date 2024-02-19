@@ -5,16 +5,7 @@
 
 #include "Tesselation.h"
 
-#include <sstream>
-
-using std::cout;
-using std::endl;
-using std::ostream;
-using std::string;
-using std::stringstream;
-
 namespace Nessie {
-    using std::map;
 
     const map<MonthEnum, int> MonthDays {
         { MonthEnum::January,   31 },
@@ -81,24 +72,32 @@ namespace Nessie {
         return isValid;
     }
 
+    // constructors
     Tesselation::Tesselation (const TableLayout        & table,
                               const ShapeCollection    & shapes,
                               MonthEnum                month,
                               int                      day)
      : m_tableLayout    (table)
-     , m_shapes            (shapes)
-     , m_month            (month)
+     , m_shapes         (shapes)
+     , m_month          (month)
      , m_day            (day)
-     , m_tableShape        (table.NumRows(),
+     , m_tableShape     (table.NumRows(),
                          table.NumCols())
     {
+        // Fill up m_tableShape:
         for (size_t row = 0; row < m_tableLayout.NumRows(); ++row) {
             for (size_t col = 0; col < m_tableLayout.NumCols(); ++col) {
-                m_tableShape[row].SetValue(col, m_tableLayout[row][col]);
+                m_tableShape[row].SetValue(col, m_tableLayout.Value(row, col) == 0);
             }
         }
+#if defined (VERBOSE)
+        bool bPrev{ m_tableShape.ShowZeroValues(true) };
+        cout << "Table" << m_tableShape;
+        (void) m_tableShape.ShowZeroValues(bPrev);
+#endif
     }
 
+    // accessors
     MonthEnum Tesselation::Month ()    const
     {
         return m_month;
@@ -109,7 +108,7 @@ namespace Nessie {
         return m_day;
     }
 
-        // accessors
+   // global operators
     ostream& operator << (ostream            & os,
                           const Tesselation  & tessy)
     {
@@ -135,17 +134,6 @@ int main ()
         { +22, +23, +24, +25, +26, +27, +28 },
         { +29, +30, +31,   0,   0,   0,   0 }
     };
-
-    //const TableShape tableShape = {
-    //    { 0, 0, 0, 0, 0, 0, 1 },
-    //    { 0, 0, 0, 0, 0, 0, 1 },
-    //    { 0, 0, 0, 0, 0, 0, 0 },
-    //    { 0, 0, 0, 0, 0, 0, 0 },
-    //    { 0, 0, 0, 0, 0, 0, 0 },
-    //    { 0, 0, 0, 0, 0, 0, 0 },
-    //    { 0, 0, 0, 1, 1, 1, 1 }
-    //};
-
 
     const ShapeCollection shapes = {
 
@@ -185,7 +173,6 @@ int main ()
     }
 
     if (IsValidDate(month, day)) {
-        cout << "The date is " << DateStr(month, day) << endl;
         Tesselation tesselation (tableLayout,
                                  shapes,
                                  month,
