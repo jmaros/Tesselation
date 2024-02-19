@@ -87,14 +87,25 @@ namespace Nessie {
      , m_dayMap         ()
 
     {
-        // Fill up m_tableShape:
+        // Fill up m_tableShape, and create the month and day maps to position:
         for (size_t row = 0; row < m_tableLayout.NumRows(); ++row) {
             for (size_t col = 0; col < m_tableLayout.NumCols(); ++col) {
                 Position pos(row, col);
                 auto newValue = m_tableLayout.Value(pos);
                 m_tableShape.SetData(pos, newValue == 0);
+                if (newValue < 0) {
+                    m_monthMap[MonthEnum(-newValue)] = pos;
+                } else
+                if (newValue > 0) {
+                    m_dayMap[newValue] = pos;
+                }
             }
         }
+        m_monthMap[MonthEnum::LeapFebr] = m_monthMap[MonthEnum::February];
+
+        // Setting the additional element cells:
+        m_tableShape.SetData(m_monthMap[month], true);
+        m_tableShape.SetData(m_dayMap[day], true);
 #if defined (VERBOSE)
         bool bPrev{ m_tableShape.SetShowZeros(true) };
         cout << "Table" << m_tableShape;
