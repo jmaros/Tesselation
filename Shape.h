@@ -26,30 +26,28 @@ namespace Geom {
         Shape (initializer_list< initializer_list<T> >    ili);
 
     // accessors
-        size_t                              NumCols ()                  const;
-        size_t                              NumRows ()                  const;
+        size_t                              NumCols     ()              const;
+        size_t                              NumRows     ()              const;
+        inline const T                      Value       (Position  pos) const;
+        inline const LinAlg::Matrix<T>    & Matrix      ()              const;
+        inline bool                         ShowZeros   ()              const;
 
-        inline const T                      Value (size_t   rowIndex,
-                                                   size_t   colIndex)   const;
-
-        inline const LinAlg::Matrix<T>    & Matrix ()                   const;
-        inline bool                         ShowZeroValues ()           const;
         // operators
         const LinAlg::Row<T>              & operator [] (size_t index)  const;
 
     // modifiers
-        inline T                DataRef         (size_t         rowIndex,
-                                                 size_t         colIndex);
+        inline bool             SetData    (Position     pos,
+                                            const T      & newValue);
 
-        inline bool             ShowZeroValues  (bool           bShow);
+        inline bool             SetShowZeros  (bool       bShow);
 
         // operators
-        LinAlg::Row<T>& operator [] (size_t    index);
+        LinAlg::Row<T>        & operator [] (size_t    index);
 
     private:
     // data members
         LinAlg::Matrix<T>   m_matrix;
-        bool                m_showZeroValues {};
+        bool                m_showZeros;
     };
 
 // definitions
@@ -58,8 +56,9 @@ namespace Geom {
     template <typename T>
     Shape<T>::Shape (size_t    numCols,
                      size_t    numRows)
-     : m_matrix    (numCols,
-                    numRows)
+     : m_matrix         (numCols,
+                         numRows)
+     , m_showZeros      ()
     {
     }
 
@@ -116,11 +115,9 @@ namespace Geom {
     }
 
     template <typename T>
-    inline const T    Shape<T>::Value (size_t      rowIndex,
-                                       size_t      colIndex)        const
+    inline const T    Shape<T>::Value (Position  pos)               const
     {
-        return m_matrix.Value(rowIndex,
-                              colIndex);
+        return m_matrix.Value(pos);
     }
 
     template <typename T>
@@ -128,11 +125,11 @@ namespace Geom {
     {
         return m_matrix;
     }
-
+    
     template <typename T>
-    inline bool     Shape<T>::ShowZeroValues ()                     const
+    inline bool     Shape<T>::ShowZeros ()                          const
     {
-        return m_showZeroValues;
+        return m_showZeros;
     }
 
     // operators
@@ -143,20 +140,20 @@ namespace Geom {
     }
 
     // modifiers
-        template <typename T>
-        inline T Shape<T>::DataRef (size_t        rowIndex,
-                                    size_t        colIndex)
-        {
-            return m_matrix.DataRef(rowIndex, colIndex);
-        }
+    template <typename T>
+    inline bool Shape<T>::SetData (Position     pos,
+                                   const T      & newValue)
+    {
+        return m_matrix.SetData(pos, newValue);
+    }
 
-        template <typename T>
-        inline bool     Shape<T>::ShowZeroValues  (bool     bShow)
-        {
-            bool bPrev{ m_showZeroValues };
-            m_showZeroValues = bShow;
-            return bPrev;
-        }
+    template <typename T>
+    inline bool     Shape<T>::SetShowZeros  (bool     bShow)
+    {
+        bool bPrev{ m_showZeros };
+        m_showZeros = bShow;
+        return bPrev;
+    }
 
         // operators
     template <typename T>
@@ -176,7 +173,7 @@ namespace Geom {
         for (auto& row : shape.Matrix().Rows()) {
             sos << prep;
             for (auto element : row.Elements()) {
-                if (shape.ShowZeroValues() || element) {
+                if (shape.ShowZeros() || element) {
                     sos << setw(3) << element;
                 } else {
                     sos << setw(3) << " ";

@@ -139,6 +139,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="Position.h" />
+    <ClInclude Include="Row.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="Tesselation.h" />
   </ItemGroup>

@@ -83,27 +83,32 @@ namespace Nessie {
      , m_day            (day)
      , m_tableShape     (table.NumRows(),
                          table.NumCols())
+     , m_monthMap       ()
+     , m_dayMap         ()
+
     {
         // Fill up m_tableShape:
         for (size_t row = 0; row < m_tableLayout.NumRows(); ++row) {
             for (size_t col = 0; col < m_tableLayout.NumCols(); ++col) {
-                m_tableShape[row].SetValue(col, m_tableLayout.Value(row, col) == 0);
+                Position pos(row, col);
+                auto newValue = m_tableLayout.Value(pos);
+                m_tableShape.SetData(pos, newValue == 0);
             }
         }
 #if defined (VERBOSE)
-        bool bPrev{ m_tableShape.ShowZeroValues(true) };
+        bool bPrev{ m_tableShape.SetShowZeros(true) };
         cout << "Table" << m_tableShape;
-        (void) m_tableShape.ShowZeroValues(bPrev);
+        (void) m_tableShape.SetShowZeros(bPrev);
 #endif
     }
 
     // accessors
-    MonthEnum Tesselation::Month ()    const
+    inline MonthEnum Tesselation::Month ()    const
     {
         return m_month;
     }
 
-    int Tesselation::Day ()    const
+    inline int Tesselation::Day ()            const
     {
         return m_day;
     }
@@ -183,7 +188,7 @@ int main ()
         cout << "No such date as " << DateStr(month, day) << endl;
     }
 }
-
+// Visual Studio (2022 Community Edition) Tips:
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
 
