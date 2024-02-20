@@ -12,9 +12,9 @@ namespace LinAlg {
     template <typename T> 
     class Matrix {
     public:
-        Matrix<T>(size_t        numRows,
-                  size_t        numCols,
-                  const T       & initialValue = T{});
+        Matrix (size_t        numRows,
+                size_t        numCols,
+                const T       & initialValue = T{});
 
     // accessors
         constexpr size_t MinRow     ()                      const;
