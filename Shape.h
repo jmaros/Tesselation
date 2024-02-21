@@ -17,6 +17,10 @@ namespace Geom {
                           const Shape<T>     & shape);
 
     template <typename T>
+    bool operator < (const Shape<T>     & lShape,
+                     const Shape<T>     & rShape);
+
+    template <typename T>
     class Shape {
     public:
     // constructors
@@ -24,26 +28,30 @@ namespace Geom {
         Shape (size_t    numCols,
                size_t    numRows);
 
-        Shape (initializer_list< initializer_list<T> >    ili);
+        Shape (initializer_list<initializer_list<T>>    ili);
 
     // accessors
-        size_t                              NumCols     ()              const;
-        size_t                              NumRows     ()              const;
-        inline const T                      Value       (Position  pos) const;
-        inline const LinAlg::Matrix<T>    & Matrix      ()              const;
-        inline bool                         ShowZeros   ()              const;
+        size_t                          NumCols                     ()              const;
+        size_t                          NumRows                     ()              const;
+        inline const T                  Value                       (Position  pos) const;
+        inline const LinAlg::Matrix<T>  & Matrix                    ()              const;
+        inline bool                     ShowZeros                   ()              const;
+        Shape<T>                        CreateTransposed            ()              const;
+        Shape<T>                        CreateHorizontallyFlipped   ()              const;
+        Shape<T>                        CreateVerticallyFlipped     ()              const;
 
         // operators
         const LinAlg::Row<T>              & operator [] (size_t index)  const;
 
     // modifiers
-        inline bool             SetData    (Position     pos,
-                                            const T      & newValue);
+        inline bool     SetData             (Position     pos,
+                                             const T      & newValue);
 
-        inline bool             SetShowZeros  (bool       bShow);
+        inline void     SetOutOfBoundValue  (const T    & newValue);
+        inline bool     SetShowZeros        (bool       bShow);
 
         // operators
-        LinAlg::Row<T>        & operator [] (size_t    index);
+        LinAlg::Row<T>  & operator [] (size_t    index);
 
     private:
     // data members
@@ -123,7 +131,7 @@ namespace Geom {
     }
 
     template <typename T>
-    inline const LinAlg::Matrix<T> &    Shape<T>::Matrix  ()        const
+    inline const LinAlg::Matrix<T>  & Shape<T>::Matrix ()           const
     {
         return m_matrix;
     }
@@ -136,6 +144,30 @@ namespace Geom {
         } else {
             return m_showZeros;
         }
+    }
+
+    template <typename T>
+    Shape<T> Shape<T>::CreateTransposed            ()              const
+    {
+        auto transposed = *this;
+        transposed.m_matrix = m_matrix.CreateTransposed();
+        return transposed;
+    }
+
+    template <typename T>
+    Shape<T> Shape<T>::CreateHorizontallyFlipped   ()              const
+    {
+        auto horizontallyFlipped = *this;
+        horizontallyFlipped.m_matrix = m_matrix.CreateHorizontallyFlipped();
+        return horizontallyFlipped;
+    }
+
+    template <typename T>
+    Shape<T> Shape<T>::CreateVerticallyFlipped     ()              const
+    {
+        auto verticallyFlipped = *this;
+        verticallyFlipped.m_matrix = m_matrix.CreateVerticallyFlipped();
+        return verticallyFlipped;
     }
 
     // operators
@@ -154,7 +186,13 @@ namespace Geom {
     }
 
     template <typename T>
-    inline bool     Shape<T>::SetShowZeros  (bool     bShow)
+    inline void Shape<T>::SetOutOfBoundValue (const T    & newValue)
+    {
+        return m_matrix.SetOutOfBoundValue(newValue);
+    }
+
+    template <typename T>
+    inline bool Shape<T>::SetShowZeros (bool     bShow)
     {
         bool bPrev{ m_showZeros };
         m_showZeros = bShow;
@@ -192,5 +230,29 @@ namespace Geom {
         return os;
     }
 
+    template <typename T>
+    bool operator < (const Shape<T>     & lShape,
+                     const Shape<T>     & rShape)
+    {
+        auto numRows = lShape.NumRows();
+        if (numRows != rShape.NumRows()) {
+            return numRows < rShape.NumRows ();
+        }
+        auto numCols = lShape.NumCols();
+        if (numCols != rShape.NumCols()) {
+            return numCols < rShape.NumCols ();
+        }
+        for (size_t idx = 0; idx < numRows; ++idx) {
+            for (size_t idy = 0; idy < numCols; ++idy) {
+                Position pos(idx, idy);
+                auto lValue = lShape.Value(pos);
+                auto rValue = rShape.Value(pos);
+                if (lValue != rValue) {
+                    return lValue < rValue;
+                }
+            }
+        }
+        return false;
+    }
 } // namespace Geom
 } // namespace Nessie

@@ -5,13 +5,41 @@
 #include "Shape.h"
 #include "Date.h"
 
+#include <list>
+#include <set>
+
 namespace Nessie {
+
+    using std::list;
+    using std::set;
 
     using TableLayout       = Geom::Shape<int>;
     using TableShape        = Geom::Shape<bool>;
     using ShapeCollection   = vector<Geom::Shape<bool>>;
     using MonthMap          = map<MonthEnum, Position>;
     using DayMap            = map<int, Position>;
+    using ShapeSet          = set<Geom::Shape<bool>>;
+    using ShapeSets         = vector<ShapeSet>;
+    using FreePositions     = list<Position>;
+
+        struct SolutionStep {
+        explicit SolutionStep (const TableShape  & tableResult)
+         :  m_indexOfShapeSet   ()
+         ,  m_shapeIndexInSet   ()
+         ,  m_position          ()
+         ,  m_tableResult       (tableResult)
+        {
+        }
+
+        size_t          m_indexOfShapeSet;
+        size_t          m_shapeIndexInSet;
+        Position        m_position;
+        TableShape      m_tableResult;
+        FreePositions   m_FreePositions;
+    };
+
+    using Solution  = vector<SolutionStep>;
+    using Riddle    = Solution;
 
     class Tesselation {
     public:
@@ -21,8 +49,10 @@ namespace Nessie {
                      const Date             & date);
 
     // accessors
-        inline const Date   & GetDate () const;
-
+        inline const Date   & GetDate   () const;
+        string              Result      () const;
+    // modifiers
+        void                Solve       (Riddle     & riddle);
     private:
     // data members
         const TableLayout       & m_tableLayout;
@@ -31,6 +61,10 @@ namespace Nessie {
         TableShape              m_tableShape;
         MonthMap                m_monthMap;
         DayMap                  m_dayMap;
+        ShapeSets               m_shapeSets;
+        TableShape              m_tableResult;
+        Solution                m_solution;
+        bool                    m_isSolved;
     };
 
     std::ostream& operator << (std::ostream         & os,

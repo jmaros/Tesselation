@@ -52,6 +52,8 @@ namespace Nessie {
         {{ 1, 1, 1, 1 },
          { 1, 0, 0, 0 }}
     };
+ 
+    const string ShapeChars { "@#$*+=x&" };
 
     // constructors
     Tesselation::Tesselation (const TableLayout         & table,
@@ -59,13 +61,49 @@ namespace Nessie {
                               const Date                & date)
      : m_tableLayout    (table)
      , m_shapes         (shapes)
-     , m_date          (date)
+     , m_date           (date)
      , m_tableShape     (table.NumRows(),
                          table.NumCols())
      , m_monthMap       ()
      , m_dayMap         ()
-
+     , m_shapeSets      ()
+     , m_tableResult    (table.NumRows(),
+                         table.NumCols())
+     , m_solution       ()
+     , m_isSolved       ()
     {
+        // fill m_shapesSet so that it will contain all the different shapes
+        for (auto   & shape : m_shapes) {
+            ShapeSet    shapesSet;
+            bool succi = shapesSet.insert(shape).second;
+            if (succi) {
+                auto horiFlipped = shape.CreateHorizontallyFlipped();
+                auto vertFlipped = shape.CreateVerticallyFlipped();
+                auto bothFlipped = horiFlipped.CreateVerticallyFlipped();
+                (void) shapesSet.insert(horiFlipped);
+                (void) shapesSet.insert(vertFlipped);
+                (void) shapesSet.insert(bothFlipped);
+                (void) shapesSet.insert(shape.CreateTransposed());
+                (void) shapesSet.insert(horiFlipped.CreateTransposed());
+                (void) shapesSet.insert(vertFlipped.CreateTransposed());
+                (void) shapesSet.insert (bothFlipped.CreateTransposed());
+                m_shapeSets.push_back(shapesSet);
+            }
+        }
+
+#if defined (VERBOSE)
+        int shNum {};
+        int shsNum {};
+        for (auto   & shapeSet : m_shapeSets) {
+            cout << ++shsNum << ". ShapeSet:\n";
+            ShapeSet    shapesSet;
+            int shssNum{};
+            for (auto   & shape : shapeSet) {
+                cout << ++shNum << ".(" << shsNum << '.' << ++shssNum << ")." << shape;
+            }
+        }
+#endif
+
         // Fill up m_tableShape, and create the month and day maps to position:
         for (size_t row = 0; row < m_tableLayout.NumRows(); ++row) {
             for (size_t col = 0; col < m_tableLayout.NumCols(); ++col) {
@@ -85,6 +123,11 @@ namespace Nessie {
         // Setting the additional element cells:
         m_tableShape.SetData(m_monthMap[m_date.Month()], true);
         m_tableShape.SetData(m_dayMap[m_date.Day()], true);
+
+        // Setting the initial valu of the resulting table and the
+        // required return value for the out of bound positions
+        m_tableResult = m_tableShape;
+        m_tableResult.SetOutOfBoundValue(true);
 //#if defined (VERBOSE)
         bool bPrev{ m_tableShape.SetShowZeros(true) };
         cout << "Table" << m_tableShape;
@@ -98,11 +141,68 @@ namespace Nessie {
         return m_date;
     }
 
+    string    Tesselation::Result () const
+    {
+        stringstream srs;
+#if defined (VERBOSE)
+        for (auto& solStep : m_solution) {
+            srs << (&solStep - &m_solution[0]) + 1;
+            srs << ". step, positon = (";
+            srs << solStep.m_position.GetRowIndex();
+            srs << ", ";
+            srs << solStep.m_position.GetColIndex();
+            srs << ")\n";
+            srs << "ShapeSetItem = ";
+            srs << solStep.m_indexOfShapeSet;
+            srs << ".";
+            srs << solStep.m_shapeIndexInSet;
+            srs << ")\n";
+            srs << solStep.m_tableResult;
+        }
+#endif
+        return srs.str();
+    }
+
+    // modifiers
+    void Tesselation::Solve (Riddle     &riddle)
+    {
+        if (!m_isSolved) {
+            if (riddle.size() == 0) {
+                //prepare the first step...
+                riddle.push_back(SolutionStep (m_tableResult));
+                for (auto row = 0; row < m_tableResult.NumCols(); ++row) {
+                     for (auto col = 0; col < m_tableResult.NumCols(); ++col) {
+                         Position   pos(row, col);
+                         if (m_tableResult.Value(pos) == false) {
+                             riddle.back().m_FreePositions.emplace_back(pos);
+                         }
+                    }
+                }
+                for (auto frp : riddle.back().m_FreePositions) {
+                    // TODO:
+                    //If (riddle.back().m_tableResult.Matrix().Accomodates(frp, this->m_shapeSets...))
+                }
+                Solve (riddle);
+            } else {
+                if (riddle.size () < this->m_shapeSets.size ()) {
+                    // TODO:
+                    //for ()
+                    riddle.push_back(SolutionStep (riddle.back().m_tableResult));
+                    Solve(riddle);
+                } else {
+                    m_isSolved = true;
+                    m_solution = riddle;
+                }
+            }
+        }
+    }
+
    // global operators
     ostream& operator << (ostream            & os,
                           const Tesselation  & tessy)
     {
-        os << "Tesselation Date = " << tessy.GetDate().DateStr();
+        os << "Tesselation Date = " << tessy.GetDate().DateStr() << endl;
+        os << tessy.Result();
         return os;
     }
 } // namespace Nessie
@@ -128,7 +228,8 @@ int main ()
         Tesselation tesselation (MainTable,
                                  Shapes,
                                  date);
-        //tesselation.Solve();
+        Riddle riddle;
+        tesselation.Solve (riddle);
         cout << tesselation << "\n";
     } else {
         cout << "No such date as " << date.DateStr() << endl;

@@ -14,25 +14,30 @@ namespace LinAlg {
     public:
         Matrix (size_t        numRows,
                 size_t        numCols,
-                const T       & initialValue = T{});
+                const T       & initialValue    = T{});
 
     // accessors
-        constexpr size_t MinRow     ()                      const;
-        constexpr size_t MinCol     ()                      const;
-        inline size_t RowSize       ()                      const;
-        inline size_t ColSize       (size_t row = 0)        const;
-        inline size_t RowUpperLimit ()                      const;
-        inline size_t ColUpperLimit ()                      const;
-        inline const T  Value (const Position   & pos)      const;
-        inline const vector<Row<T>> & Rows              ()  const;
-        Matrix<T>                   CreateTransposed    ()  const;
+        inline size_t               MinRow                      ()                              const;
+        inline size_t               MinCol                      ()                              const;
+        inline size_t               RowSize                     ()                              const;
+        inline size_t               ColSize                     (size_t             row = 0)    const;
+        inline size_t               RowUpperLimit               ()                              const;
+        inline size_t               ColUpperLimit               ()                              const;
+        inline bool                 IsLegalPosition             (const Position     & pos)      const;
+        inline const T              Value                       (const Position     & pos)      const;
+        inline const vector<Row<T>> & Rows                      ()                              const;
+        Matrix<T>                   CreateTransposed            ()                              const;
+        Matrix<T>                   CreateHorizontallyFlipped   ()                              const;
+        Matrix<T>                   CreateVerticallyFlipped     ()                              const;
 
     // operators
-        const Row<T>& operator [] (size_t    index) const;
+        const Row<T>& operator []       (size_t    index) const;
 
     // modifiers
-        inline bool SetData     (Position      pos,
-                                 const T       & newValue);
+        inline bool SetData             (Position      pos,
+                                         const T       & newValue);
+
+        inline void SetOutOfBoundValue  (const T       & newValue);
 
         inline void PushBack    (const Row<T>  & row);
         
@@ -41,6 +46,7 @@ namespace LinAlg {
 
     private:
         vector<Row<T>>        m_rows;
+        T                     m_outOfBoundValue;
     };
 
 
@@ -50,7 +56,8 @@ namespace LinAlg {
     Matrix<T>::Matrix (size_t    numRows,
                        size_t    numCols,
                        const T   & initialValue)
-        : m_rows      ()
+     : m_rows               ()
+     , m_outOfBoundValue    ()
     {
         Row<T> defRow(numCols, initialValue);
         m_rows.resize(numRows, defRow);
@@ -58,13 +65,13 @@ namespace LinAlg {
 
     // accessors
     template <typename T>
-    constexpr size_t  Matrix<T>::MinRow () const
+    inline size_t  Matrix<T>::MinRow () const
     {
         return 0u;
     }
 
     template <typename T>
-    constexpr size_t  Matrix<T>::MinCol () const
+    inline size_t  Matrix<T>::MinCol () const
     {
         return 0u;
     }
@@ -100,9 +107,20 @@ namespace LinAlg {
     }
 
     template <typename T>
+    inline bool  Matrix<T>::IsLegalPosition (const Position      & pos) const
+    {
+        return (MinRow () <= pos.GetRowIndex() && pos.GetRowIndex() < RowUpperLimit () &&
+                MinCol () <= pos.GetColIndex() && pos.GetColIndex() < ColUpperLimit ());
+    }
+
+    template <typename T>
     inline const T    Matrix<T>::Value (const Position      & pos) const
     {
-        return m_rows[pos.GetRowIndex()].Value(pos.GetColIndex());
+        T retVal{ m_outOfBoundValue };
+        if (IsLegalPosition(pos)) {
+            retVal = m_rows[pos.GetRowIndex()].Value(pos.GetColIndex());
+        }
+        return retVal;
     }
 
     template <typename T>
@@ -114,14 +132,43 @@ namespace LinAlg {
     template <typename T>
     Matrix<T> Matrix<T>::CreateTransposed () const
     {
-        static_assert(MinRow() == 0 && MinCol() == 0, "Unexpected configuration!");
         Matrix<T> transposed(ColSize(), RowSize());
         for (auto rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
             for (auto colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
-                transposed[colIndex][rowIndex] = Value(rowIndex, colIndex);
+                Position    srcPos(rowIndex, colIndex);
+                Position    dstPos(colIndex, rowIndex);
+                transposed.SetData(dstPos, Value(srcPos));
             }
         }
         return transposed;
+    }
+
+    template <typename T>
+    Matrix<T> Matrix<T>::CreateHorizontallyFlipped () const
+    {
+        Matrix<T> horizontallyFlipped(RowSize(), ColSize());
+        for (auto rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
+            for (auto colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
+                Position    srcPos(rowIndex, colIndex);
+                Position    dstPos(RowUpperLimit() - (rowIndex + 1), colIndex);
+                horizontallyFlipped.SetData(dstPos, Value(srcPos));
+            }
+        }
+        return horizontallyFlipped;
+    }
+
+    template <typename T>
+    Matrix<T> Matrix<T>::CreateVerticallyFlipped () const
+    {
+        Matrix<T> verticallyFlipped(RowSize(), ColSize());
+        for (auto rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
+            for (auto colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
+                Position    srcPos(rowIndex, colIndex);
+                Position    dstPos(rowIndex, ColUpperLimit() - (colIndex + 1));
+                verticallyFlipped.SetData(dstPos, Value(srcPos));
+            }
+        }
+        return verticallyFlipped;
     }
 
 // modifiers
@@ -137,6 +184,12 @@ namespace LinAlg {
             succ = m_rows[row].SetValue(col, newValue);
         }
         return succ;
+    }
+
+    template <typename T>
+    inline void Matrix<T>::SetOutOfBoundValue  (const T     & newValue)
+    {
+        m_outOfBoundValue = newValue;
     }
 
     template <typename T>
