@@ -24,8 +24,14 @@ namespace LinAlg {
         inline size_t               RowUpperLimit               ()                              const;
         inline size_t               ColUpperLimit               ()                              const;
         inline bool                 IsLegalPosition             (const Position     & pos)      const;
+
+        inline bool                 Accomodates                 (const Position     & pos,
+                                                                 const Matrix<T>    & mat)      const;
+
         inline const T              Value                       (const Position     & pos)      const;
         inline const vector<Row<T>> & Rows                      ()                              const;
+
+    // creators
         Matrix<T>                   CreateTransposed            ()                              const;
         Matrix<T>                   CreateHorizontallyFlipped   ()                              const;
         Matrix<T>                   CreateVerticallyFlipped     ()                              const;
@@ -107,10 +113,26 @@ namespace LinAlg {
     }
 
     template <typename T>
-    inline bool  Matrix<T>::IsLegalPosition (const Position      & pos) const
+    inline bool Matrix<T>::IsLegalPosition (const Position      & pos) const
     {
         return (MinRow () <= pos.GetRowIndex() && pos.GetRowIndex() < RowUpperLimit () &&
                 MinCol () <= pos.GetColIndex() && pos.GetColIndex() < ColUpperLimit ());
+    }
+
+    template <typename T>
+    inline bool Matrix<T>::Accomodates (const Position     & pos,
+                                        const Matrix<T>    & mat) const
+    {
+        const T     EV{};
+
+        for (Position inPos; inPos.GetRowIndex() < mat.RowUpperLimit(); inPos.IncRow()) {
+            for (;inPos.GetColIndex() < mat.ColUpperLimit(); inPos.IncCol()) {
+                if (Value(pos + inPos) != EV && mat.Value(inPos) != EV) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     template <typename T>

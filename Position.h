@@ -57,9 +57,27 @@ public:
         m_colIndex = colIndex;
     }
 
+    void IncRow ()
+    {
+        ++m_rowIndex;
+    }
+
+    void IncCol ()
+    {
+        ++m_colIndex;
+    }
+
 private:
-    size_t m_rowIndex;
-    size_t m_colIndex;
+    size_t m_rowIndex{};
+    size_t m_colIndex{};
 };
+
+// global operator
+Position operator+ (const Position  & lPos,
+                    const Position  & rPos)
+{
+    return Position (lPos.GetRowIndex() + rPos.GetRowIndex(),
+                     lPos.GetColIndex() + rPos.GetColIndex());
+}
 
 } // namespace Nessie

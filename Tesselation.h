@@ -5,12 +5,10 @@
 #include "Shape.h"
 #include "Date.h"
 
-#include <list>
 #include <set>
 
 namespace Nessie {
 
-    using std::list;
     using std::set;
 
     using TableLayout       = Geom::Shape<int>;
@@ -20,7 +18,6 @@ namespace Nessie {
     using DayMap            = map<int, Position>;
     using ShapeSet          = set<Geom::Shape<bool>>;
     using ShapeSets         = vector<ShapeSet>;
-    using FreePositions     = list<Position>;
 
         struct SolutionStep {
         explicit SolutionStep (const TableShape  & tableResult)
@@ -35,7 +32,6 @@ namespace Nessie {
         size_t          m_shapeIndexInSet;
         Position        m_position;
         TableShape      m_tableResult;
-        FreePositions   m_FreePositions;
     };
 
     using Solution  = vector<SolutionStep>;

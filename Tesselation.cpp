@@ -144,7 +144,7 @@ namespace Nessie {
     string    Tesselation::Result () const
     {
         stringstream srs;
-#if defined (VERBOSE)
+//#if defined (VERBOSE)
         for (auto& solStep : m_solution) {
             srs << (&solStep - &m_solution[0]) + 1;
             srs << ". step, positon = (";
@@ -159,7 +159,7 @@ namespace Nessie {
             srs << ")\n";
             srs << solStep.m_tableResult;
         }
-#endif
+//#endif
         return srs.str();
     }
 
@@ -168,30 +168,32 @@ namespace Nessie {
     {
         if (!m_isSolved) {
             if (riddle.size() == 0) {
-                //prepare the first step...
+                // prepare the first step
                 riddle.push_back(SolutionStep (m_tableResult));
-                for (auto row = 0; row < m_tableResult.NumCols(); ++row) {
-                     for (auto col = 0; col < m_tableResult.NumCols(); ++col) {
-                         Position   pos(row, col);
-                         if (m_tableResult.Value(pos) == false) {
-                             riddle.back().m_FreePositions.emplace_back(pos);
-                         }
-                    }
-                }
-                for (auto frp : riddle.back().m_FreePositions) {
-                    // TODO:
-                    //If (riddle.back().m_tableResult.Matrix().Accomodates(frp, this->m_shapeSets...))
-                }
-                Solve (riddle);
             } else {
                 if (riddle.size () < this->m_shapeSets.size ()) {
-                    // TODO:
-                    //for ()
+                    // prepare the next step
                     riddle.push_back(SolutionStep (riddle.back().m_tableResult));
-                    Solve(riddle);
+                    ++riddle.back().m_indexOfShapeSet;
                 } else {
+                    // we are done, and happy with the first solution found!
                     m_isSolved = true;
                     m_solution = riddle;
+                    return;
+                }
+            }
+
+            if (!m_isSolved) {
+                for (auto row = 0u; row < m_tableResult.NumCols(); ++row) {
+                    for (auto col = 0u; col < m_tableResult.NumCols(); ++col) {
+                        Position   pos(row, col);
+                        for (auto currentShape : m_shapeSets[riddle.back().m_indexOfShapeSet]) {
+                            if (riddle.back().m_tableResult.Matrix().Accomodates(pos, currentShape.Matrix())) {
+                                Riddle  remainingRiddle{riddle};
+                                Solve(remainingRiddle);
+                            }
+                        }
+                    }
                 }
             }
         }
