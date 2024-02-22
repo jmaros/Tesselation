@@ -53,52 +53,55 @@ namespace Nessie {
          { 1, 0, 0, 0 }}
     };
  
-    const string ShapeChars { "@#$*+=x&" };
+    const string    ShapeChars  { "@#$*+=x&" };
 
     // constructors
     Tesselation::Tesselation (const TableLayout         & table,
                               const ShapeCollection     & shapes,
                               const Date                & date)
-     : m_tableLayout    (table)
-     , m_shapes         (shapes)
-     , m_date           (date)
-     , m_tableShape     (table.NumRows(),
-                         table.NumCols())
-     , m_monthMap       ()
-     , m_dayMap         ()
-     , m_shapeSets      ()
-     , m_tableResult    (table.NumRows(),
-                         table.NumCols())
-     , m_solution       ()
-     , m_isSolved       ()
+     : m_tableLayout        (table)
+     , m_shapes             (shapes)
+     , m_date               (date)
+     , m_tableShape         (table.NumRows(),
+                             table.NumCols())
+     , m_monthMap           ()
+     , m_dayMap             ()
+     , m_shapeCollections   ()
+     , m_tableResult        (table.NumRows(),
+                             table.NumCols())
+     , m_solution           ()
+     , m_isSolved           ()
     {
         // fill m_shapesSet so that it will contain all the different shapes
         for (auto   & shape : m_shapes) {
-            ShapeSet    shapesSet;
-            bool succi = shapesSet.insert(shape).second;
+            ShapeSet    shapeSet;
+            bool succi = shapeSet.insert(shape).second;
             if (succi) {
                 auto horiFlipped = shape.CreateHorizontallyFlipped();
                 auto vertFlipped = shape.CreateVerticallyFlipped();
                 auto bothFlipped = horiFlipped.CreateVerticallyFlipped();
-                (void) shapesSet.insert(horiFlipped);
-                (void) shapesSet.insert(vertFlipped);
-                (void) shapesSet.insert(bothFlipped);
-                (void) shapesSet.insert(shape.CreateTransposed());
-                (void) shapesSet.insert(horiFlipped.CreateTransposed());
-                (void) shapesSet.insert(vertFlipped.CreateTransposed());
-                (void) shapesSet.insert (bothFlipped.CreateTransposed());
-                m_shapeSets.push_back(shapesSet);
+                (void) shapeSet.insert(horiFlipped);
+                (void) shapeSet.insert(vertFlipped);
+                (void) shapeSet.insert(bothFlipped);
+                (void) shapeSet.insert(shape.CreateTransposed());
+                (void) shapeSet.insert(horiFlipped.CreateTransposed());
+                (void) shapeSet.insert(vertFlipped.CreateTransposed());
+                (void) shapeSet.insert (bothFlipped.CreateTransposed());
+                ShapeCollection shapeCollection;
+                for (auto& uniqueShape : shapeSet) {
+                    shapeCollection.push_back(uniqueShape);
+                }
+                m_shapeCollections.push_back(shapeCollection);
             }
         }
 
 #if defined (VERBOSE)
         int shNum {};
         int shsNum {};
-        for (auto   & shapeSet : m_shapeSets) {
+        for (auto   & shapeCollection : m_shapeCollections) {
             cout << ++shsNum << ". ShapeSet:\n";
-            ShapeSet    shapesSet;
             int shssNum{};
-            for (auto   & shape : shapeSet) {
+            for (auto   & shape : shapeCollection) {
                 cout << ++shNum << ".(" << shsNum << '.' << ++shssNum << ")." << shape;
             }
         }
@@ -141,20 +144,28 @@ namespace Nessie {
 
     string    Tesselation::Result () const
     {
+        TableResultChars    result(m_tableResult.NumRows(),
+                                   m_tableResult.NumCols());
         stringstream srs;
         for (auto& solStep : m_solution) {
+            auto& shapes = m_shapeCollections[solStep.m_indexOfShapeSet];
+            const TableResult &theShape{ shapes[solStep.m_shapeIndexInSet] };
+            (void)theShape;
+            result.SetData(solStep.m_position, ShapeChars[solStep.m_shapeIndexInSet]);
+        }
+        srs << result;
+        for (auto& solStep : m_solution) {
             srs << (&solStep - &m_solution[0]) + 1;
-            srs << ". step, positon = (";
+            srs << ". step: positon = (";
             srs << solStep.m_position.GetRowIndex();
             srs << ", ";
             srs << solStep.m_position.GetColIndex();
-            srs << ")\n";
-            srs << "ShapeSetItem = (";
+            srs << "); ShapeSetItem = (";
             srs << solStep.m_indexOfShapeSet;
             srs << ".";
             srs << solStep.m_shapeIndexInSet;
             srs << ")\n";
-            srs << solStep.m_tableResult;
+            //srs << solStep.m_tableResult;
         }
         return srs.str();
     }
@@ -165,33 +176,31 @@ namespace Nessie {
         if (!m_isSolved) {
             if (riddle.size() == 0) {
                 // prepare the first step
-                riddle.push_back(SolutionStep (m_tableResult));
+                riddle.push_back(SolutionStep(m_tableResult));
             }
-            riddle.back ().m_callDepth++;
             for (auto row = 0u; row < m_tableResult.NumRows(); ++row) {
                 for (auto col = 0u; col < m_tableResult.NumCols(); ++col) {
                     // Set all the possible positions
-                    Position   & pos {riddle.back().m_position};
-                    pos.SetPosition(row, col);
-                    for (const auto & currentShape : m_shapeSets[riddle.back().m_indexOfShapeSet]) {
+                    for (const auto & currentShape : m_shapeCollections[riddle.back().m_indexOfShapeSet]) {
                         // Try to use the current shape's all possible rotations
+                        Riddle  remainingRiddle{ riddle };
+                        SolutionStep& step{ remainingRiddle.back() };
+                        Position& pos{ step.m_position };
+                        pos.SetPosition(row, col);
 #if defined (VERBOSE)
-                        cout << riddle.back().m_callDepth << ". "
-                             << riddle.back().m_indexOfShapeSet << ". ShapeSet "
+                        cout << step.m_indexOfShapeSet << ". ShapeSet "
                              << pos << currentShape;
 #endif
-                        if (riddle.back().m_tableResult.CanAccomodate(pos, currentShape)) {
-                            Riddle  remainingRiddle{riddle};
-                            remainingRiddle.back().m_tableResult.Accomodate(pos, currentShape);
+                        if (step.m_tableResult.CanAccomodate(pos, currentShape)) {
+                            step.m_tableResult.Accomodate(pos, currentShape);
                             // prepare the next step
-                            remainingRiddle.push_back(SolutionStep (remainingRiddle.back().m_tableResult));
-                            if (remainingRiddle.size () < m_shapeSets.size ()) {
-                                    remainingRiddle.back().m_indexOfShapeSet += 1;
+                            remainingRiddle.push_back(step);
+                            if (remainingRiddle.size() < m_shapeCollections.size()) {
+                                remainingRiddle.back().m_indexOfShapeSet += 1;
                                 Solve(remainingRiddle);
 #if defined (VERBOSE) 
                                 for (const auto & solutionAttempt : remainingRiddle) {
                                     cout << " AfterSolve:"
-                                         << " cdp:" << solutionAttempt.m_callDepth
                                          << " shs:" << solutionAttempt.m_indexOfShapeSet
                                          << " shi:" << solutionAttempt.m_shapeIndexInSet
                                          << " pos:" << solutionAttempt.m_position
@@ -207,8 +216,7 @@ namespace Nessie {
                         } else {
 #if defined (VERBOSE)
                             for (const auto & solutionAttempt : riddle) {
-                                cout << " cdp:" << solutionAttempt.m_callDepth
-                                     << " shs:" << solutionAttempt.m_indexOfShapeSet
+                                cout << " shs:" << solutionAttempt.m_indexOfShapeSet
                                      << " shi:" << solutionAttempt.m_shapeIndexInSet
                                      << " pos:" << solutionAttempt.m_position
                                      << "\ntb:" << solutionAttempt.m_tableResult;
@@ -266,7 +274,7 @@ int main ()
                       month,
                       day);
 
-    bool        useCurrentTime  = true;
+    bool        useCurrentTime = false; // true;
 
     if (useCurrentTime) {
         date = Date::GetCurrentDate();

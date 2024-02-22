@@ -12,19 +12,19 @@ namespace Nessie {
     using std::set;
 
     using TableLayout       = Geom::Shape<int>;
-    using TableShape        = Geom::Shape<bool>;
-    using ShapeCollection   = vector<Geom::Shape<bool>>;
+    using TableResult       = Geom::Shape<bool>;
+    using ShapeCollection   = vector<TableResult>;
     using MonthMap          = map<MonthEnum, Position>;
     using DayMap            = map<int, Position>;
-    using ShapeSet          = set<Geom::Shape<bool>>;
-    using ShapeSets         = vector<ShapeSet>;
+    using ShapeSet          = set<TableResult>;
+    using ShapeCollections  = vector<ShapeCollection>;
+    using TableResultChars  = Geom::Shape<char>;
 
         struct SolutionStep {
-        explicit SolutionStep (const TableShape  & tableResult)
+        explicit SolutionStep (const TableResult& tableResult)
          :  m_indexOfShapeSet   ()
          ,  m_shapeIndexInSet   ()
          ,  m_position          ()
-         ,  m_callDepth         ()
          ,  m_tableResult       (tableResult)
         {
         }
@@ -32,8 +32,7 @@ namespace Nessie {
         size_t          m_indexOfShapeSet{};
         size_t          m_shapeIndexInSet{};
         Position        m_position{};
-        size_t          m_callDepth{};
-        TableShape      m_tableResult;
+        TableResult     m_tableResult;
     };
 
     using Solution  = vector<SolutionStep>;
@@ -56,11 +55,11 @@ namespace Nessie {
         const TableLayout       & m_tableLayout;
         const ShapeCollection   & m_shapes;
         Date                    m_date;
-        TableShape              m_tableShape;
+        TableResult             m_tableShape;
         MonthMap                m_monthMap;
         DayMap                  m_dayMap;
-        ShapeSets               m_shapeSets;
-        TableShape              m_tableResult;
+        ShapeCollections        m_shapeCollections;
+        TableResult             m_tableResult;
         Solution                m_solution;
         bool                    m_isSolved;
     };
