@@ -33,6 +33,10 @@ namespace Geom {
     // accessors
         size_t                          NumCols                     ()              const;
         size_t                          NumRows                     ()              const;
+
+        inline bool                     CanAccomodate  (const Position     & pos,
+                                                        const Shape<T>     & shape) const;
+
         inline const T                  Value                       (Position  pos) const;
         inline const LinAlg::Matrix<T>  & Matrix                    ()              const;
         inline bool                     ShowZeros                   ()              const;
@@ -44,14 +48,17 @@ namespace Geom {
         const LinAlg::Row<T>              & operator [] (size_t index)  const;
 
     // modifiers
-        inline bool     SetData             (Position     pos,
-                                             const T      & newValue);
+        inline bool     SetData             (Position       pos,
+                                             const T        & newValue);
 
-        inline void     SetOutOfBoundValue  (const T    & newValue);
-        inline bool     SetShowZeros        (bool       bShow);
+        inline bool Accomodate              (const Position & pos,
+                                            const Shape<T>  & shape);
+
+        inline void     SetOutOfBoundValue  (const T        & newValue);
+        inline bool     SetShowZeros        (bool           bShow);
 
         // operators
-        LinAlg::Row<T>  & operator [] (size_t    index);
+        LinAlg::Row<T>  & operator []       (size_t         index);
 
     private:
     // data members
@@ -125,6 +132,13 @@ namespace Geom {
     }
 
     template <typename T>
+    inline bool Shape<T>::CanAccomodate (const Position     & pos,
+                                          const Shape<T>    & shape) const
+    {
+        return m_matrix.CanAccomodate(pos, shape.m_matrix);
+    }
+
+    template <typename T>
     inline const T    Shape<T>::Value (Position  pos)               const
     {
         return m_matrix.Value(pos);
@@ -186,6 +200,13 @@ namespace Geom {
     }
 
     template <typename T>
+    inline bool Shape<T>::Accomodate (const Position    & pos,
+                                      const Shape<T>    & shape)
+    {
+        return m_matrix.Accomodate(pos, shape.m_matrix);
+    }
+
+    template <typename T>
     inline void Shape<T>::SetOutOfBoundValue (const T    & newValue)
     {
         return m_matrix.SetOutOfBoundValue(newValue);
@@ -214,7 +235,7 @@ namespace Geom {
         stringstream sos;
         sos << "Shape = \n";
         string prep{ "          " };
-        for (auto& row : shape.Matrix().Rows()) {
+        for (auto& row : shape.Matrix().GetRows()) {
             sos << prep;
             for (auto element : row.Elements()) {
                 if (shape.ShowZeros() || element) {

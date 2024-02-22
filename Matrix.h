@@ -25,11 +25,11 @@ namespace LinAlg {
         inline size_t               ColUpperLimit               ()                              const;
         inline bool                 IsLegalPosition             (const Position     & pos)      const;
 
-        inline bool                 Accomodates                 (const Position     & pos,
+        inline bool                 CanAccomodate               (const Position     & pos,
                                                                  const Matrix<T>    & mat)      const;
 
         inline const T              Value                       (const Position     & pos)      const;
-        inline const vector<Row<T>> & Rows                      ()                              const;
+        inline const vector<Row<T>> & GetRows                   ()                              const;
 
     // creators
         Matrix<T>                   CreateTransposed            ()                              const;
@@ -44,10 +44,12 @@ namespace LinAlg {
                                          const T       & newValue);
 
         inline void SetOutOfBoundValue  (const T       & newValue);
+        inline void PushBack            (const Row<T>  & row);
 
-        inline void PushBack    (const Row<T>  & row);
-        
-    // operators
+        inline bool Accomodate          (const Position     & pos,
+                                         const Matrix<T>    & mat);
+
+        // operators
         Row<T>& operator [] (size_t         index);
 
     private:
@@ -95,7 +97,7 @@ namespace LinAlg {
     }
 
     template <typename T>
-    inline const vector<Row<T>>     & Matrix<T>::Rows ()   const
+    inline const vector<Row<T>> & Matrix<T>::GetRows () const
     {
         return m_rows;
     }
@@ -120,14 +122,18 @@ namespace LinAlg {
     }
 
     template <typename T>
-    inline bool Matrix<T>::Accomodates (const Position     & pos,
-                                        const Matrix<T>    & mat) const
+    inline bool Matrix<T>::CanAccomodate (const Position     & pos,
+                                          const Matrix<T>    & mat) const
     {
-        const T     EV{};
+        const T         EV{};
+        const size_t    ru{mat.RowUpperLimit ()};
+        const size_t    cu{mat.ColUpperLimit ()};
 
-        for (Position inPos; inPos.GetRowIndex() < mat.RowUpperLimit(); inPos.IncRow()) {
-            for (;inPos.GetColIndex() < mat.ColUpperLimit(); inPos.IncCol()) {
-                if (Value(pos + inPos) != EV && mat.Value(inPos) != EV) {
+        for (size_t row = 0u; row < ru; ++row) {
+            for (size_t col = 0u; col < cu; ++col) {
+                Position inPos(row, col);
+                Position ouPos{pos + inPos};
+                if (Value(ouPos) != EV && mat.Value(inPos) != EV) {
                     return false;
                 }
             }
@@ -218,6 +224,34 @@ namespace LinAlg {
     inline void Matrix<T>::PushBack (const Row<T>        & row)
     {
         m_rows.push_back(row);
+    }
+
+    template <typename T>
+    inline bool Matrix<T>::Accomodate (const Position     & pos,
+                                       const Matrix<T>    & mat)
+    {
+        const T         EV{};
+        const size_t    ru{mat.RowUpperLimit ()};
+        const size_t    cu{mat.ColUpperLimit ()};
+
+        for (size_t row = 0u; row < ru; ++row) {
+            for (size_t col = 0u; col < cu; ++col) {
+                Position inPos(row, col);
+                Position ouPos{pos + inPos};
+                if (Value(ouPos) != EV && mat.Value(inPos) != EV) {
+                    cout << "Unexpexted collision at " << pos << endl;
+                    return false;
+                }
+                if (Value(ouPos) == EV && mat.Value(inPos) != EV) {
+                    bool bSucc = SetData(ouPos, mat.Value(inPos));
+                    if (!bSucc) {
+                        cout << "Failed to write to " << ouPos
+                             << " = " << pos << " + " << inPos << endl;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     template <typename T>

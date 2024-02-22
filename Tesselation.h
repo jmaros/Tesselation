@@ -24,13 +24,15 @@ namespace Nessie {
          :  m_indexOfShapeSet   ()
          ,  m_shapeIndexInSet   ()
          ,  m_position          ()
+         ,  m_callDepth         ()
          ,  m_tableResult       (tableResult)
         {
         }
 
-        size_t          m_indexOfShapeSet;
-        size_t          m_shapeIndexInSet;
-        Position        m_position;
+        size_t          m_indexOfShapeSet{};
+        size_t          m_shapeIndexInSet{};
+        Position        m_position{};
+        size_t          m_callDepth{};
         TableShape      m_tableResult;
     };
 

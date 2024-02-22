@@ -128,11 +128,9 @@ namespace Nessie {
         // required return value for the out of bound positions
         m_tableResult = m_tableShape;
         m_tableResult.SetOutOfBoundValue(true);
-//#if defined (VERBOSE)
         bool bPrev{ m_tableShape.SetShowZeros(true) };
         cout << "Table" << m_tableShape;
         (void) m_tableShape.SetShowZeros(bPrev);
-//#endif
     }
 
     // accessors
@@ -144,7 +142,6 @@ namespace Nessie {
     string    Tesselation::Result () const
     {
         stringstream srs;
-//#if defined (VERBOSE)
         for (auto& solStep : m_solution) {
             srs << (&solStep - &m_solution[0]) + 1;
             srs << ". step, positon = (";
@@ -152,14 +149,13 @@ namespace Nessie {
             srs << ", ";
             srs << solStep.m_position.GetColIndex();
             srs << ")\n";
-            srs << "ShapeSetItem = ";
+            srs << "ShapeSetItem = (";
             srs << solStep.m_indexOfShapeSet;
             srs << ".";
             srs << solStep.m_shapeIndexInSet;
             srs << ")\n";
             srs << solStep.m_tableResult;
         }
-//#endif
         return srs.str();
     }
 
@@ -170,33 +166,61 @@ namespace Nessie {
             if (riddle.size() == 0) {
                 // prepare the first step
                 riddle.push_back(SolutionStep (m_tableResult));
-            } else {
-                if (riddle.size () < this->m_shapeSets.size ()) {
-                    // prepare the next step
-                    riddle.push_back(SolutionStep (riddle.back().m_tableResult));
-                    ++riddle.back().m_indexOfShapeSet;
-                } else {
-                    // we are done, and happy with the first solution found!
-                    m_isSolved = true;
-                    m_solution = riddle;
-                    return;
-                }
             }
-
-            if (!m_isSolved) {
-                for (auto row = 0u; row < m_tableResult.NumCols(); ++row) {
-                    for (auto col = 0u; col < m_tableResult.NumCols(); ++col) {
-                        Position   pos(row, col);
-                        for (auto currentShape : m_shapeSets[riddle.back().m_indexOfShapeSet]) {
-                            if (riddle.back().m_tableResult.Matrix().Accomodates(pos, currentShape.Matrix())) {
-                                Riddle  remainingRiddle{riddle};
+            riddle.back ().m_callDepth++;
+            for (auto row = 0u; row < m_tableResult.NumRows(); ++row) {
+                for (auto col = 0u; col < m_tableResult.NumCols(); ++col) {
+                    // Set all the possible positions
+                    Position   & pos {riddle.back().m_position};
+                    pos.SetPosition(row, col);
+                    for (const auto & currentShape : m_shapeSets[riddle.back().m_indexOfShapeSet]) {
+                        // Try to use the current shape's all possible rotations
+#if defined (VERBOSE)
+                        cout << riddle.back().m_callDepth << ". "
+                             << riddle.back().m_indexOfShapeSet << ". ShapeSet "
+                             << pos << currentShape;
+#endif
+                        if (riddle.back().m_tableResult.CanAccomodate(pos, currentShape)) {
+                            Riddle  remainingRiddle{riddle};
+                            remainingRiddle.back().m_tableResult.Accomodate(pos, currentShape);
+                            // prepare the next step
+                            remainingRiddle.push_back(SolutionStep (remainingRiddle.back().m_tableResult));
+                            if (remainingRiddle.size () < m_shapeSets.size ()) {
+                                    remainingRiddle.back().m_indexOfShapeSet += 1;
                                 Solve(remainingRiddle);
+#if defined (VERBOSE) 
+                                for (const auto & solutionAttempt : remainingRiddle) {
+                                    cout << " AfterSolve:"
+                                         << " cdp:" << solutionAttempt.m_callDepth
+                                         << " shs:" << solutionAttempt.m_indexOfShapeSet
+                                         << " shi:" << solutionAttempt.m_shapeIndexInSet
+                                         << " pos:" << solutionAttempt.m_position
+                                         << "\ntb:" << solutionAttempt.m_tableResult;
+                                }
+#endif
+                            } else {
+                                // we are done, and happy with the first solution found!
+                                m_isSolved = true;
+                                m_solution = remainingRiddle;
+                                return;
                             }
+                        } else {
+#if defined (VERBOSE)
+                            for (const auto & solutionAttempt : riddle) {
+                                cout << " cdp:" << solutionAttempt.m_callDepth
+                                     << " shs:" << solutionAttempt.m_indexOfShapeSet
+                                     << " shi:" << solutionAttempt.m_shapeIndexInSet
+                                     << " pos:" << solutionAttempt.m_position
+                                     << "\ntb:" << solutionAttempt.m_tableResult;
+                            }
+#endif
                         }
                     }
                 }
             }
+            return;
         }
+        return;
     }
 
    // global operators
@@ -211,8 +235,30 @@ namespace Nessie {
 
 using namespace Nessie;
 
+class ElapsedTime {
+public:
+    ElapsedTime ()
+     : m_startTime  (std::chrono::system_clock::now())
+     , m_endTime    (m_startTime)
+    {
+    }
+
+    ~ElapsedTime ()
+    {
+        m_endTime = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = m_endTime - m_startTime;
+        cout << "\n Elapsed Time: " << elapsed_seconds.count() << "s\n";
+    }
+
+private:
+    std::chrono::time_point<std::chrono::system_clock> m_startTime;
+    std::chrono::time_point<std::chrono::system_clock> m_endTime;
+};
+
 int main ()
 {
+    ElapsedTime et;
+
     int         year            = 2024;
     MonthEnum   month           = MonthEnum::February;
     int         day             = 29;

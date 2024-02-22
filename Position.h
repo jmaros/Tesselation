@@ -56,6 +56,12 @@ public:
     {
         m_colIndex = colIndex;
     }
+    void SetPosition (size_t    rowIndex,
+                      size_t    colIndex)
+    {
+        m_rowIndex = rowIndex;
+        m_colIndex = colIndex;
+    }
 
     void IncRow ()
     {
@@ -73,6 +79,20 @@ private:
 };
 
 // global operator
+ostream& operator << (ostream            & os,
+                      const Position     & pos)
+{
+    stringstream sos;
+    sos << "Position = (";
+    sos << pos.GetRowIndex();
+    sos << ", ";
+    sos << pos.GetColIndex();
+    sos << ")";
+    sos << endl;
+    os << sos.str();
+    return os;
+}
+
 Position operator+ (const Position  & lPos,
                     const Position  & rPos)
 {
