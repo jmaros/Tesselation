@@ -2,6 +2,7 @@
 //
 // Position.h
 //
+#include <functional>
 #include <iostream>
 #include <iomanip>
 #include <map>
@@ -14,10 +15,12 @@ namespace Nessie {
 
     using std::cout;
     using std::endl;
+    using std::function;
     using std::map;
     using std::ostream;
     using std::size_t;
     using std::initializer_list;
+    using std::is_same;
     using std::setw;
     //    using std::shared_ptr;
     using std::string;

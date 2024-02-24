@@ -7,7 +7,7 @@
 namespace Nessie {
 namespace LinAlg {
 
-// declarations
+    // declarations
 
     template <typename T> 
     class Matrix {
@@ -46,8 +46,8 @@ namespace LinAlg {
         inline void SetOutOfBoundValue  (const T       & newValue);
         inline void PushBack            (const Row<T>  & row);
 
-        inline bool Accomodate          (const Position     & pos,
-                                         const Matrix<T>    & mat);
+        inline bool Accomodate          (const Position& pos,
+                                         const Matrix<T>& mat);
 
         // operators
         Row<T>& operator [] (size_t         index);
@@ -227,17 +227,17 @@ namespace LinAlg {
     }
 
     template <typename T>
-    inline bool Matrix<T>::Accomodate (const Position     & pos,
-                                       const Matrix<T>    & mat)
+    inline bool Matrix<T>::Accomodate (const Position& pos,
+                                       const Matrix<T>& mat)
     {
         const T         EV{};
-        const size_t    ru{mat.RowUpperLimit ()};
-        const size_t    cu{mat.ColUpperLimit ()};
+        const size_t    ru{ mat.RowUpperLimit () };
+        const size_t    cu{ mat.ColUpperLimit () };
 
         for (size_t row = 0u; row < ru; ++row) {
             for (size_t col = 0u; col < cu; ++col) {
                 Position inPos(row, col);
-                Position ouPos{pos + inPos};
+                Position ouPos{ pos + inPos };
                 if (Value(ouPos) != EV && mat.Value(inPos) != EV) {
                     cout << "Unexpexted collision at " << pos << endl;
                     return false;
@@ -246,7 +246,7 @@ namespace LinAlg {
                     bool bSucc = SetData(ouPos, mat.Value(inPos));
                     if (!bSucc) {
                         cout << "Failed to write to " << ouPos
-                             << " = " << pos << " + " << inPos << endl;
+                            << " = " << pos << " + " << inPos << endl;
                     }
                 }
             }

@@ -43,27 +43,31 @@ namespace Geom {
         Shape<T>                        CreateTransposed            ()              const;
         Shape<T>                        CreateHorizontallyFlipped   ()              const;
         Shape<T>                        CreateVerticallyFlipped     ()              const;
+        inline bool                     SetMutableShowZeros         (bool    bShow) const;
+        const string                    & GetShapeName              ()              const;
 
         // operators
-        const LinAlg::Row<T>              & operator [] (size_t index)  const;
+        const LinAlg::Row<T>            & operator []               (size_t  index) const;
 
     // modifiers
-        inline bool     SetData             (Position       pos,
-                                             const T        & newValue);
+        inline void     SetShapeName        (const string& shana);
 
-        inline bool Accomodate              (const Position & pos,
-                                            const Shape<T>  & shape);
+        inline bool     SetData             (Position           pos,
+                                             const T            & newValue);
 
-        inline void     SetOutOfBoundValue  (const T        & newValue);
-        inline bool     SetShowZeros        (bool           bShow);
+        inline bool Accomodate              (const Position     & pos,
+                                            const Shape<T>      & shape);
+
+        inline void     SetOutOfBoundValue  (const T            & newValue);
 
         // operators
-        LinAlg::Row<T>  & operator []       (size_t         index);
+        LinAlg::Row<T>  & operator []       (size_t             index);
 
     private:
     // data members
+        string              m_shapeName{ "Shape" };
         LinAlg::Matrix<T>   m_matrix;
-        bool                m_showZeros{};
+        mutable bool        m_showZeros{};
     };
 
 // definitions
@@ -72,13 +76,14 @@ namespace Geom {
     template <typename T>
     Shape<T>::Shape (size_t    numCols,
                      size_t    numRows)
-     : m_matrix         (numCols,
-                         numRows)
-        , m_showZeros   ()
+        : m_shapeName       ("Shape")
+        , m_matrix          (numCols,
+                             numRows)
+        , m_showZeros       ()
     {
     }
 
-#if defined (VERBOSE)
+#if defined (VERBOSE) && VERBOSE > 100
     namespace {
         int shapeNumber{};
     }
@@ -86,7 +91,8 @@ namespace Geom {
 
     template <typename T>
     Shape<T>::Shape (initializer_list<initializer_list<T>>    ili)
-     : m_matrix         (0u,0u)
+     : m_shapeName      ("Shape")
+     , m_matrix         (0u,0u)
      , m_showZeros      ()
     {
         size_t roi{};
@@ -106,7 +112,7 @@ namespace Geom {
                 init[r].push_back(*it2);
             }
         }
-#if defined (VERBOSE)
+#if defined (VERBOSE) && VERBOSE > 100
         if (shapeNumber == 0) {
             cout << "Extended Table";
         } else {
@@ -184,6 +190,21 @@ namespace Geom {
         return verticallyFlipped;
     }
 
+    template <typename T>
+    inline bool Shape<T>::SetMutableShowZeros (bool     bShow)      const
+    {
+        bool bPrev{ m_showZeros };
+        m_showZeros = bShow;
+        return bPrev;
+    }
+
+    template <typename T>
+    const string& Shape<T>::GetShapeName () const
+    {
+        return m_shapeName;
+
+    }
+
     // operators
     template <typename T>
     const LinAlg::Row<T>   & Shape<T>::operator [] (size_t  index)  const
@@ -193,6 +214,12 @@ namespace Geom {
 
     // modifiers
     template <typename T>
+    inline void Shape<T>::SetShapeName (const string& shana)
+    {
+        m_shapeName = shana;
+    }
+
+    template <typename T>
     inline bool Shape<T>::SetData (Position     pos,
                                    const T      & newValue)
     {
@@ -200,8 +227,8 @@ namespace Geom {
     }
 
     template <typename T>
-    inline bool Shape<T>::Accomodate (const Position    & pos,
-                                      const Shape<T>    & shape)
+    inline bool Shape<T>::Accomodate (const Position& pos,
+                                      const Shape<T>& shape)
     {
         return m_matrix.Accomodate(pos, shape.m_matrix);
     }
@@ -212,15 +239,7 @@ namespace Geom {
         return m_matrix.SetOutOfBoundValue(newValue);
     }
 
-    template <typename T>
-    inline bool Shape<T>::SetShowZeros (bool     bShow)
-    {
-        bool bPrev{ m_showZeros };
-        m_showZeros = bShow;
-        return bPrev;
-    }
-
-        // operators
+    // operators
     template <typename T>
     LinAlg::Row<T>& Shape<T>::operator [] (size_t    index)
     {
@@ -232,16 +251,19 @@ namespace Geom {
     ostream& operator << (ostream            & os,
                           const Shape<T>     & shape)
     {
+        constexpr bool IsBool{ std::is_same<T, bool>::value };
+        constexpr bool IsChar{ std::is_same<T, char>::value };
+        constexpr size_t sw = (IsBool || IsChar) ? 1 : 4;
         stringstream sos;
-        sos << "Shape = \n";
+        sos << shape.GetShapeName() << " = \n";
         string prep{ "          " };
         for (auto& row : shape.Matrix().GetRows()) {
             sos << prep;
             for (auto element : row.Elements()) {
                 if (shape.ShowZeros() || element) {
-                             sos << setw(3) << element;
+                             sos << setw(sw) << element;
                 } else {
-                    sos << setw(3) << " ";
+                    sos << setw(sw) << " ";
                 }
             }
             sos << endl;

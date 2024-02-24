@@ -53,7 +53,8 @@ namespace Nessie {
          { 1, 0, 0, 0 }}
     };
  
-    const string    ShapeChars  { "@#$*+=x&" };
+    //const string    ShapeChars{ "ABCDEFGH" };
+    const string    ShapeChars{ "@#$*+ox&" };
 
     // constructors
     Tesselation::Tesselation (const TableLayout         & table,
@@ -96,6 +97,7 @@ namespace Nessie {
         }
 
 #if defined (VERBOSE)
+        cout << "\nMain Table:" << table;
         int shNum {};
         int shsNum {};
         for (auto   & shapeCollection : m_shapeCollections) {
@@ -131,9 +133,6 @@ namespace Nessie {
         // required return value for the out of bound positions
         m_tableResult = m_tableShape;
         m_tableResult.SetOutOfBoundValue(true);
-        bool bPrev{ m_tableShape.SetShowZeros(true) };
-        cout << "Table" << m_tableShape;
-        (void) m_tableShape.SetShowZeros(bPrev);
     }
 
     // accessors
@@ -147,28 +146,59 @@ namespace Nessie {
         TableResultChars    result(m_tableResult.NumRows(),
                                    m_tableResult.NumCols());
         stringstream srs;
+
+#if defined (VERBOSE)
+        for (auto& solStep : m_solution) {
+            srs << (&solStep - &m_solution[0]) + 1;
+            srs << ". step: positon = (" << solStep.m_position.GetRowIndex() << ", ";
+            srs << solStep.m_position.GetColIndex() << "); ShapeSetItem = (";
+            srs << solStep.m_indexOfShapeSet << "." << solStep.m_shapeIndexInSet << ")\n";
+        }
+#endif
         for (auto& solStep : m_solution) {
             auto& shapes = m_shapeCollections[solStep.m_indexOfShapeSet];
             const TableResult &theShape{ shapes[solStep.m_shapeIndexInSet] };
-            (void)theShape;
-            result.SetData(solStep.m_position, ShapeChars[solStep.m_shapeIndexInSet]);
+            TableResultChars chrep(theShape.NumRows(),
+                                   theShape.NumCols());
+
+            for (size_t r = 0; r < chrep.NumRows(); ++r) {
+                for (size_t c = 0; c < chrep.NumCols(); ++c) {
+                    Position chPos(r, c);
+                    if (theShape.Value(chPos)) {
+                        chrep.SetData(chPos, ShapeChars[solStep.m_indexOfShapeSet]);
+                    }
+                }
+            }
+
+            result.Accomodate(solStep.m_position, chrep);
         }
+        result.SetShapeName("Solution");
         srs << result;
-        for (auto& solStep : m_solution) {
-            srs << (&solStep - &m_solution[0]) + 1;
-            srs << ". step: positon = (";
-            srs << solStep.m_position.GetRowIndex();
-            srs << ", ";
-            srs << solStep.m_position.GetColIndex();
-            srs << "); ShapeSetItem = (";
-            srs << solStep.m_indexOfShapeSet;
-            srs << ".";
-            srs << solStep.m_shapeIndexInSet;
-            srs << ")\n";
-            //srs << solStep.m_tableResult;
-        }
         return srs.str();
     }
+
+#if defined (VERBOSE) && VERBOSE > 100
+    void Tesselation::DebugAfterSolve (const Riddle      & rx) const
+    {
+        for (const auto& solutionAttempt : rx) {
+            cout << " AfterSolve:"
+                 << " shs:" << solutionAttempt.m_indexOfShapeSet
+                 << " shi:" << solutionAttempt.m_shapeIndexInSet
+                 << " pos:" << solutionAttempt.m_position
+                 << "\ntb:" << solutionAttempt.m_tableResult;
+        }
+    }
+#endif
+    bool Tesselation::SetTableShapeShowZeros (bool  bShow) const
+    {
+        return m_tableShape.SetMutableShowZeros(bShow);
+    }
+
+    const TableResult& Tesselation::GetTableShape () const
+    {
+        return m_tableShape;
+    }
+
 
     // modifiers
     void Tesselation::Solve (Riddle     &riddle)
@@ -181,31 +211,28 @@ namespace Nessie {
             for (auto row = 0u; row < m_tableResult.NumRows(); ++row) {
                 for (auto col = 0u; col < m_tableResult.NumCols(); ++col) {
                     // Set all the possible positions
-                    for (const auto & currentShape : m_shapeCollections[riddle.back().m_indexOfShapeSet]) {
+                    auto    ioss{ riddle.back().m_indexOfShapeSet };
+                    auto    & currentShapeSet{ m_shapeCollections[ioss] };
+                    for (size_t shIdxIS = 0; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
                         // Try to use the current shape's all possible rotations
+                        riddle.back().m_shapeIndexInSet = shIdxIS;
+                        const auto& currentShape = currentShapeSet[shIdxIS];
                         Riddle  remainingRiddle{ riddle };
                         SolutionStep& step{ remainingRiddle.back() };
                         Position& pos{ step.m_position };
                         pos.SetPosition(row, col);
-#if defined (VERBOSE)
-                        cout << step.m_indexOfShapeSet << ". ShapeSet "
-                             << pos << currentShape;
+#if defined (VERBOSE) && VERBOSE > 100
+                        cout << step.m_indexOfShapeSet << ". ShapeSet " << pos << currentShape;
 #endif
                         if (step.m_tableResult.CanAccomodate(pos, currentShape)) {
                             step.m_tableResult.Accomodate(pos, currentShape);
                             // prepare the next step
-                            remainingRiddle.push_back(step);
                             if (remainingRiddle.size() < m_shapeCollections.size()) {
+                                remainingRiddle.push_back(step);
                                 remainingRiddle.back().m_indexOfShapeSet += 1;
                                 Solve(remainingRiddle);
-#if defined (VERBOSE) 
-                                for (const auto & solutionAttempt : remainingRiddle) {
-                                    cout << " AfterSolve:"
-                                         << " shs:" << solutionAttempt.m_indexOfShapeSet
-                                         << " shi:" << solutionAttempt.m_shapeIndexInSet
-                                         << " pos:" << solutionAttempt.m_position
-                                         << "\ntb:" << solutionAttempt.m_tableResult;
-                                }
+#if defined (VERBOSE) && VERBOSE > 100
+                                DebugAfterSolve(remainingRiddle);
 #endif
                             } else {
                                 // we are done, and happy with the first solution found!
@@ -214,13 +241,8 @@ namespace Nessie {
                                 return;
                             }
                         } else {
-#if defined (VERBOSE)
-                            for (const auto & solutionAttempt : riddle) {
-                                cout << " shs:" << solutionAttempt.m_indexOfShapeSet
-                                     << " shi:" << solutionAttempt.m_shapeIndexInSet
-                                     << " pos:" << solutionAttempt.m_position
-                                     << "\ntb:" << solutionAttempt.m_tableResult;
-                            }
+#if defined (VERBOSE) && VERBOSE > 100
+                            DebugAfterSolve(riddle);
 #endif
                         }
                     }
@@ -231,10 +253,13 @@ namespace Nessie {
         return;
     }
 
-   // global operators
+    // global operators
     ostream& operator << (ostream            & os,
                           const Tesselation  & tessy)
     {
+        bool bPrev{ tessy.SetTableShapeShowZeros(true) };
+        os << "Table" << tessy.GetTableShape();
+        (void)tessy.SetTableShapeShowZeros(bPrev);
         os << "Tesselation Date = " << tessy.GetDate().DateStr() << endl;
         os << tessy.Result();
         return os;
@@ -274,7 +299,7 @@ int main ()
                       month,
                       day);
 
-    bool        useCurrentTime = false; // true;
+    bool        useCurrentTime = true;
 
     if (useCurrentTime) {
         date = Date::GetCurrentDate();
