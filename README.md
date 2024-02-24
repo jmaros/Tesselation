@@ -49,4 +49,25 @@ Shape 7 =   1  1  1
 Shape 8 =   1  1  1  1
             1
 ```
+An example of the output teszt run:
+```
+2024-02-24 23:15:06
+TableShape =
+          0100001
+          0000001
+          0000000
+          0000000
+          0000000
+          0010000
+          0001111
 
+Tesselation Date = 2024 February 24
+Solution =
+          @ @###
+          @@@###
+          x++&&&&
+          xx+&$$$
+          *x++o$$
+          *x oooo
+          ***
+```
