@@ -8,11 +8,16 @@
 #include <map>      // map
 #include <sstream>  // stringstream
 #include <iomanip>  // put_time
+#include <iostream> // cout
 #include <regex>    // regexp search
 #include <string>   // string
 
 namespace Nessie {
 
+    using namespace std::chrono;
+
+    using std::cout;
+    using std::endl;
     using std::map;
     using std::regex;
     using std::regex_search;
@@ -145,8 +150,8 @@ public:
     // static methods
     static string CurrentTimeAndDate ()
     {
-        auto now = std::chrono::system_clock::now();
-        auto in_time_t = std::chrono::system_clock::to_time_t(now);
+        auto now        = system_clock::now();
+        auto in_time_t  = system_clock::to_time_t(now);
 
         stringstream ss;
         ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");

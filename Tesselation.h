@@ -48,9 +48,6 @@ namespace Nessie {
     // accessors
         inline const Date   & GetDate   ()          const;
         string              Result      ()          const;
-#if defined (VERBOSE) && VERBOSE > 100
-        void DebugAfterSolve (const Riddle& rx)     const;
-#endif
         bool SetTableShapeShowZeros (bool  bShow)   const;
         const TableResult& GetTableShape ()         const;
      // modifiers

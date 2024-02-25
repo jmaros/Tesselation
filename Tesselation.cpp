@@ -2,12 +2,30 @@
 // Tesselation.cpp
 //  : This file contains the 'main' function. Program execution begins and ends there.
 //
+// You can compile this code by using Visual Studio (2022 Community Edition)
+//
+// or you can compile on Windows using MinGW and a specific c++ version:
+// test Tesselation c++23
+//
+// or you can compile on Linux using a specific c++ version:
+// ./test.sh Tesselation c++23
+//
+/* You might have to convert crlf to lf in test.sh using sed like this:
+sed -i 's/\r
+/
+/g' test.sh
+*/
+// or you can use
+// dos2unix test.sh
+// for the same.
+//
 
 #if defined (_MSC_VER) && _MSC_VER >= 1900 && !defined (_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include "Tesselation.h"
+#include "ElapsedTime.h"
 
 namespace Nessie {
 
@@ -147,14 +165,6 @@ namespace Nessie {
                                    m_tableResult.NumCols());
         stringstream srs;
 
-#if defined (VERBOSE)
-        for (auto& solStep : m_solution) {
-            srs << (&solStep - &m_solution[0]) + 1;
-            srs << ". step: positon = (" << solStep.m_position.GetRowIndex() << ", ";
-            srs << solStep.m_position.GetColIndex() << "); ShapeSetItem = (";
-            srs << solStep.m_indexOfShapeSet << "." << solStep.m_shapeIndexInSet << ")\n";
-        }
-#endif
         for (auto& solStep : m_solution) {
             auto& shapes = m_shapeCollections[solStep.m_indexOfShapeSet];
             const TableResult &theShape{ shapes[solStep.m_shapeIndexInSet] };
@@ -177,18 +187,6 @@ namespace Nessie {
         return srs.str();
     }
 
-#if defined (VERBOSE) && VERBOSE > 100
-    void Tesselation::DebugAfterSolve (const Riddle      & rx) const
-    {
-        for (const auto& solutionAttempt : rx) {
-            cout << " AfterSolve:"
-                 << " shs:" << solutionAttempt.m_indexOfShapeSet
-                 << " shi:" << solutionAttempt.m_shapeIndexInSet
-                 << " pos:" << solutionAttempt.m_position
-                 << "\ntb:" << solutionAttempt.m_tableResult;
-        }
-    }
-#endif
     bool Tesselation::SetTableShapeShowZeros (bool  bShow) const
     {
         return m_tableShape.SetMutableShowZeros(bShow);
@@ -221,9 +219,6 @@ namespace Nessie {
                         SolutionStep& step{ remainingRiddle.back() };
                         Position& pos{ step.m_position };
                         pos.SetPosition(row, col);
-#if defined (VERBOSE) && VERBOSE > 100
-                        cout << step.m_indexOfShapeSet << ". ShapeSet " << pos << currentShape;
-#endif
                         if (step.m_tableResult.CanAccomodate(pos, currentShape)) {
                             step.m_tableResult.Accomodate(pos, currentShape);
                             // prepare the next step
@@ -231,19 +226,12 @@ namespace Nessie {
                                 remainingRiddle.push_back(step);
                                 remainingRiddle.back().m_indexOfShapeSet += 1;
                                 Solve(remainingRiddle);
-#if defined (VERBOSE) && VERBOSE > 100
-                                DebugAfterSolve(remainingRiddle);
-#endif
                             } else {
                                 // we are done, and happy with the first solution found!
-                                m_isSolved = true;
-                                m_solution = remainingRiddle;
+                                m_isSolved      = true;
+                                m_solution      = remainingRiddle;
                                 return;
                             }
-                        } else {
-#if defined (VERBOSE) && VERBOSE > 100
-                            DebugAfterSolve(riddle);
-#endif
                         }
                     }
                 }
@@ -267,26 +255,6 @@ namespace Nessie {
 } // namespace Nessie
 
 using namespace Nessie;
-
-class ElapsedTime {
-public:
-    ElapsedTime ()
-     : m_startTime  (std::chrono::system_clock::now())
-     , m_endTime    (m_startTime)
-    {
-    }
-
-    ~ElapsedTime ()
-    {
-        m_endTime = std::chrono::system_clock::now();
-        std::chrono::duration<double> elapsed_seconds = m_endTime - m_startTime;
-        cout << "\n Elapsed Time: " << elapsed_seconds.count() << "s\n";
-    }
-
-private:
-    std::chrono::time_point<std::chrono::system_clock> m_startTime;
-    std::chrono::time_point<std::chrono::system_clock> m_endTime;
-};
 
 int main ()
 {

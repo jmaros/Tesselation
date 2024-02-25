@@ -90,8 +90,8 @@ g++ -std=%cv% %opt% %dln% -Wall -Wextra -Wpedantic -Werror -time %optargs% %fqn%
 @ECHO test cpp_filename_without_the_cpp_extension [ compiler options ]
 @ECHO test [ --help ] for this help
 @ECHO The [ ] square brackets denote the optionality of the enclosed part.
-@ECHO For compiler options substitute the "=" (equal sign) with the word "egual".
-@ECHO For example instead of the "-D VERBOSE=11" write "-D VERBOSE egual 11".
+@ECHO For compiler options substitute the "=" (equal sign) with the word "equal".
+@ECHO For example instead of the "-D VERBOSE=11" write "-D VERBOSE equal 11".
 @ECHO You can specify the language version by typing [-std=]c++11, c++14, c++17, c++20 or c++23.
 @ECHO You can specify the optimization level by typing -O0, -O1, -O2, or -O3.
 @ECHO You can specify the debug level by typing -g -g0 -g1, -g2, -g3 or gdb.

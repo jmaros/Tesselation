@@ -83,12 +83,6 @@ namespace Geom {
     {
     }
 
-#if defined (VERBOSE) && VERBOSE > 100
-    namespace {
-        int shapeNumber{};
-    }
-#endif
-
     template <typename T>
     Shape<T>::Shape (initializer_list<initializer_list<T>>    ili)
      : m_shapeName      ("Shape")
@@ -112,15 +106,6 @@ namespace Geom {
                 init[r].push_back(*it2);
             }
         }
-#if defined (VERBOSE) && VERBOSE > 100
-        if (shapeNumber == 0) {
-            cout << "Extended Table";
-        } else {
-            cout << shapeNumber << '.';
-        }
-        ++shapeNumber;
-        cout << *this;
-#endif
     }
 
     // accessors
