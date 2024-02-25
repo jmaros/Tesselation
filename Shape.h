@@ -100,7 +100,7 @@ namespace Geom {
         vector<vector<T>> init;
         size_t r{};
         for (auto it1 = ili.begin(); it1 != ili.end(); ++r, ++it1) {
-            init.push_back(vector<T>{});         
+            init.push_back(vector<T>{});
             size_t c{};
             for (auto it2 = it1->begin(); it2 != it1->end(); ++c, ++it2) {
                 init[r].push_back(*it2);
@@ -140,7 +140,7 @@ namespace Geom {
     {
         return m_matrix;
     }
-    
+
     template <typename T>
     inline bool     Shape<T>::ShowZeros ()                          const
     {

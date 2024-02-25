@@ -9,7 +9,7 @@ namespace LinAlg {
 
     // declarations
 
-    template <typename T> 
+    template <typename T>
     class Matrix {
     public:
         Matrix (size_t        numRows,

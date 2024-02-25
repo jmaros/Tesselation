@@ -10,6 +10,8 @@
 // or you can compile on Linux using a specific c++ version:
 // ./test.sh Tesselation c++23
 //
+// (optionally you can add " -D VERBOSE" at the end of the command line)
+//
 /* You might have to convert crlf to lf in test.sh using sed like this:
 sed -i 's/\r
 /
@@ -17,7 +19,10 @@ sed -i 's/\r
 */
 // or you can use
 // dos2unix test.sh
-// for the same.
+// for the same reason, and
+// chmod +x test.sh
+//
+// to make it executable after cloning the repository.
 //
 
 #if defined (_MSC_VER) && _MSC_VER >= 1900 && !defined (_CRT_SECURE_NO_WARNINGS)
@@ -70,7 +75,7 @@ namespace Nessie {
         {{ 1, 1, 1, 1 },
          { 1, 0, 0, 0 }}
     };
- 
+
     //const string    ShapeChars{ "ABCDEFGH" };
     const string    ShapeChars{ "@#$*+ox&" };
 
@@ -288,7 +293,7 @@ int main ()
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
 
-// Tips for Getting Started: 
+// Tips for Getting Started:
 //   1. Use the Solution Explorer window to add/manage files
 //   2. Use the Team Explorer window to connect to source control
 //   3. Use the Output window to see build output and other messages
