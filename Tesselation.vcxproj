@@ -141,6 +141,7 @@
     <ClInclude Include="Date.h" />
     <ClInclude Include="ElapsedTime.h" />
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="Options.h" />
     <ClInclude Include="Position.h" />
     <ClInclude Include="Row.h" />
     <ClInclude Include="Shape.h" />

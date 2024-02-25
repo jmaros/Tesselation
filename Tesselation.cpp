@@ -31,6 +31,7 @@ sed -i 's/\r
 
 #include "Tesselation.h"
 #include "ElapsedTime.h"
+#include "Options.h"
 
 namespace Nessie {
 
@@ -261,9 +262,13 @@ namespace Nessie {
 
 using namespace Nessie;
 
-int main ()
+int main (int argc,
+          char *argv[],
+          char *arge[])
 {
     ElapsedTime et;
+
+    Options options(argc, argv, arge);
 
     int         year            = 2024;
     MonthEnum   month           = MonthEnum::February;
