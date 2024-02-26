@@ -4,6 +4,7 @@
 //
 #include "Shape.h"
 #include "Date.h"
+#include "Options.h"
 
 #include <set>
 
@@ -43,7 +44,7 @@ namespace Nessie {
     // constructors
         Tesselation (const TableLayout      & tableLayout,
                      const ShapeCollection  & shapes,
-                     const Date             & date);
+                     const Options          & options);
 
     // accessors
         inline const Date   & GetDate   ()          const;
@@ -56,7 +57,7 @@ namespace Nessie {
     // data members
         const TableLayout       & m_tableLayout;
         const ShapeCollection   & m_shapes;
-        Date                    m_date;
+        Options                 m_options;
         TableResult             m_tableShape;
         MonthMap                m_monthMap;
         DayMap                  m_dayMap;

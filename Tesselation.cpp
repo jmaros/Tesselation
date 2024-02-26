@@ -31,7 +31,6 @@ sed -i 's/\r
 
 #include "Tesselation.h"
 #include "ElapsedTime.h"
-#include "Options.h"
 
 namespace Nessie {
 
@@ -77,16 +76,16 @@ namespace Nessie {
          { 1, 0, 0, 0 }}
     };
 
-    //const string    ShapeChars{ "ABCDEFGH" };
+    const string    ShapeLetters{ "ABCDEFGH" };
     const string    ShapeChars{ "@#$*+ox&" };
 
     // constructors
     Tesselation::Tesselation (const TableLayout         & table,
                               const ShapeCollection     & shapes,
-                              const Date                & date)
+                              const Options             & options)
      : m_tableLayout        (table)
      , m_shapes             (shapes)
-     , m_date               (date)
+     , m_options            (options)
      , m_tableShape         (table.NumRows(),
                              table.NumCols())
      , m_monthMap           ()
@@ -124,10 +123,10 @@ namespace Nessie {
         cout << "\nMain Table:" << table;
         int shNum {};
         int shsNum {};
-        for (auto   & shapeCollection : m_shapeCollections) {
+        for (auto   & shapeColl : m_shapeCollections) {
             cout << ++shsNum << ". ShapeSet:\n";
             int shssNum{};
-            for (auto   & shape : shapeCollection) {
+            for (auto   & shape : shapeColl) {
                 cout << ++shNum << ".(" << shsNum << '.' << ++shssNum << ")." << shape;
             }
         }
@@ -150,8 +149,8 @@ namespace Nessie {
         m_monthMap[MonthEnum::LeapFebr] = m_monthMap[MonthEnum::February];
 
         // Setting the additional element cells:
-        m_tableShape.SetData(m_monthMap[m_date.Month()], true);
-        m_tableShape.SetData(m_dayMap[m_date.Day()], true);
+        m_tableShape.SetData(m_monthMap[m_options.GetDate().GetMonth()], true);
+        m_tableShape.SetData(m_dayMap[m_options.GetDate().GetDay()], true);
 
         // Setting the initial valu of the resulting table and the
         // required return value for the out of bound positions
@@ -162,7 +161,7 @@ namespace Nessie {
     // accessors
     inline const Date & Tesselation::GetDate ()   const
     {
-        return m_date;
+        return m_options.GetDate();
     }
 
     string    Tesselation::Result () const
@@ -181,7 +180,11 @@ namespace Nessie {
                 for (size_t c = 0; c < chrep.NumCols(); ++c) {
                     Position chPos(r, c);
                     if (theShape.Value(chPos)) {
-                        chrep.SetData(chPos, ShapeChars[solStep.m_indexOfShapeSet]);
+                        if (m_options.GetOpted().m_useLetters) {
+                            chrep.SetData(chPos, ShapeLetters[solStep.m_indexOfShapeSet]);
+                        } else {
+                            chrep.SetData(chPos, ShapeChars[solStep.m_indexOfShapeSet]);
+                        }
                     }
                 }
             }
@@ -269,29 +272,34 @@ int main (int argc,
     ElapsedTime et;
 
     Options options(argc, argv, arge);
-
-    int         year            = 2024;
-    MonthEnum   month           = MonthEnum::February;
-    int         day             = 29;
-    Date        date (year,
-                      month,
-                      day);
-
-    bool        useCurrentTime = true;
-
-    if (useCurrentTime) {
-        date = Date::GetCurrentDate();
-    }
-
-    if (date.IsValidDate()) {
-        Tesselation tesselation (MainTable,
-                                 Shapes,
-                                 date);
-        Riddle riddle;
-        tesselation.Solve (riddle);
-        cout << tesselation << "\n";
+    options.SetOpted();
+    if (options.AskedForHelp()) {
+        cout << "Usage:\n"
+            << "  Tesselation [options]\n"
+            << " where options can be:\n"
+            << "  -h or --help for this help\n"
+            << "  -v or --verbose for more detailed output\n"
+            << "  -a or --all for finding all solution (might require quite long time)\n"
+            << "  -y or --year followed by yyyy\n"
+            << "  -m or --month followed by [m]m\n"
+            << "  -d or --day followed by [d]d\n"
+            << endl;
     } else {
-        cout << "No such date as " << date.DateStr() << endl;
+        if (options.IsValid()) {
+            Date date{ options.GetDate() };
+            if (date.IsValidDate()) {
+                Tesselation tesselation (MainTable,
+                                         Shapes,
+                                         options);
+                Riddle riddle;
+                tesselation.Solve (riddle);
+                cout << tesselation << "\n";
+            } else {
+                cout << "No such date as " << date.DateStr() << endl;
+            }
+        }else {
+          cout << "Error: Invalid commandline option(s)!" << endl;
+        }
     }
 }
 // Visual Studio (2022 Community Edition) Tips:

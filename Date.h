@@ -95,17 +95,17 @@ public:
     }
 
     // accessors
-    int         Year        () const
+    int         GetYear     () const
     {
         return m_year;
     }
 
-    MonthEnum    Month      () const
+    MonthEnum   GetMonth    () const
     {
         return m_month;
     }
 
-    int          Day        () const
+    int          GetDay     () const
     {
         return m_day;
     }
@@ -145,7 +145,26 @@ public:
     }
 
     // modifiers
-    /* not yet */
+    void SetYear (const string   & ys)
+    {
+        stringstream ios(ys);
+        ios >> m_year;
+    }
+
+    void SetMonth (const string   & ms)
+    {
+        stringstream ios(ms);
+        int moi;
+        ios >> moi;
+        m_month = MonthEnum(moi);
+    }
+
+    void SetDay (const string   & ds)
+    {
+        stringstream ios(ds);
+        ios >> m_day;
+    }
+
 
     // static methods
     static string CurrentTimeAndDate ()
