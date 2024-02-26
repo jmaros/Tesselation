@@ -89,9 +89,7 @@ public:
      , m_month  (month)
      , m_day    (day)
     {
-        if (IsLeapYear() && month == MonthEnum::February) {
-            m_month = MonthEnum::LeapFebr;
-        }
+        AdjustLeapMonth();
     }
 
     // accessors
@@ -145,10 +143,24 @@ public:
     }
 
     // modifiers
+    void AdjustLeapMonth ()
+    {
+        if (IsLeapYear()) {
+            if (m_month == MonthEnum::February) {
+                m_month = MonthEnum::LeapFebr;
+            }
+        } else {
+            if (m_month == MonthEnum::LeapFebr) {
+                m_month = MonthEnum::February;
+            }
+        }
+    }
+
     void SetYear (const string   & ys)
     {
         stringstream ios(ys);
         ios >> m_year;
+        AdjustLeapMonth();
     }
 
     void SetMonth (const string   & ms)
@@ -157,6 +169,7 @@ public:
         int moi;
         ios >> moi;
         m_month = MonthEnum(moi);
+        AdjustLeapMonth();
     }
 
     void SetDay (const string   & ds)
