@@ -1,43 +1,39 @@
 //
-// ApplicationSpecificOptios.h
+// ApplicationSpecificOptions.h
 //
 #pragma once
-#include "Date.h"
 
-#include <set>
-#include <string>
-#include <utility>
+#include "Options.h"
 
 namespace Nessie {
-
-    using std::pair;
-    using std::set;
-    using std::string;
-
-    using ArgsMap = map<char, pair<int, string>>;
 
     struct Opted {
         bool        m_isValid{ true };
         bool        m_askedForHelp{};
         bool        m_calculateAll{};
         bool        m_verbose{};
-        bool        m_useLetters{};
+        bool        m_useLetters{ true };
         Date        m_date{ Date::GetCurrentDate() };
     };
 
-    class ApplicationSpecificOptios {
+    class ApplicationSpecificOptions : public Options {
     public:
     // constructors
-        ApplicationSpecificOptios ()
-            : m_longNamesMap   {{"year"       , 'y'},
-                                {"month"      , 'm'},
-                                {"day"        , 'd'},
-                                {"all"        , 'a'},
-                                {"help"       , 'h'},
-                                {"verbose"    , 'v'}}
-            , m_singleCharOpts  {'a', 'h', 'v', 'A' }
-            , m_definedOptChars {}
-            , m_opted           ()
+        ApplicationSpecificOptions (int         argc,
+                                    const char  * const argv[],
+                                    const char  * const arge[])
+         :     Options(argc,
+                       argv,
+                       arge)
+         , m_longNamesMap   {{"year"       , 'y'},
+                             {"month"      , 'm'},
+                             {"day"        , 'd'},
+                             {"all"        , 'a'},
+                             {"help"       , 'h'},
+                             {"verbose"    , 'v'}}
+         , m_singleCharOpts  {'a', 'h', 'v', '@' }
+         , m_definedOptChars {}
+         , m_opted           ()
         {
             for (const auto& mi : m_longNamesMap) {         // create the {short --> long} inverse mapping
                 m_definedOptChars[mi.second] = mi.first;
@@ -50,14 +46,16 @@ namespace Nessie {
             }
         }
     // accessors
-        const map<string, char> & GetLongNamesMap       ()  const;
-        const set<char>         & GetSingleCharOpts     ()  const;
-        const map<char, string> & GetDefinedOptChars    ()  const;
+        const map<string, char> & GetLongNamesMap       ()  const override;
+        const set<char>         & GetSingleCharOpts     ()  const override;
+        const map<char, string> & GetDefinedOptChars    ()  const override;
         const Opted             & GetOpted              ()  const;
-        bool                    IsValid                 ()  const;
+        bool                    IsValid                 ()  const override;
         bool                    AskedForHelp            ()  const;
-         // modifiers
-        void                    SetOpted (const ArgsMap& argsMap);
+        const Date&             GetDate                 ()  const override;
+
+        // modifiers
+        void                    SetOpted                ();
         void                    Invalidate              ();
 
     private:
@@ -69,45 +67,51 @@ namespace Nessie {
     };
 
     // accessors
-    const map<string, char>     & ApplicationSpecificOptios::GetLongNamesMap    ()  const
+    const map<string, char>     & ApplicationSpecificOptions::GetLongNamesMap    ()  const
     {
         return m_longNamesMap;
     }
 
-    const set<char>             & ApplicationSpecificOptios::GetSingleCharOpts  ()  const
+    const set<char>             & ApplicationSpecificOptions::GetSingleCharOpts  ()  const
     {
         return m_singleCharOpts;
     }
 
-    const map<char, string>     & ApplicationSpecificOptios::GetDefinedOptChars  () const
+    const map<char, string>     & ApplicationSpecificOptions::GetDefinedOptChars  () const
     {
         return m_definedOptChars;
     }
 
-    const Opted& ApplicationSpecificOptios::GetOpted ()    const
+    const Opted& ApplicationSpecificOptions::GetOpted ()    const
     {
         return m_opted;
     }
 
-    bool ApplicationSpecificOptios::IsValid ()    const
+    bool ApplicationSpecificOptions::IsValid ()    const
     {
         return m_opted.m_isValid;
     }
 
-    bool ApplicationSpecificOptios::AskedForHelp ()    const
+    bool ApplicationSpecificOptions::AskedForHelp ()    const
     {
         return m_opted.m_askedForHelp;
     }
 
+    const Date& ApplicationSpecificOptions::GetDate () const
+    {
+        return m_opted.m_date;
+    }
+
+
     // modifiers
-    void ApplicationSpecificOptios::Invalidate ()
+    void ApplicationSpecificOptions::Invalidate ()
     {
         m_opted.m_isValid = false;
     }
 
-    void ApplicationSpecificOptios::SetOpted (const ArgsMap& argsMap)
+    void ApplicationSpecificOptions::SetOpted ()
     {
-        for (auto am : argsMap) {
+        for (auto am : GetArgsMap()) {
             switch (am.first) {
                 case 'a':
                     // calculate all
@@ -121,9 +125,9 @@ namespace Nessie {
                     // verbose
                     m_opted.m_verbose = true;
                     break;
-                case 'A':
-                    // Use letters [A-H] to display the shapes
-                    m_opted.m_useLetters = true;
+                case '@':
+                    // Use special chars instead of letters [A-H] to display the shapes
+                    m_opted.m_useLetters = false;
                     break;
                 case 'y':
                     // Override "year"

@@ -3,81 +3,80 @@
 //
 #pragma once
 
-#include "ApplicationSpecificOptios.h"
+#include "Date.h"
 
+#include <set>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace Nessie {
 
+    using std::pair;
+    using std::set;
+    using std::string;
     using std::make_pair;
     using std::vector;
 
-    using AppsOpt = ApplicationSpecificOptios;
+    using ArgsMap = map<char, pair<int, string>>;
 
     class Options {
     public:
     // constructors
         Options (int            argc,
-                 const char     * const argv[],
-                 const char     * const arge[],
-                 const AppsOpt  & appsOpt = AppsOpt());
-    // accessors
-        const Opted& GetOpted ()    const
+                 const char* const argv[],
+                 const char* const arge[]);
+
+        virtual ~Options () = default;
+
+        // accessors
+        virtual const map<string, char>     & GetLongNamesMap       () const = 0;
+        virtual const set<char>             & GetSingleCharOpts     () const = 0;
+        virtual const map<char, string>     & GetDefinedOptChars    () const = 0;
+        virtual bool                        IsValid                 () const = 0;
+        virtual const Date                  & GetDate               () const = 0;
+
+        const ArgsMap                       & GetArgsMap            () const
         {
-            return m_appSpecOpt.GetOpted();
-        }
-        const Date& GetDate ()    const
-        {
-            return m_appSpecOpt.GetOpted().m_date;
+            return m_argMap;
         }
 
-        bool IsValid () const
-        {
-            return m_appSpecOpt.IsValid();
-        }
-        bool AskedForHelp ()  const
-        {
-            return m_appSpecOpt.AskedForHelp();
-        }
-
-        // modifiers
-        void Invalidate ()
-        {
-            m_appSpecOpt.Invalidate ();
-        }
-
-        void SetOpted ()
-        {
-            m_appSpecOpt.SetOpted(m_argMap);
-        }
-
+    // modifiers
+        virtual void                        Invalidate              () = 0;
+        void                                Evaluate                ();
     private:
-            int                 m_argc;
             vector<string>      m_argv;
             vector<string>      m_arge;
-            AppsOpt             m_appSpecOpt;
             ArgsMap             m_argMap;
             bool                m_hasOptions;
     };
 
     Options::Options (int               argc,
-                      const char        * const argv[],
-                      const char        * const arge[],
-                      const AppsOpt&    appsOpt)
-     : m_argc           (argc)
-     , m_argv           ()
-     , m_arge           ()
-     , m_appSpecOpt     (appsOpt)
-     , m_argMap         ()
-     , m_hasOptions     ()
+                      const char* const argv[],
+                      const char* const arge[])
+        : m_argv           ()
+        , m_arge           ()
+        , m_argMap         ()
+        , m_hasOptions     ()
     {
-        auto    & doch  = m_appSpecOpt.GetDefinedOptChars();
-        auto    & sco   = m_appSpecOpt.GetSingleCharOpts();
-        auto    & lm    = m_appSpecOpt.GetLongNamesMap();
-        int idax{};
         for (int idx = 0; idx < argc; ++idx) {
             m_argv.push_back(argv[idx]);
-            const string & latestArg = m_argv.back();
+        }
+        if (arge) {
+            for (int ide = 0; arge[ide] != nullptr; ++ide) {
+                m_arge.push_back(arge[ide]);
+            }
+        }
+    }
+
+    void Options::Evaluate ()
+    {
+        auto    & doch  = GetDefinedOptChars();
+        auto    & sco   = GetSingleCharOpts();
+        auto    & lm    = GetLongNamesMap();
+        int idax{};
+        for (size_t idx = 0; idx < m_argv.size(); ++idx) {
+            const string& latestArg = m_argv[idx];
             if (!latestArg.empty() &&
                 latestArg[0] == '-') {
                 // expecting named command line argument
@@ -96,8 +95,7 @@ namespace Nessie {
                         auto scit = sco.find(optionChar);
                         if (scit == sco.end()) {
                             // has argument
-                            m_argv.push_back(argv[++idx]);
-                            argStr = m_argv.back();
+                            argStr = m_argv[++idx];
                         }
 
                         m_argMap[optionChar] = make_pair(++idax, argStr);
@@ -124,8 +122,7 @@ namespace Nessie {
                             argStr = latestArg.substr(idc);
                             if (argStr.empty()) {
                                 // the parameter is in a separate argument
-                                m_argv.push_back(argv[++idx]);
-                                argStr = m_argv.back();
+                                argStr = m_argv[++idx];
                             }
                             m_argMap[optionChar] = make_pair(++idax, argStr);
                             break;
@@ -136,14 +133,9 @@ namespace Nessie {
                 }
                 if (!IsValid()) {
                     // invalid argument
-                    cout << "Error: " << idx + 1 << ". argument('" << latestArg << "') is  invalid!" << endl;
+                    cout << "Error: " << idx << ". argument('" << latestArg << "') is  invalid!" << endl;
                     break;
                 }
-            }
-        }
-        if (arge) {
-            for (int ide = 0; arge[ide] != nullptr; ++ide) {
-                m_arge.push_back(arge[ide]);
             }
         }
     }

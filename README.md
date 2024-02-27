@@ -49,7 +49,7 @@ Shape 7 =   1  1  1
 Shape 8 =   1  1  1  1
             1
 ```
-An example of the output teszt run:
+An example of the output of test-run:
 ```
 2024-02-24 23:15:06
 TableShape =

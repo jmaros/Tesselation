@@ -11,6 +11,9 @@
 #include <iostream> // cout
 #include <regex>    // regexp search
 #include <string>   // string
+#include <type_traits>
+
+#include <cmath>    // abs
 
 namespace Nessie {
 
@@ -23,6 +26,7 @@ namespace Nessie {
     using std::regex_search;
     using std::regex_constants::egrep;
     using std::right;
+    using std::setw;
     using std::setfill;
     using std::smatch;
     using std::string;
@@ -195,37 +199,48 @@ public:
         int         year            = 2024;
         MonthEnum   month           = MonthEnum::February;
         int         day             = 17;
-        /*
-        2024-02-19 13:49:16
-        */
+        //
+        // Date-time format:
+        // 2024-02-19 13:49:16
+        //
         string stregex = "^[ \\t]*([0-9]{4})-([0-9]{2})-([0-9]{2})"
-            "[ \\t]+([0-9]{2}):([0-9]{2}):([0-9]{2})$";
+                         "[ \\t]+([0-9]{2}):([0-9]{2}):([0-9]{2})$";
         regex dateRegex(stregex);
         smatch dateMatch;
 
         string dateStr{ Date::CurrentTimeAndDate() };
         cout << dateStr << endl;
 
-        if (regex_search(dateStr, dateMatch, dateRegex) && dateMatch.size() == 7) {
+        if (regex_search(dateStr,
+                         dateMatch,
+                         dateRegex) &&
+            dateMatch.size() == 7) {
             int dateparts[7] = {};
             for (size_t i = 1; i < dateMatch.size(); ++i) {
                 stringstream sios;
                 sios.str(dateMatch[i]);
                 sios >> dateparts[i];
             }
-            year  = dateparts[1];
+            year = dateparts[1];
             month = MonthEnum (dateparts[2]);
-            day   = dateparts[3];
-#if defined (VERBOSE)
-            int hour = dateparts[4];
-            int min  = dateparts[5];
-            int sec  = dateparts[6];
-            stringstream sos;
-            sos << right << setfill('0')
-                << setw(2) << hour << ':'
-                << setw(2) << min << ':'
-                << setw(2) << sec << endl;
-            cout << sos.str();
+            day = dateparts[3];
+
+#if defined(VERBOSE)
+            bool isHmsRequired = true;
+            if (isHmsRequired) {
+                int hour = dateparts[4];
+                int min = dateparts[5];
+                int sec = dateparts[6];
+                stringstream sos;
+                sos << right << setfill('0')
+                    << setw(4) << year << '-'
+                    << setw(2) << abs(static_cast<int>(month)) << '-'
+                    << setw(2) << day  << ' '
+                    << setw(2) << hour << ':'
+                    << setw(2) << min  << ':'
+                    << setw(2) << sec  << endl;
+                cout << sos.str();
+            }
 #endif
         } else {
             cout << "The regexp search didn't yeald match!" << endl;

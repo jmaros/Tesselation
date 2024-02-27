@@ -2,9 +2,10 @@
 //
 // Tesselation.h
 //
+#include "ApplicationSpecificOptions.h"
 #include "Shape.h"
 #include "Date.h"
-#include "Options.h"
+
 
 #include <set>
 
@@ -42,9 +43,9 @@ namespace Nessie {
     class Tesselation {
     public:
     // constructors
-        Tesselation (const TableLayout      & tableLayout,
-                     const ShapeCollection  & shapes,
-                     const Options          & options);
+        Tesselation (const TableLayout                  & tableLayout,
+                     const ShapeCollection              & shapes,
+                     const ApplicationSpecificOptions   & options);
 
     // accessors
         inline const Date   & GetDate   ()          const;
@@ -55,16 +56,16 @@ namespace Nessie {
         void                Solve       (Riddle     & riddle);
     private:
     // data members
-        const TableLayout       & m_tableLayout;
-        const ShapeCollection   & m_shapes;
-        Options                 m_options;
-        TableResult             m_tableShape;
-        MonthMap                m_monthMap;
-        DayMap                  m_dayMap;
-        ShapeCollections        m_shapeCollections;
-        TableResult             m_tableResult;
-        Solution                m_solution;
-        bool                    m_isSolved;
+        const TableLayout           & m_tableLayout;
+        const ShapeCollection       & m_shapes;
+        ApplicationSpecificOptions  m_options;
+        TableResult                 m_tableShape;
+        MonthMap                    m_monthMap;
+        DayMap                      m_dayMap;
+        ShapeCollections            m_shapeCollections;
+        TableResult                 m_tableResult;
+        Solution                    m_solution;
+        bool                        m_isSolved;
     };
 
     std::ostream& operator << (std::ostream         & os,

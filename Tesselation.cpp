@@ -80,9 +80,9 @@ namespace Nessie {
     const string    ShapeChars{ "@#$*+ox&" };
 
     // constructors
-    Tesselation::Tesselation (const TableLayout         & table,
-                              const ShapeCollection     & shapes,
-                              const Options             & options)
+    Tesselation::Tesselation (const TableLayout                 & table,
+                              const ShapeCollection             & shapes,
+                              const ApplicationSpecificOptions  & options)
      : m_tableLayout        (table)
      , m_shapes             (shapes)
      , m_options            (options)
@@ -119,18 +119,18 @@ namespace Nessie {
             }
         }
 
-#if defined (VERBOSE)
-        cout << "\nMain Table:" << table;
-        int shNum {};
-        int shsNum {};
-        for (auto   & shapeColl : m_shapeCollections) {
-            cout << ++shsNum << ". ShapeSet:\n";
-            int shssNum{};
-            for (auto   & shape : shapeColl) {
-                cout << ++shNum << ".(" << shsNum << '.' << ++shssNum << ")." << shape;
+        if (m_options.GetOpted().m_verbose) {
+            cout << "\nMain Table:" << table;
+            int shNum {};
+            int shsNum {};
+            for (auto   & shapeColl : m_shapeCollections) {
+                cout << ++shsNum << ". ShapeSet:\n";
+                int shssNum{};
+                for (auto   & shape : shapeColl) {
+                    cout << ++shNum << ".(" << shsNum << '.' << ++shssNum << ")." << shape;
+                }
             }
         }
-#endif
 
         // Fill up m_tableShape, and create the month and day maps to position:
         for (size_t row = 0; row < m_tableLayout.NumRows(); ++row) {
@@ -271,7 +271,8 @@ int main (int argc,
 {
     ElapsedTime et;
 
-    Options options(argc, argv, arge);
+    ApplicationSpecificOptions options(argc, argv, arge);
+    options.Evaluate();
     options.SetOpted();
     if (options.AskedForHelp()) {
         cout << "Usage:\n"
@@ -279,10 +280,11 @@ int main (int argc,
             << " where options can be:\n"
             << "  -h or --help for this help\n"
             << "  -v or --verbose for more detailed output\n"
-            << "  -a or --all for finding all solution (might require quite long time)\n"
+            << "  -a or --all for finding all solution (might require quite long time, not yet implemented!)\n"
             << "  -y or --year followed by yyyy\n"
             << "  -m or --month followed by [m]m\n"
             << "  -d or --day followed by [d]d\n"
+            << "  -@ to use special characters instead of letters [A-H] to display the solution\n"
             << endl;
     } else {
         if (options.IsValid()) {
