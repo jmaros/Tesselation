@@ -63,11 +63,13 @@ TableShape =
 
 Tesselation Date = 2024 February 24
 Solution =
-          @ @###
-          @@@###
-          x++&&&&
-          xx+&$$$
-          *x++o$$
-          *x oooo
-          ***
+          A ABBB
+          AAABBB
+          GEEHHHH
+          GGEHCCC
+          DGEEFCC
+          DG FFFF
+          DDD
+
+ Elapsed Time: 41.6221s
 ```
