@@ -33,43 +33,43 @@ GOTO Extension
 @if not exist "%fqn%%fx%" GOTO Missing
 @SET cv=c++11
 @SET optargs=
-@SET arg=
+@SET appargs=
 @SET separator= 
 @SET opt=-O2
 @SET dln=
 @SET deb=
 :Loop
 @SHIFT
-@IF "%1"==""        GOTO Compleeted
-@IF not "%arg%"=="" GOTO AppArgs
-@IF "%1"=="-args"   GOTO InitAppArgs
-@IF "%1"=="-std"    GOTO Loop
-@IF "%1"=="EQUAL"   GOTO Equal
-@IF "%1"=="Equal"   GOTO Equal
-@IF "%1"=="equal"   GOTO Equal
-@IF "%1"=="gdb"     GOTO Debug2
-@IF "%1"=="-g3"     GOTO Debug
-@IF "%1"=="-g2"     GOTO Debug
-@IF "%1"=="-g1"     GOTO Debug
-@IF "%1"=="-g0"     GOTO Debug
-@IF "%1"=="-g"      GOTO Debug
-@IF "%1"=="-O3"     GOTO Optimize
-@IF "%1"=="-O2"     GOTO Optimize
-@IF "%1"=="-O1"     GOTO Optimize
-@IF "%1"=="-O0"     GOTO Optimize
-@IF "%1"=="c++11"   GOTO Std
-@IF "%1"=="c++14"   GOTO Std
-@IF "%1"=="c++17"   GOTO Std
-@IF "%1"=="c++20"   GOTO Std
-@IF "%1"=="c++23"   GOTO Std
+@IF "%1"==""            GOTO Compleeted
+@IF not "%appargs%"=="" GOTO CollectAppArgs
+@IF "%1"=="-args"       GOTO InitAppArgs
+@IF "%1"=="-std"        GOTO Loop
+@IF "%1"=="EQUAL"       GOTO Equal
+@IF "%1"=="Equal"       GOTO Equal
+@IF "%1"=="equal"       GOTO Equal
+@IF "%1"=="gdb"         GOTO Debug2
+@IF "%1"=="-g3"         GOTO Debug
+@IF "%1"=="-g2"         GOTO Debug
+@IF "%1"=="-g1"         GOTO Debug
+@IF "%1"=="-g0"         GOTO Debug
+@IF "%1"=="-g"          GOTO Debug
+@IF "%1"=="-O3"         GOTO Optimize
+@IF "%1"=="-O2"         GOTO Optimize
+@IF "%1"=="-O1"         GOTO Optimize
+@IF "%1"=="-O0"         GOTO Optimize
+@IF "%1"=="c++11"       GOTO Std
+@IF "%1"=="c++14"       GOTO Std
+@IF "%1"=="c++17"       GOTO Std
+@IF "%1"=="c++20"       GOTO Std
+@IF "%1"=="c++23"       GOTO Std
 @SET optargs=%optargs%%separator%%1
 @SET separator= 
 @GOTO Loop
 :InitAppArgs
-@SET arg= 
+@SET appargs= 
 @GOTO Loop
-:AppArgs
-@SET arg=%arg% %1
+:CollectAppArgs
+@SET appargs=%appargs% %1
 @GOTO Loop
 :Debug2
 @SET opt=-O0
@@ -92,7 +92,7 @@ GOTO Extension
 @SET cv=%1
 @GOTO Loop
 :Compleeted
-g++ -std=%cv% %opt% %dln% -Wall -Wextra -Wpedantic -Werror -time %optargs% %fqn%%fx% -o bin\%fn% && %deb% .\bin\%fn%%arg%
+g++ -std=%cv% %opt% %dln% -Wall -Wextra -Wpedantic -Werror -time %optargs% %fqn%%fx% -o bin\%fn% && %deb% .\bin\%fn%%appargs%
 @GOTO :EOF
 :Usage
 @ECHO Usage:

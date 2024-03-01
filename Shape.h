@@ -253,7 +253,6 @@ namespace Geom {
             }
             sos << endl;
         }
-        sos << endl;
         os << sos.str();
         return os;
     }

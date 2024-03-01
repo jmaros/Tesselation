@@ -48,12 +48,13 @@ namespace Nessie {
                      const ApplicationSpecificOptions   & options);
 
     // accessors
-        inline const Date   & GetDate   ()          const;
-        string              Result      ()          const;
-        bool SetTableShapeShowZeros (bool  bShow)   const;
-        const TableResult& GetTableShape ()         const;
+        inline const Date   & GetDate               ()                      const;
+        string              Result                  ()                      const;
+        bool                SetTableShapeShowZeros  (bool       bShow)      const;
+        const TableResult&  GetTableShape           ()                      const;
+        size_t              RandomValue             (size_t     maxValue)   const;
      // modifiers
-        void                Solve       (Riddle     & riddle);
+        void                Solve                   (Riddle     & riddle);
     private:
     // data members
         const TableLayout           & m_tableLayout;

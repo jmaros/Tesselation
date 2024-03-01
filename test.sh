@@ -12,10 +12,13 @@ if [ "$1" == "" -o "$1" == "/?" -o "${1%%-*}" == "" -o "$1" == "--help" ]; then
   echo $
   echo $ Usage:
   echo $
-  echo $ ./test.sh cpp_filename [ more options ]   -- to compile
-  echo $ ./test.sh [ --help ]                      -- for this help
+  echo $ ./test.sh cpp_filename [more options] [-args options_for_the_executable] -- to compile and run
+  echo $ ./test.sh [ --help ]                                                        -- for this help
   echo
   echo $ The [ ] square brackets denote the optionality!
+  echo $
+  echo $ Example for compiling and running hell.cpp with option --help:
+  echo $  "./test.sh hell.cpp -args --help"
   echo $
   echo $ Example for compiling and running   hello.cpp:
   echo $  "./test.sh hello.cpp -std=c++23 -O3"
@@ -54,12 +57,22 @@ elif [ -f "$1" -o -f "$1.cpp" ]; then
 
     Language=c++11
     Args=""
+	AppArgs=
     Opt=-O2
     Dln=
     Deb=
 
     # Populate Args and extract Language specification
     for Arg in "$@"; do
+      if [ -n "$AppArgs" ]; then
+        # collect the rermaining part for passing to the executable
+        AppArgs=$(echo "$AppArgs" "$Arg")
+        continue
+      elif [ $Arg == -args ]; then
+        # handle the -args option, initiate the collection
+        AppArgs=" "
+        continue
+      fi
       opt_std="$Arg"
       # Leave out the leading "-std=" if it's there, and keep the rest
       # otherwise keep $opt_std unchanged
@@ -78,30 +91,26 @@ elif [ -f "$1" -o -f "$1.cpp" ]; then
         Language=$opt_std
       elif [ $opt_cpv != "Default" ]; then
         Language=c++$opt_cpv
+      elif [ $Arg == gdb ]; then
+        Opt=-O0
+        Dln=-g2
+        Deb=gdb
+      elif [[ $Arg == -g3 || $Arg == -g2 || $Arg == -g1 || $Arg == -g0 || $Arg == -g ]]; then
+        Opt=
+        Dln=$Arg
+        Deb=gdb
+      elif [[ $Arg == -O3 || $Arg == -O2 || $Arg == -O1 || $Arg == -O0 ]]; then
+        Opt=$Arg
       else
-        if [ $Arg == gdb ]; then
-          Opt=-O0
-          Dln=-g2
-          Deb=gdb
-        elif [[ $Arg == -g3 || $Arg == -g2 || $Arg == -g1 || $Arg == -g0 || $Arg == -g ]]; then
-          Opt=
-          Dln=$Arg
-          Deb=gdb
-        else
-          if [[ $Arg == -O3 || $Arg == -O2 || $Arg == -O1 || $Arg == -O0 ]]; then
-            Opt=$Arg
-          else
-            Args=$(echo "$Args" "$Arg")
-          fi
-        fi
+        Args=$(echo "$Args" "$Arg")
       fi
     done
     echo Compile and run "$pfn$ext" file using "$Language"...
     if [ -n "$Args" ]; then
       echo Additional options specified: "$Args"
     fi
-    echo g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror -time "$Args" "$pfn$ext" -o "bin/$tn" \&\&  $Deb "./bin/$tn"
-    g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror -time $Args $pfn$ext -o bin/$tn && $Deb ./bin/$tn
+    echo g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror -time "$Args" "$pfn$ext" -o "bin/$tn" \&\&  $Deb "./bin/$tn$AppArgs"
+    g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror -time $Args $pfn$ext -o bin/$tn && $Deb ./bin/$tn$AppArgs
   else
       echo \"$pfn$ext file doesn\'t exist!\"
   fi

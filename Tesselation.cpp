@@ -32,7 +32,12 @@ sed -i 's/\r
 #include "Tesselation.h"
 #include "ElapsedTime.h"
 
+#include <random>
+
 namespace Nessie {
+    
+    using std::random_device;
+    using std::uniform_int_distribution;
 
     // The zeros representing the excluded parts
     // The negative numbers are placeholders for the monthes
@@ -166,15 +171,20 @@ namespace Nessie {
 
     string    Tesselation::Result () const
     {
+        if (!m_isSolved) {
+            return "No solution found!\n";
+        }
+
+        stringstream        srs;
+
         TableResultChars    result(m_tableResult.NumRows(),
-                                   m_tableResult.NumCols());
-        stringstream srs;
+                                    m_tableResult.NumCols());
 
         for (auto& solStep : m_solution) {
             auto& shapes = m_shapeCollections[solStep.m_indexOfShapeSet];
             const TableResult &theShape{ shapes[solStep.m_shapeIndexInSet] };
             TableResultChars chrep(theShape.NumRows(),
-                                   theShape.NumCols());
+                                    theShape.NumCols());
 
             for (size_t r = 0; r < chrep.NumRows(); ++r) {
                 for (size_t c = 0; c < chrep.NumCols(); ++c) {
@@ -206,21 +216,41 @@ namespace Nessie {
         return m_tableShape;
     }
 
+    size_t Tesselation::RandomValue (size_t     maxValue) const
+    {
+        static std::mt19937              mt(random_device{}());
+        uniform_int_distribution<size_t> value(0, maxValue);
+        return value(mt);
+    }
 
     // modifiers
     void Tesselation::Solve (Riddle     &riddle)
     {
         if (!m_isSolved) {
+            size_t minRow{};
+            size_t minCol{};
+            size_t minShi{};
             if (riddle.size() == 0) {
                 // prepare the first step
                 riddle.push_back(SolutionStep(m_tableResult));
+                // init the starting position values
+                if (m_options.GetOpted().m_random) {
+                    minRow = RandomValue(m_tableResult.NumRows());
+                    minCol = RandomValue(m_tableResult.NumCols());
+                    minShi = RandomValue(m_shapeCollections[0].size());
+                    cout << "Random starting position = ("
+                         << minRow << ", " << minCol
+                         << ") first shape index = "
+                         << minShi
+                         << endl;
+                }
             }
-            for (auto row = 0u; row < m_tableResult.NumRows(); ++row) {
-                for (auto col = 0u; col < m_tableResult.NumCols(); ++col) {
+            for (auto row = minRow; row < m_tableResult.NumRows(); ++row) {
+                for (auto col = minCol; col < m_tableResult.NumCols(); ++col) {
                     // Set all the possible positions
                     auto    ioss{ riddle.back().m_indexOfShapeSet };
                     auto    & currentShapeSet{ m_shapeCollections[ioss] };
-                    for (size_t shIdxIS = 0; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
+                    for (size_t shIdxIS = minShi; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
                         // Try to use the current shape's all possible rotations
                         riddle.back().m_shapeIndexInSet = shIdxIS;
                         const auto& currentShape = currentShapeSet[shIdxIS];
@@ -243,7 +273,9 @@ namespace Nessie {
                             }
                         }
                     }
+                    minShi = 0;
                 }
+                minCol = 0;
             }
             return;
         }
@@ -279,6 +311,7 @@ int main (int argc,
             << "  Tesselation [options]\n"
             << " where options can be:\n"
             << "  -h or --help for this help\n"
+            << "  -r or --random to find a random solution (or to fail finding any)\n"
             << "  -v or --verbose for more detailed output\n"
             << "  -a or --all for finding all solution (might require quite long time, not yet implemented!)\n"
             << "  -y or --year followed by yyyy\n"

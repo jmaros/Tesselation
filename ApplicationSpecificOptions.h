@@ -11,6 +11,7 @@ namespace Nessie {
         bool        m_isValid{ true };
         bool        m_askedForHelp{};
         bool        m_calculateAll{};
+        bool        m_random{};
         bool        m_verbose{};
         bool        m_useLetters{ true };
         Date        m_date{ Date::GetCurrentDate() };
@@ -25,13 +26,14 @@ namespace Nessie {
          :     Options(argc,
                        argv,
                        arge)
-         , m_longNamesMap   {{"year"       , 'y'},
-                             {"month"      , 'm'},
-                             {"day"        , 'd'},
-                             {"all"        , 'a'},
-                             {"help"       , 'h'},
-                             {"verbose"    , 'v'}}
-         , m_singleCharOpts  {'a', 'h', 'v', '@' }
+         , m_longNamesMap   {{"year"            , 'y'},
+                             {"month"           , 'm'},
+                             {"day"             , 'd'},
+                             {"all"             , 'a'},
+                             {"help"            , 'h'},
+                             {"random"          , 'r'},
+                             {"verbose"         , 'v'}}
+         , m_singleCharOpts  {'a', 'h', 'r', 'v', '@' }
          , m_definedOptChars {}
          , m_opted           ()
         {
@@ -120,6 +122,10 @@ namespace Nessie {
                 case 'h':
                     // help
                     m_opted.m_askedForHelp = true;
+                    break;
+                case 'r':
+                    // verbose
+                    m_opted.m_random = true;
                     break;
                 case 'v':
                     // verbose
