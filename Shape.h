@@ -50,7 +50,8 @@ namespace Geom {
         const LinAlg::Row<T>            & operator []               (size_t  index) const;
 
     // modifiers
-        inline void     SetShapeName        (const string& shana);
+        inline void     SetShapeName        (const string       & shana,
+                                             size_t             index = 0);
 
         inline bool     SetData             (Position           pos,
                                              const T            & newValue);
@@ -199,9 +200,15 @@ namespace Geom {
 
     // modifiers
     template <typename T>
-    inline void Shape<T>::SetShapeName (const string& shana)
+    inline void Shape<T>::SetShapeName (const string    & shana,
+                                        size_t          index)
     {
-        m_shapeName = shana;
+        stringstream    ass;
+        ass << shana;
+        if (index) {
+            ass << "-" << setw(3) << right << setfill('0') << index << ".";
+        }
+        m_shapeName = ass.str();
     }
 
     template <typename T>

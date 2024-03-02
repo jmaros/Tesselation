@@ -98,8 +98,7 @@ namespace Nessie {
      , m_shapeCollections   ()
      , m_tableResult        (table.NumRows(),
                              table.NumCols())
-     , m_solution           ()
-     , m_isSolved           ()
+     , m_solutions          ()
     {
         // fill m_shapesSet so that it will contain all the different shapes
         for (auto   & shape : m_shapes) {
@@ -124,7 +123,7 @@ namespace Nessie {
             }
         }
 
-        if (m_options.GetOpted().m_verbose) {
+        if (m_options.Verbose()) {
             cout << "\nMain Table:" << table;
             int shNum {};
             int shsNum {};
@@ -169,22 +168,18 @@ namespace Nessie {
         return m_options.GetDate();
     }
 
-    string    Tesselation::Result () const
+    string  Tesselation::GetTableResult (const Solution     & solution,
+                                         size_t             index) const
     {
-        if (!m_isSolved) {
-            return "No solution found!\n";
-        }
-
         stringstream        srs;
-
         TableResultChars    result(m_tableResult.NumRows(),
-                                    m_tableResult.NumCols());
+                                   m_tableResult.NumCols());
 
-        for (auto& solStep : m_solution) {
+        for (auto& solStep : solution) {
             auto& shapes = m_shapeCollections[solStep.m_indexOfShapeSet];
-            const TableResult &theShape{ shapes[solStep.m_shapeIndexInSet] };
+            const TableResult& theShape{ shapes[solStep.m_shapeIndexInSet] };
             TableResultChars chrep(theShape.NumRows(),
-                                    theShape.NumCols());
+                                   theShape.NumCols());
 
             for (size_t r = 0; r < chrep.NumRows(); ++r) {
                 for (size_t c = 0; c < chrep.NumCols(); ++c) {
@@ -198,11 +193,25 @@ namespace Nessie {
                     }
                 }
             }
-
             result.Accomodate(solStep.m_position, chrep);
         }
-        result.SetShapeName("Solution");
+        result.SetShapeName("Solution", index);
         srs << result;
+        return srs.str();
+    }
+
+    string    Tesselation::Result () const
+    {
+        if (m_solutions.empty()) {
+            return "No solution found!\n";
+        }
+
+        size_t             index{};
+        stringstream        srs;
+
+        for (auto& solution : m_solutions) {
+            srs << GetTableResult (solution, ++index);
+        }
         return srs.str();
     }
 
@@ -224,62 +233,66 @@ namespace Nessie {
     }
 
     // modifiers
-    void Tesselation::Solve (Riddle     &riddle)
+    bool Tesselation::Solve (Riddle     &riddle)
     {
-        if (!m_isSolved) {
-            size_t minRow{};
-            size_t minCol{};
-            size_t minShi{};
-            if (riddle.size() == 0) {
-                // prepare the first step
-                riddle.push_back(SolutionStep(m_tableResult));
-                // init the starting position values
-                if (m_options.GetOpted().m_random) {
-                    minRow = RandomValue(m_tableResult.NumRows());
-                    minCol = RandomValue(m_tableResult.NumCols());
-                    minShi = RandomValue(m_shapeCollections[0].size());
-                    cout << "Random starting position = ("
-                         << minRow << ", " << minCol
-                         << ") first shape index = "
-                         << minShi
-                         << endl;
-                }
+        size_t minRow{};
+        size_t minCol{};
+        size_t minShi{};
+        if (riddle.size() == 0) {
+            // prepare the first step
+            riddle.push_back(SolutionStep(m_tableResult));
+            // init the starting position values
+            if (m_options.Random()) {
+                minRow = RandomValue(m_tableResult.NumRows());
+                minCol = RandomValue(m_tableResult.NumCols());
+                minShi = RandomValue(m_shapeCollections[0].size());
+                cout << "Random starting position = ("
+                        << minRow << ", " << minCol
+                        << ") first shape index = "
+                        << minShi
+                        << endl;
             }
-            for (auto row = minRow; row < m_tableResult.NumRows(); ++row) {
-                for (auto col = minCol; col < m_tableResult.NumCols(); ++col) {
-                    // Set all the possible positions
-                    auto    ioss{ riddle.back().m_indexOfShapeSet };
-                    auto    & currentShapeSet{ m_shapeCollections[ioss] };
-                    for (size_t shIdxIS = minShi; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
-                        // Try to use the current shape's all possible rotations
-                        riddle.back().m_shapeIndexInSet = shIdxIS;
-                        const auto& currentShape = currentShapeSet[shIdxIS];
-                        Riddle  remainingRiddle{ riddle };
-                        SolutionStep& step{ remainingRiddle.back() };
-                        Position& pos{ step.m_position };
-                        pos.SetPosition(row, col);
-                        if (step.m_tableResult.CanAccomodate(pos, currentShape)) {
-                            step.m_tableResult.Accomodate(pos, currentShape);
-                            // prepare the next step
-                            if (remainingRiddle.size() < m_shapeCollections.size()) {
-                                remainingRiddle.push_back(step);
-                                remainingRiddle.back().m_indexOfShapeSet += 1;
-                                Solve(remainingRiddle);
-                            } else {
-                                // we are done, and happy with the first solution found!
-                                m_isSolved      = true;
-                                m_solution      = remainingRiddle;
-                                return;
+        }
+        for (auto row = minRow; row < m_tableResult.NumRows(); ++row) {
+            for (auto col = minCol; col < m_tableResult.NumCols(); ++col) {
+                // Set all the possible positions
+                auto    ioss{ riddle.back().m_indexOfShapeSet };
+                auto    & currentShapeSet{ m_shapeCollections[ioss] };
+                for (size_t shIdxIS = minShi; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
+                    // Try to use the current shape's all possible rotations
+                    riddle.back().m_shapeIndexInSet = shIdxIS;
+                    const auto& currentShape = currentShapeSet[shIdxIS];
+                    Riddle  remainingRiddle{ riddle };
+                    SolutionStep& step{ remainingRiddle.back() };
+                    Position& pos{ step.m_position };
+                    pos.SetPosition(row, col);
+                    if (step.m_tableResult.CanAccomodate(pos, currentShape)) {
+                       step.m_tableResult.Accomodate(pos, currentShape);
+                        // prepare the next step
+                        if (remainingRiddle.size() < m_shapeCollections.size()) {
+                            remainingRiddle.push_back(step);
+                            remainingRiddle.back().m_indexOfShapeSet += 1;
+                            bool justSolved = Solve(remainingRiddle);
+                            if (justSolved) {
+                                if (!m_options.CalculateAll()) {
+                                    return true;
+                                }
                             }
+                        } else {
+                            // be happy, we just have found a solution!
+                            m_solutions.push_back(remainingRiddle);
+                            if (m_options.CalculateAll()) {
+                                cout << GetTableResult(remainingRiddle, m_solutions.size());
+                            }
+                            return true;
                         }
                     }
-                    minShi = 0;
                 }
-                minCol = 0;
+                minShi = 0;
             }
-            return;
+            minCol = 0;
         }
-        return;
+        return false;
     }
 
     // global operators
@@ -313,11 +326,11 @@ int main (int argc,
             << "  -h or --help for this help\n"
             << "  -r or --random to find a random solution (or to fail finding any)\n"
             << "  -v or --verbose for more detailed output\n"
-            << "  -a or --all for finding all solution (might require quite long time, not yet implemented!)\n"
+            << "  -a or --all for finding all solution (might require quite long time!)\n"
             << "  -y or --year followed by yyyy\n"
             << "  -m or --month followed by [m]m\n"
             << "  -d or --day followed by [d]d\n"
-            << "  -@ to use special characters instead of letters [A-H] to display the solution\n"
+            << "  -@ to use special characters, instead of letters [A-H] for the shapes\n"
             << endl;
     } else {
         if (options.IsValid()) {

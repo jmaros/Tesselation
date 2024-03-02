@@ -12,6 +12,7 @@
 namespace Nessie {
 
     using std::set;
+    using std::ostream;
 
     using TableLayout       = Geom::Shape<int>;
     using TableResult       = Geom::Shape<bool>;
@@ -38,6 +39,7 @@ namespace Nessie {
     };
 
     using Solution  = vector<SolutionStep>;
+    using Solutions = vector<Solution>;
     using Riddle    = Solution;
 
     class Tesselation {
@@ -48,13 +50,16 @@ namespace Nessie {
                      const ApplicationSpecificOptions   & options);
 
     // accessors
-        inline const Date   & GetDate               ()                      const;
-        string              Result                  ()                      const;
-        bool                SetTableShapeShowZeros  (bool       bShow)      const;
-        const TableResult&  GetTableShape           ()                      const;
-        size_t              RandomValue             (size_t     maxValue)   const;
+        inline const Date   & GetDate               ()                              const;
+        string              GetTableResult          (const Solution     & solution,
+                                                     size_t             index = 0u) const;
+        string              Result                  ()                              const;
+        bool                SetTableShapeShowZeros  (bool               bShow)      const;
+        const TableResult&  GetTableShape           ()                              const;
+        size_t              RandomValue             (size_t             maxValue)   const;
+
      // modifiers
-        void                Solve                   (Riddle     & riddle);
+        bool                Solve                   (Riddle     & riddle);
     private:
     // data members
         const TableLayout           & m_tableLayout;
@@ -65,10 +70,9 @@ namespace Nessie {
         DayMap                      m_dayMap;
         ShapeCollections            m_shapeCollections;
         TableResult                 m_tableResult;
-        Solution                    m_solution;
-        bool                        m_isSolved;
+        Solutions                   m_solutions;
     };
 
-    std::ostream& operator << (std::ostream         & os,
+    ostream     & operator << (const ostream        & os,
                                const Tesselation    & tesselation);
 } // namespace Nessie

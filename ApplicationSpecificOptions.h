@@ -51,9 +51,12 @@ namespace Nessie {
         const map<string, char> & GetLongNamesMap       ()  const override;
         const set<char>         & GetSingleCharOpts     ()  const override;
         const map<char, string> & GetDefinedOptChars    ()  const override;
-        const Opted             & GetOpted              ()  const;
+        inline const Opted      & GetOpted              ()  const;
         bool                    IsValid                 ()  const override;
-        bool                    AskedForHelp            ()  const;
+        inline bool             AskedForHelp            ()  const;
+        inline bool             CalculateAll            ()  const;
+        inline bool             Random                  ()  const;
+        inline bool             Verbose                 ()  const;
         const Date&             GetDate                 ()  const override;
 
         // modifiers
@@ -84,7 +87,7 @@ namespace Nessie {
         return m_definedOptChars;
     }
 
-    const Opted& ApplicationSpecificOptions::GetOpted ()    const
+    inline const Opted& ApplicationSpecificOptions::GetOpted ()    const
     {
         return m_opted;
     }
@@ -94,9 +97,24 @@ namespace Nessie {
         return m_opted.m_isValid;
     }
 
-    bool ApplicationSpecificOptions::AskedForHelp ()    const
+    inline bool ApplicationSpecificOptions::AskedForHelp ()    const
     {
         return m_opted.m_askedForHelp;
+    }
+
+    inline bool ApplicationSpecificOptions::CalculateAll ()  const
+    {
+        return m_opted.m_calculateAll;
+    }
+
+    inline bool ApplicationSpecificOptions::Random ()  const
+    {
+        return m_opted.m_random;
+    }
+
+    inline bool ApplicationSpecificOptions::Verbose ()  const
+    {
+        return m_opted.m_verbose;
     }
 
     const Date& ApplicationSpecificOptions::GetDate () const
@@ -106,12 +124,12 @@ namespace Nessie {
 
 
     // modifiers
-    void ApplicationSpecificOptions::Invalidate ()
+    inline void ApplicationSpecificOptions::Invalidate ()
     {
         m_opted.m_isValid = false;
     }
 
-    void ApplicationSpecificOptions::SetOpted ()
+    inline void ApplicationSpecificOptions::SetOpted ()
     {
         for (auto am : GetArgsMap()) {
             switch (am.first) {
