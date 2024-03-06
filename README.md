@@ -61,7 +61,7 @@ TableShape =
           0000000
           0001111
 Tile Date = 2024 March 6
-Solution-001. =
+Solution =
           AA BBB
           AGGBBB
           AAGGG F
