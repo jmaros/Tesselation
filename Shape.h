@@ -25,8 +25,9 @@ namespace Geom {
     public:
     // constructors
         Shape () = delete;
-        Shape (size_t    numCols,
-               size_t    numRows);
+        Shape (size_t   numCols,
+               size_t   numRows,
+               const T  & initialValue ={});
 
         Shape (initializer_list<initializer_list<T>>    ili);
 
@@ -75,11 +76,13 @@ namespace Geom {
     // constructors
 
     template <typename T>
-    Shape<T>::Shape (size_t    numCols,
-                     size_t    numRows)
+    Shape<T>::Shape (size_t     numCols,
+                     size_t     numRows,
+                     const T    & initialValue)
         : m_shapeName       ("Shape")
         , m_matrix          (numCols,
-                             numRows)
+                             numRows,
+                             initialValue)
         , m_showZeros       ()
     {
     }

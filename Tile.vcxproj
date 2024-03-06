@@ -22,8 +22,9 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{774cce84-4f79-4e75-9e50-effe47eaa1fe}</ProjectGuid>
-    <RootNamespace>Tesselation</RootNamespace>
+    <RootNamespace>Tile</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Tile</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -135,7 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Tesselation.cpp" />
+    <ClCompile Include="Tile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ApplicationSpecificOptions.h" />
@@ -146,7 +147,7 @@
     <ClInclude Include="Position.h" />
     <ClInclude Include="Row.h" />
     <ClInclude Include="Shape.h" />
-    <ClInclude Include="Tesselation.h" />
+    <ClInclude Include="Tile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

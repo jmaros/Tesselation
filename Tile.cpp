@@ -1,14 +1,14 @@
 //
-// Tesselation.cpp
+// Tile.cpp
 //  : This file contains the 'main' function. Program execution begins and ends there.
 //
 // You can compile this code by using Visual Studio (2022 Community Edition)
 //
 // or you can compile on Windows using MinGW and a specific c++ version:
-// test Tesselation c++23
+// test Tile c++23
 //
 // or you can compile on Linux using a specific c++ version:
-// ./test.sh Tesselation c++23
+// ./test.sh Tile c++23
 //
 // (optionally you can add " -D VERBOSE" at the end of the command line)
 //
@@ -29,7 +29,7 @@ sed -i 's/\r
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "Tesselation.h"
+#include "Tile.h"
 #include "ElapsedTime.h"
 
 #include <random>
@@ -85,7 +85,7 @@ namespace Nessie {
     const string    ShapeChars{ "@#$*+ox&" };
 
     // constructors
-    Tesselation::Tesselation (const TableLayout                 & table,
+    Tile::Tile (const TableLayout                 & table,
                               const ShapeCollection             & shapes,
                               const ApplicationSpecificOptions  & options)
      : m_tableLayout        (table)
@@ -163,23 +163,25 @@ namespace Nessie {
     }
 
     // accessors
-    inline const Date & Tesselation::GetDate ()   const
+    inline const Date & Tile::GetDate ()   const
     {
         return m_options.GetDate();
     }
 
-    string  Tesselation::GetTableResult (const Solution     & solution,
-                                         size_t             index) const
+    string  Tile::GetTableResultStr (const Solution     & solution,
+                                            size_t             index) const
     {
         stringstream        srs;
         TableResultChars    result(m_tableResult.NumRows(),
-                                   m_tableResult.NumCols());
+                                   m_tableResult.NumCols(),
+                                   ' ');
 
         for (auto& solStep : solution) {
             auto& shapes = m_shapeCollections[solStep.m_indexOfShapeSet];
             const TableResult& theShape{ shapes[solStep.m_shapeIndexInSet] };
             TableResultChars chrep(theShape.NumRows(),
-                                   theShape.NumCols());
+                                   theShape.NumCols(),
+                                   ' ');
 
             for (size_t r = 0; r < chrep.NumRows(); ++r) {
                 for (size_t c = 0; c < chrep.NumCols(); ++c) {
@@ -193,14 +195,18 @@ namespace Nessie {
                     }
                 }
             }
-            result.Accomodate(solStep.m_position, chrep);
+            bool bSucc = result.Accomodate(solStep.m_position, chrep);
+            if (!bSucc) {
+                srs << "Failed to place the shape\n" << chrep << "at position: " << solStep.m_position;
+                break;
+            }
         }
         result.SetShapeName("Solution", index);
         srs << result;
         return srs.str();
     }
 
-    string    Tesselation::Result () const
+    string    Tile::Result () const
     {
         if (m_solutions.empty()) {
             return "No solution found!\n";
@@ -210,22 +216,27 @@ namespace Nessie {
         stringstream        srs;
 
         for (auto& solution : m_solutions) {
-            srs << GetTableResult (solution, ++index);
+            srs << GetTableResultStr (solution, ++index);
         }
         return srs.str();
     }
 
-    bool Tesselation::SetTableShapeShowZeros (bool  bShow) const
+    bool Tile::SetTableShapeShowZeros (bool  bShow) const
     {
         return m_tableShape.SetMutableShowZeros(bShow);
     }
 
-    const TableResult& Tesselation::GetTableShape () const
+    const TableResult& Tile::GetTableShape () const
     {
         return m_tableShape;
     }
 
-    size_t Tesselation::RandomValue (size_t     maxValue) const
+    const TableResult& Tile::GetTableResult () const
+    {
+        return m_tableResult;
+    }
+
+    size_t Tile::RandomValue (size_t     maxValue) const
     {
         static std::mt19937              mt(random_device{}());
         uniform_int_distribution<size_t> value(0, maxValue);
@@ -233,56 +244,60 @@ namespace Nessie {
     }
 
     // modifiers
-    bool Tesselation::Solve (Riddle     &riddle)
+    bool Tile::Solve (Riddle     &riddle)
     {
+        SolutionStep* actualStepPtr = riddle.GetSolutionStepPtr();
+        if (actualStepPtr == nullptr) {
+            cout << "Unexpected failure!" << endl;
+            return false;
+        }
+        SolutionStep & actualStep = *actualStepPtr;
         size_t minRow{};
         size_t minCol{};
         size_t minShi{};
-        if (riddle.size() == 0) {
+        if (riddle.GetLevel() == 0) {
             // prepare the first step
-            riddle.push_back(SolutionStep(m_tableResult));
             // init the starting position values
             if (m_options.Random()) {
                 minRow = RandomValue(m_tableResult.NumRows());
                 minCol = RandomValue(m_tableResult.NumCols());
                 minShi = RandomValue(m_shapeCollections[0].size());
                 cout << "Random starting position = ("
-                        << minRow << ", " << minCol
-                        << ") first shape index = "
-                        << minShi
-                        << endl;
+                    << minRow << ", " << minCol
+                    << ") first shape index = "
+                    << minShi
+                    << endl;
             }
         }
+        TableResult savedTableResult = actualStep.m_tableResult;
         for (auto row = minRow; row < m_tableResult.NumRows(); ++row) {
             for (auto col = minCol; col < m_tableResult.NumCols(); ++col) {
                 // Set all the possible positions
-                auto    ioss{ riddle.back().m_indexOfShapeSet };
+                auto    ioss{ actualStep.m_indexOfShapeSet };
                 auto    & currentShapeSet{ m_shapeCollections[ioss] };
                 for (size_t shIdxIS = minShi; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
                     // Try to use the current shape's all possible rotations
-                    riddle.back().m_shapeIndexInSet = shIdxIS;
+                    actualStep.m_shapeIndexInSet = shIdxIS;
                     const auto& currentShape = currentShapeSet[shIdxIS];
-                    Riddle  remainingRiddle{ riddle };
-                    SolutionStep& step{ remainingRiddle.back() };
-                    Position& pos{ step.m_position };
+                    Position& pos{ actualStep.m_position };
                     pos.SetPosition(row, col);
-                    if (step.m_tableResult.CanAccomodate(pos, currentShape)) {
-                       step.m_tableResult.Accomodate(pos, currentShape);
+                    if (actualStep.m_tableResult.CanAccomodate(pos, currentShape)) {
+                        actualStep.m_tableResult.Accomodate(pos, currentShape);
                         // prepare the next step
-                        if (remainingRiddle.size() < m_shapeCollections.size()) {
-                            remainingRiddle.push_back(step);
-                            remainingRiddle.back().m_indexOfShapeSet += 1;
-                            bool justSolved = Solve(remainingRiddle);
+                        if (riddle.GetLevel() + 1 < m_shapeCollections.size()) {
+                            riddle.SetNextLevel();
+                            bool justSolved = Solve(riddle);
                             if (justSolved) {
                                 if (!m_options.CalculateAll()) {
                                     return true;
                                 }
                             }
+                            actualStep.m_tableResult = savedTableResult;
                         } else {
                             // be happy, we just have found a solution!
-                            m_solutions.push_back(remainingRiddle);
+                            m_solutions.push_back(riddle.GetSolution());
                             if (m_options.CalculateAll()) {
-                                cout << GetTableResult(remainingRiddle, m_solutions.size());
+                                cout << GetTableResultStr(riddle.GetSolution(), m_solutions.size());
                             }
                             return true;
                         }
@@ -297,12 +312,12 @@ namespace Nessie {
 
     // global operators
     ostream& operator << (ostream            & os,
-                          const Tesselation  & tessy)
+                          const Tile  & tessy)
     {
         bool bPrev{ tessy.SetTableShapeShowZeros(true) };
         os << "Table" << tessy.GetTableShape();
         (void)tessy.SetTableShapeShowZeros(bPrev);
-        os << "Tesselation Date = " << tessy.GetDate().DateStr() << endl;
+        os << "Tile Date = " << tessy.GetDate().DateStr() << endl;
         os << tessy.Result();
         return os;
     }
@@ -321,7 +336,7 @@ int main (int argc,
     options.SetOpted();
     if (options.AskedForHelp()) {
         cout << "Usage:\n"
-            << "  Tesselation [options]\n"
+            << "  Tile [options]\n"
             << " where options can be:\n"
             << "  -h or --help for this help\n"
             << "  -r or --random to find a random solution (or to fail finding any)\n"
@@ -336,12 +351,12 @@ int main (int argc,
         if (options.IsValid()) {
             Date date{ options.GetDate() };
             if (date.IsValidDate()) {
-                Tesselation tesselation (MainTable,
+                Tile tile (MainTable,
                                          Shapes,
                                          options);
-                Riddle riddle;
-                tesselation.Solve (riddle);
-                cout << tesselation << "\n";
+                Riddle riddle(tile.GetTableResult());
+                tile.Solve (riddle);
+                cout << tile << "\n";
             } else {
                 cout << "No such date as " << date.DateStr() << endl;
             }
