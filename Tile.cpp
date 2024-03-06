@@ -81,8 +81,8 @@ namespace Nessie {
 
     // constructors
     Tile::Tile (const TableLayout                 & table,
-                              const ShapeCollection             & shapes,
-                              const ApplicationSpecificOptions  & options)
+                const ShapeCollection             & shapes,
+                const ApplicationSpecificOptions  & options)
      : m_tableLayout        (table)
      , m_shapes             (shapes)
      , m_options            (options)
@@ -158,13 +158,18 @@ namespace Nessie {
     }
 
     // accessors
-    inline const Date & Tile::GetDate ()   const
+    inline const Date   & Tile::GetDate ()      const
     {
         return m_options.GetDate();
     }
 
+    inline const AppSpecOpts    & Tile::GetOptions ()   const
+    {
+        return m_options;
+    }
+
     string  Tile::GetTableResultStr (const Solution     & solution,
-                                            size_t             index) const
+                                     size_t             index) const
     {
         stringstream        srs;
         TableResultChars    result(m_tableResult.NumRows(),
@@ -210,8 +215,13 @@ namespace Nessie {
         size_t             index{};
         stringstream        srs;
 
-        for (auto& solution : m_solutions) {
-            srs << GetTableResultStr (solution, ++index);
+        if (m_solutions.size() == 1) {
+            Solution solout = m_solutions[0];
+            srs << GetTableResultStr (solout);
+        } else {
+            for (auto& solution : m_solutions) {
+                srs << GetTableResultStr (solution, index);
+            }
         }
         return srs.str();
     }
@@ -255,6 +265,9 @@ namespace Nessie {
             // prepare the first step
             if (m_options.Random()) {
                 RandomShuffle(m_shapeCollections);
+                for (auto& sc : m_shapeCollections) {
+                    RandomShuffle(sc);
+                }
             }
         }
         TableResult savedTableResult = actualStep.m_tableResult;
@@ -300,14 +313,22 @@ namespace Nessie {
     }
 
     // global operators
-    ostream& operator << (ostream            & os,
-                          const Tile  & tessy)
+    ostream& operator << (ostream       & os,
+                          const Tile    & tessy)
     {
-        bool bPrev{ tessy.SetTableShapeShowZeros(true) };
-        os << "Table" << tessy.GetTableShape();
-        (void)tessy.SetTableShapeShowZeros(bPrev);
+        if (!tessy.GetOptions().Random() &&
+            !tessy.GetOptions().CalculateAll()) {
+            bool bPrev{ tessy.SetTableShapeShowZeros(true) };
+            os << "Table" << tessy.GetTableShape();
+            (void)tessy.SetTableShapeShowZeros(bPrev);
+        }
         os << "Tile Date = " << tessy.GetDate().DateStr() << endl;
-        os << tessy.Result();
+        if (tessy.GetOptions().Random()) {
+            os << "Random ";
+        }
+        if (!tessy.GetOptions().CalculateAll()) {
+            os << tessy.Result();
+        }
         return os;
     }
 } // namespace Nessie

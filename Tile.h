@@ -26,6 +26,7 @@ namespace Nessie {
     using ShapeSet          = set<TableResult>;
     using ShapeCollections  = vector<ShapeCollection>;
     using TableResultChars  = Geom::Shape<char>;
+    using AppSpecOpts       = ApplicationSpecificOptions;
 
         struct SolutionStep {
         explicit SolutionStep (const TableResult& tableResult)
@@ -110,25 +111,26 @@ namespace Nessie {
     public:
     // constructors
         Tile (const TableLayout                  & tableLayout,
-                     const ShapeCollection              & shapes,
-                     const ApplicationSpecificOptions   & options);
+              const ShapeCollection              & shapes,
+              const ApplicationSpecificOptions   & options);
 
     // accessors
-        inline const Date   & GetDate               ()                                  const;
-        string              GetTableResultStr       (const Solution     & solution,
-                                                     size_t             index = 0u)     const;
-        string              Result                  ()                                  const;
-        bool                SetTableShapeShowZeros  (bool               bShow)          const;
-        const TableResult&  GetTableShape           ()                                  const;
-        const TableResult& GetTableResult           ()                                  const;
-        size_t              RandomValue             (size_t             maxValue)       const;
+        inline const Date           & GetDate               ()                                  const;
+        inline const AppSpecOpts    & GetOptions            ()                                  const;
+        string                      GetTableResultStr       (const Solution     & solution,
+                                                             size_t             index = 0u)     const;
+        string                      Result                  ()                                  const;
+        bool                        SetTableShapeShowZeros  (bool               bShow)          const;
+        const TableResult           & GetTableShape         ()                                  const;
+        const TableResult           & GetTableResult        ()                                  const;
+        size_t                      RandomValue             (size_t             maxValue)       const;
 
     // static template members
         template<typename Container>
-        static void         RandomShuffle           (Container          & container);
+        static void                 RandomShuffle           (Container          & container);
 
      // modifiers
-        bool                Solve                   (Riddle     & riddle);
+        bool                        Solve                   (Riddle     & riddle);
     private:
     // data members
         const TableLayout           & m_tableLayout;
