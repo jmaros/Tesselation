@@ -247,14 +247,18 @@ namespace Nessie {
     bool Tile::Solve (Riddle     &riddle)
     {
         SolutionStep* actualStepPtr = riddle.GetSolutionStepPtr();
+
         if (actualStepPtr == nullptr) {
             cout << "Unexpected failure!" << endl;
             return false;
         }
+
         SolutionStep & actualStep = *actualStepPtr;
+        size_t actualLevel = riddle.GetLevel();
         size_t minRow{};
         size_t minCol{};
         size_t minShi{};
+
         if (riddle.GetLevel() == 0) {
             // prepare the first step
             // init the starting position values
@@ -283,6 +287,9 @@ namespace Nessie {
                     pos.SetPosition(row, col);
                     if (actualStep.m_tableResult.CanAccomodate(pos, currentShape)) {
                         actualStep.m_tableResult.Accomodate(pos, currentShape);
+#if defined (VERBOSE)
+                        cout << riddle.GetLevel() + 1 << ". " << actualStep.m_tableResult;
+#endif
                         // prepare the next step
                         if (riddle.GetLevel() + 1 < m_shapeCollections.size()) {
                             riddle.SetNextLevel();
@@ -292,7 +299,7 @@ namespace Nessie {
                                     return true;
                                 }
                             }
-                            actualStep.m_tableResult = savedTableResult;
+                            riddle.RestorePreviousLevel(actualLevel, savedTableResult);
                         } else {
                             // be happy, we just have found a solution!
                             m_solutions.push_back(riddle.GetSolution());
@@ -352,8 +359,8 @@ int main (int argc,
             Date date{ options.GetDate() };
             if (date.IsValidDate()) {
                 Tile tile (MainTable,
-                                         Shapes,
-                                         options);
+                           Shapes,
+                           options);
                 Riddle riddle(tile.GetTableResult());
                 tile.Solve (riddle);
                 cout << tile << "\n";

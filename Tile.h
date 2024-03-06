@@ -75,8 +75,15 @@ namespace Nessie {
                 m_solution[m_level].m_tableResult       = m_solution[actLevel].m_tableResult;
                 m_solution[m_level].m_shapeIndexInSet   = 0;
             } else {
-                cout << "Internal error!\n";
+                cout << "Internal error at SetNextLevel!\n";
             }
+        }
+
+        void RestorePreviousLevel (const size_t         actLevel,
+                                   const TableResult    & savedTableResult)
+        {
+            m_level = actLevel;
+            m_solution[m_level].m_tableResult = savedTableResult;
         }
 
         SolutionStep    * GetSolutionStepPtr ()
