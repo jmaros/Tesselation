@@ -32,13 +32,8 @@ sed -i 's/\r
 #include "Tile.h"
 #include "ElapsedTime.h"
 
-#include <random>
-
 namespace Nessie {
     
-    using std::random_device;
-    using std::uniform_int_distribution;
-
     // The zeros representing the excluded parts
     // The negative numbers are placeholders for the monthes
     // The positive numbers specify the position of the given day on the table
@@ -255,31 +250,20 @@ namespace Nessie {
 
         SolutionStep & actualStep = *actualStepPtr;
         size_t actualLevel = riddle.GetLevel();
-        size_t minRow{};
-        size_t minCol{};
-        size_t minShi{};
 
         if (riddle.GetLevel() == 0) {
             // prepare the first step
-            // init the starting position values
             if (m_options.Random()) {
-                minRow = RandomValue(m_tableResult.NumRows());
-                minCol = RandomValue(m_tableResult.NumCols());
-                minShi = RandomValue(m_shapeCollections[0].size());
-                cout << "Random starting position = ("
-                    << minRow << ", " << minCol
-                    << ") first shape index = "
-                    << minShi
-                    << endl;
+                RandomShuffle(m_shapeCollections);
             }
         }
         TableResult savedTableResult = actualStep.m_tableResult;
-        for (auto row = minRow; row < m_tableResult.NumRows(); ++row) {
-            for (auto col = minCol; col < m_tableResult.NumCols(); ++col) {
+        for (auto row = 0u; row < m_tableResult.NumRows(); ++row) {
+            for (auto col = 0u; col < m_tableResult.NumCols(); ++col) {
                 // Set all the possible positions
                 auto    ioss{ actualStep.m_indexOfShapeSet };
                 auto    & currentShapeSet{ m_shapeCollections[ioss] };
-                for (size_t shIdxIS = minShi; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
+                for (size_t shIdxIS = 0; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
                     // Try to use the current shape's all possible rotations
                     actualStep.m_shapeIndexInSet = shIdxIS;
                     const auto& currentShape = currentShapeSet[shIdxIS];
@@ -310,9 +294,7 @@ namespace Nessie {
                         }
                     }
                 }
-                minShi = 0;
             }
-            minCol = 0;
         }
         return false;
     }
@@ -346,13 +328,14 @@ int main (int argc,
             << "  Tile [options]\n"
             << " where options can be:\n"
             << "  -h or --help for this help\n"
-            << "  -r or --random to find a random solution (or to fail finding any)\n"
+            << "  -r or --random to find a random solution\n"
             << "  -v or --verbose for more detailed output\n"
-            << "  -a or --all for finding all solution (might require quite long time!)\n"
+            << "  -a or --all for finding all solution\n"
             << "  -y or --year followed by yyyy\n"
             << "  -m or --month followed by [m]m\n"
             << "  -d or --day followed by [d]d\n"
-            << "  -@ to use special characters, instead of letters [A-H] for the shapes\n"
+            << "  -@ to use special characters\n"
+            << "     instead of letters [A-H] for the shapes\n"
             << endl;
     } else {
         if (options.IsValid()) {

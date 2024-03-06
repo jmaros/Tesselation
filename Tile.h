@@ -8,11 +8,15 @@
 
 
 #include <set>
+#include <random>
 
 namespace Nessie {
 
-    using std::set;
     using std::ostream;
+    using std::random_device;
+    using std::set;
+    using std::shuffle;
+    using std::uniform_int_distribution;
 
     using TableLayout       = Geom::Shape<int>;
     using TableResult       = Geom::Shape<bool>;
@@ -119,12 +123,16 @@ namespace Nessie {
         const TableResult& GetTableResult           ()                                  const;
         size_t              RandomValue             (size_t             maxValue)       const;
 
+    // static template members
+        template<typename Container>
+        static void         RandomShuffle           (Container          & container);
+
      // modifiers
         bool                Solve                   (Riddle     & riddle);
     private:
     // data members
         const TableLayout           & m_tableLayout;
-        const ShapeCollection       & m_shapes;
+        ShapeCollection             m_shapes;
         ApplicationSpecificOptions  m_options;
         TableResult                 m_tableShape;
         MonthMap                    m_monthMap;
@@ -133,6 +141,13 @@ namespace Nessie {
         TableResult                 m_tableResult;
         Solutions                   m_solutions;
     };
+
+    template<typename Container>
+    void   Tile::RandomShuffle (Container   & container)
+    {
+        static std::mt19937  mt(random_device{}());
+        shuffle(container.begin(), container.end(), mt);
+    }
 
     ostream     & operator << (const ostream        & os,
                                const Tile    & tile);
