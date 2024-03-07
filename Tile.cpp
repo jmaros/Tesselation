@@ -371,7 +371,7 @@ int main (int argc,
             } else {
                 cout << "No such date as " << date.DateStr() << endl;
             }
-        }else {
+        } else {
           cout << "Error: Invalid commandline option(s)!" << endl;
         }
     }
