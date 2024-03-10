@@ -61,7 +61,7 @@ namespace Nessie {
 
         // modifiers
         void                    SetOpted                ();
-        void                    Invalidate              ();
+        void                    Invalidate              () override;
 
     private:
     // data members
