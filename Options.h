@@ -48,7 +48,6 @@ namespace Nessie {
             vector<string>      m_argv;
             vector<string>      m_arge;
             ArgsMap             m_argMap;
-            bool                m_hasOptions;
     };
 
     Options::Options (int               argc,
@@ -57,7 +56,6 @@ namespace Nessie {
         : m_argv           ()
         , m_arge           ()
         , m_argMap         ()
-        , m_hasOptions     ()
     {
         for (int idx = 0; idx < argc; ++idx) {
             m_argv.push_back(argv[idx]);
