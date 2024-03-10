@@ -54,6 +54,7 @@ namespace LinAlg {
 
     private:
         vector<Row<T>>        m_rows;
+        T                     m_initialValue;
         T                     m_outOfBoundValue;
     };
 
@@ -65,6 +66,7 @@ namespace LinAlg {
                        size_t    numCols,
                        const T   & initialValue)
      : m_rows               ()
+     , m_initialValue       (initialValue)
      , m_outOfBoundValue    ()
     {
         Row<T> defRow(numCols, initialValue);
@@ -125,7 +127,8 @@ namespace LinAlg {
     inline bool Matrix<T>::CanAccomodate (const Position     & pos,
                                           const Matrix<T>    & mat) const
     {
-        const T         EV{};
+        const T         EVI{mat.m_initialValue};
+        const T         EVO{ m_initialValue };
         const size_t    ru{mat.RowUpperLimit ()};
         const size_t    cu{mat.ColUpperLimit ()};
 
@@ -133,7 +136,7 @@ namespace LinAlg {
             for (size_t col = 0u; col < cu; ++col) {
                 Position inPos(row, col);
                 Position ouPos{pos + inPos};
-                if (Value(ouPos) != EV && mat.Value(inPos) != EV) {
+                if (Value(ouPos) != EVO && mat.Value(inPos) != EVI) {
                     return false;
                 }
             }
@@ -230,7 +233,8 @@ namespace LinAlg {
     inline bool Matrix<T>::Accomodate (const Position& pos,
                                        const Matrix<T>& mat)
     {
-        const T         EV{};
+        const T         EVI{ mat.m_initialValue };
+        const T         EVO{ m_initialValue };
         const size_t    ru{ mat.RowUpperLimit () };
         const size_t    cu{ mat.ColUpperLimit () };
 
@@ -238,11 +242,11 @@ namespace LinAlg {
             for (size_t col = 0u; col < cu; ++col) {
                 Position inPos(row, col);
                 Position ouPos{ pos + inPos };
-                if (Value(ouPos) != EV && mat.Value(inPos) != EV) {
+                if (Value(ouPos) != EVO && mat.Value(inPos) != EVI) {
                     cout << "Unexpexted collision at " << pos << endl;
                     return false;
                 }
-                if (Value(ouPos) == EV && mat.Value(inPos) != EV) {
+                if (Value(ouPos) == EVO && mat.Value(inPos) != EVI) {
                     bool bSucc = SetData(ouPos, mat.Value(inPos));
                     if (!bSucc) {
                         cout << "Failed to write to " << ouPos

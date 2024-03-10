@@ -1,14 +1,14 @@
 //
-// Tesselation.cpp
+// Tile.cpp
 //  : This file contains the 'main' function. Program execution begins and ends there.
 //
 // You can compile this code by using Visual Studio (2022 Community Edition)
 //
 // or you can compile on Windows using MinGW and a specific c++ version:
-// test Tesselation c++23
+// test Tile c++23
 //
 // or you can compile on Linux using a specific c++ version:
-// ./test.sh Tesselation c++23
+// ./test.sh Tile c++23
 //
 // (optionally you can add " -D VERBOSE" at the end of the command line)
 //
@@ -29,16 +29,11 @@ sed -i 's/\r
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "Tesselation.h"
+#include "Tile.h"
 #include "ElapsedTime.h"
-
-#include <random>
 
 namespace Nessie {
     
-    using std::random_device;
-    using std::uniform_int_distribution;
-
     // The zeros representing the excluded parts
     // The negative numbers are placeholders for the monthes
     // The positive numbers specify the position of the given day on the table
@@ -85,9 +80,9 @@ namespace Nessie {
     const string    ShapeChars{ "@#$*+ox&" };
 
     // constructors
-    Tesselation::Tesselation (const TableLayout                 & table,
-                              const ShapeCollection             & shapes,
-                              const ApplicationSpecificOptions  & options)
+    Tile::Tile (const TableLayout                 & table,
+                const ShapeCollection             & shapes,
+                const ApplicationSpecificOptions  & options)
      : m_tableLayout        (table)
      , m_shapes             (shapes)
      , m_options            (options)
@@ -163,23 +158,30 @@ namespace Nessie {
     }
 
     // accessors
-    inline const Date & Tesselation::GetDate ()   const
+    inline const Date   & Tile::GetDate ()      const
     {
         return m_options.GetDate();
     }
 
-    string  Tesselation::GetTableResult (const Solution     & solution,
-                                         size_t             index) const
+    inline const AppSpecOpts    & Tile::GetOptions ()   const
+    {
+        return m_options;
+    }
+
+    string  Tile::GetTableResultStr (const Solution     & solution,
+                                     size_t             index) const
     {
         stringstream        srs;
         TableResultChars    result(m_tableResult.NumRows(),
-                                   m_tableResult.NumCols());
+                                   m_tableResult.NumCols(),
+                                   ' ');
 
         for (auto& solStep : solution) {
             auto& shapes = m_shapeCollections[solStep.m_indexOfShapeSet];
             const TableResult& theShape{ shapes[solStep.m_shapeIndexInSet] };
             TableResultChars chrep(theShape.NumRows(),
-                                   theShape.NumCols());
+                                   theShape.NumCols(),
+                                   ' ');
 
             for (size_t r = 0; r < chrep.NumRows(); ++r) {
                 for (size_t c = 0; c < chrep.NumCols(); ++c) {
@@ -193,14 +195,18 @@ namespace Nessie {
                     }
                 }
             }
-            result.Accomodate(solStep.m_position, chrep);
+            bool bSucc = result.Accomodate(solStep.m_position, chrep);
+            if (!bSucc) {
+                srs << "Failed to place the shape\n" << chrep << "at position: " << solStep.m_position;
+                break;
+            }
         }
         result.SetShapeName("Solution", index);
         srs << result;
         return srs.str();
     }
 
-    string    Tesselation::Result () const
+    string    Tile::Result () const
     {
         if (m_solutions.empty()) {
             return "No solution found!\n";
@@ -209,23 +215,33 @@ namespace Nessie {
         size_t             index{};
         stringstream        srs;
 
-        for (auto& solution : m_solutions) {
-            srs << GetTableResult (solution, ++index);
+        if (m_solutions.size() == 1) {
+            Solution solout = m_solutions[0];
+            srs << GetTableResultStr (solout);
+        } else {
+            for (auto& solution : m_solutions) {
+                srs << GetTableResultStr (solution, index);
+            }
         }
         return srs.str();
     }
 
-    bool Tesselation::SetTableShapeShowZeros (bool  bShow) const
+    bool Tile::SetTableShapeShowZeros (bool  bShow) const
     {
         return m_tableShape.SetMutableShowZeros(bShow);
     }
 
-    const TableResult& Tesselation::GetTableShape () const
+    const TableResult& Tile::GetTableShape () const
     {
         return m_tableShape;
     }
 
-    size_t Tesselation::RandomValue (size_t     maxValue) const
+    const TableResult& Tile::GetTableResult () const
+    {
+        return m_tableResult;
+    }
+
+    size_t Tile::RandomValue (size_t     maxValue) const
     {
         static std::mt19937              mt(random_device{}());
         uniform_int_distribution<size_t> value(0, maxValue);
@@ -233,77 +249,86 @@ namespace Nessie {
     }
 
     // modifiers
-    bool Tesselation::Solve (Riddle     &riddle)
+    bool Tile::Solve (Riddle     &riddle)
     {
-        size_t minRow{};
-        size_t minCol{};
-        size_t minShi{};
-        if (riddle.size() == 0) {
+        SolutionStep* actualStepPtr = riddle.GetSolutionStepPtr();
+
+        if (actualStepPtr == nullptr) {
+            cout << "Unexpected failure!" << endl;
+            return false;
+        }
+
+        SolutionStep & actualStep = *actualStepPtr;
+        size_t actualLevel = riddle.GetLevel();
+
+        if (riddle.GetLevel() == 0) {
             // prepare the first step
-            riddle.push_back(SolutionStep(m_tableResult));
-            // init the starting position values
             if (m_options.Random()) {
-                minRow = RandomValue(m_tableResult.NumRows());
-                minCol = RandomValue(m_tableResult.NumCols());
-                minShi = RandomValue(m_shapeCollections[0].size());
-                cout << "Random starting position = ("
-                        << minRow << ", " << minCol
-                        << ") first shape index = "
-                        << minShi
-                        << endl;
+                RandomShuffle(m_shapeCollections);
+                for (auto& sc : m_shapeCollections) {
+                    RandomShuffle(sc);
+                }
             }
         }
-        for (auto row = minRow; row < m_tableResult.NumRows(); ++row) {
-            for (auto col = minCol; col < m_tableResult.NumCols(); ++col) {
+        TableResult savedTableResult = actualStep.m_tableResult;
+        for (auto row = 0u; row < m_tableResult.NumRows(); ++row) {
+            for (auto col = 0u; col < m_tableResult.NumCols(); ++col) {
                 // Set all the possible positions
-                auto    ioss{ riddle.back().m_indexOfShapeSet };
+                auto    ioss{ actualStep.m_indexOfShapeSet };
                 auto    & currentShapeSet{ m_shapeCollections[ioss] };
-                for (size_t shIdxIS = minShi; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
+                for (size_t shIdxIS = 0; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
                     // Try to use the current shape's all possible rotations
-                    riddle.back().m_shapeIndexInSet = shIdxIS;
+                    actualStep.m_shapeIndexInSet = shIdxIS;
                     const auto& currentShape = currentShapeSet[shIdxIS];
-                    Riddle  remainingRiddle{ riddle };
-                    SolutionStep& step{ remainingRiddle.back() };
-                    Position& pos{ step.m_position };
+                    Position& pos{ actualStep.m_position };
                     pos.SetPosition(row, col);
-                    if (step.m_tableResult.CanAccomodate(pos, currentShape)) {
-                       step.m_tableResult.Accomodate(pos, currentShape);
+                    if (actualStep.m_tableResult.CanAccomodate(pos, currentShape)) {
+                        actualStep.m_tableResult.Accomodate(pos, currentShape);
+#if defined (VERBOSE)
+                        cout << riddle.GetLevel() + 1 << ". " << actualStep.m_tableResult;
+#endif
                         // prepare the next step
-                        if (remainingRiddle.size() < m_shapeCollections.size()) {
-                            remainingRiddle.push_back(step);
-                            remainingRiddle.back().m_indexOfShapeSet += 1;
-                            bool justSolved = Solve(remainingRiddle);
+                        if (riddle.GetLevel() + 1 < m_shapeCollections.size()) {
+                            riddle.SetNextLevel();
+                            bool justSolved = Solve(riddle);
                             if (justSolved) {
                                 if (!m_options.CalculateAll()) {
                                     return true;
                                 }
                             }
+                            riddle.RestorePreviousLevel(actualLevel, savedTableResult);
                         } else {
                             // be happy, we just have found a solution!
-                            m_solutions.push_back(remainingRiddle);
+                            m_solutions.push_back(riddle.GetSolution());
                             if (m_options.CalculateAll()) {
-                                cout << GetTableResult(remainingRiddle, m_solutions.size());
+                                cout << GetTableResultStr(riddle.GetSolution(), m_solutions.size());
                             }
                             return true;
                         }
                     }
                 }
-                minShi = 0;
             }
-            minCol = 0;
         }
         return false;
     }
 
     // global operators
-    ostream& operator << (ostream            & os,
-                          const Tesselation  & tessy)
+    ostream& operator << (ostream       & os,
+                          const Tile    & tessy)
     {
-        bool bPrev{ tessy.SetTableShapeShowZeros(true) };
-        os << "Table" << tessy.GetTableShape();
-        (void)tessy.SetTableShapeShowZeros(bPrev);
-        os << "Tesselation Date = " << tessy.GetDate().DateStr() << endl;
-        os << tessy.Result();
+        if (!tessy.GetOptions().Random() &&
+            !tessy.GetOptions().CalculateAll()) {
+            bool bPrev{ tessy.SetTableShapeShowZeros(true) };
+            os << "Table" << tessy.GetTableShape();
+            (void)tessy.SetTableShapeShowZeros(bPrev);
+        }
+        os << "Tile Date = " << tessy.GetDate().DateStr() << endl;
+        if (tessy.GetOptions().Random()) {
+            os << "Random ";
+        }
+        if (!tessy.GetOptions().CalculateAll()) {
+            os << tessy.Result();
+        }
         return os;
     }
 } // namespace Nessie
@@ -321,31 +346,32 @@ int main (int argc,
     options.SetOpted();
     if (options.AskedForHelp()) {
         cout << "Usage:\n"
-            << "  Tesselation [options]\n"
+            << "  Tile [options]\n"
             << " where options can be:\n"
             << "  -h or --help for this help\n"
-            << "  -r or --random to find a random solution (or to fail finding any)\n"
+            << "  -r or --random to find a random solution\n"
             << "  -v or --verbose for more detailed output\n"
-            << "  -a or --all for finding all solution (might require quite long time!)\n"
+            << "  -a or --all for finding all solution\n"
             << "  -y or --year followed by yyyy\n"
             << "  -m or --month followed by [m]m\n"
             << "  -d or --day followed by [d]d\n"
-            << "  -@ to use special characters, instead of letters [A-H] for the shapes\n"
+            << "  -@ to use special characters\n"
+            << "     instead of letters [A-H] for the shapes\n"
             << endl;
     } else {
         if (options.IsValid()) {
             Date date{ options.GetDate() };
             if (date.IsValidDate()) {
-                Tesselation tesselation (MainTable,
-                                         Shapes,
-                                         options);
-                Riddle riddle;
-                tesselation.Solve (riddle);
-                cout << tesselation << "\n";
+                Tile tile (MainTable,
+                           Shapes,
+                           options);
+                Riddle riddle(tile.GetTableResult());
+                tile.Solve (riddle);
+                cout << tile << "\n";
             } else {
                 cout << "No such date as " << date.DateStr() << endl;
             }
-        }else {
+        } else {
           cout << "Error: Invalid commandline option(s)!" << endl;
         }
     }

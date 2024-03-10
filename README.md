@@ -1,4 +1,4 @@
-# Tesselation
+# Tile
 
 There is a table and there are 8 shapes, each of whitch can be rotated and mirrored.
 The first 12 positions on the table (from -1 to -12) are for the monthes (from Jan. do Dec.),
@@ -51,25 +51,25 @@ Shape 8 =   1  1  1  1
 ```
 An example of the output of test-run:
 ```
-2024-02-24 23:15:06
+2024-03-06 13:30:15
 TableShape =
-          0100001
+          0010001
           0000001
+          0000010
           0000000
           0000000
           0000000
-          0010000
           0001111
-
-Tesselation Date = 2024 February 24
+Tile Date = 2024 March 6
 Solution =
-          A ABBB
-          AAABBB
-          GEEHHHH
-          GGEHCCC
-          DGEEFCC
-          DG FFFF
-          DDD
+          AA BBB
+          AGGBBB
+          AAGGG F
+          DDDCCFF
+          DEECCCF
+          DEHHHHF
+          EEH
 
- Elapsed Time: 41.6221s
+
+ Elapsed Time: 1.58236s
 ```
