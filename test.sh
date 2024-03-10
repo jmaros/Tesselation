@@ -109,8 +109,8 @@ elif [ -f "$1" -o -f "$1.cpp" ]; then
     if [ -n "$Args" ]; then
       echo Additional options specified: "$Args"
     fi
-    echo g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror -time "$Args" "$pfn$ext" -o "bin/$tn" \&\&  $Deb "./bin/$tn$AppArgs"
-    g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror -time $Args $pfn$ext -o bin/$tn && $Deb ./bin/$tn$AppArgs
+    echo g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror "$Args" "$pfn$ext" -o "bin/$tn" \&\&  $Deb "./bin/$tn$AppArgs"
+    g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror $Args $pfn$ext -o bin/$tn && $Deb ./bin/$tn$AppArgs
   else
       echo \"$pfn$ext file doesn\'t exist!\"
   fi
