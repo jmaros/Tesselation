@@ -139,7 +139,7 @@
     <ClCompile Include="Tile.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ApplicationSpecificOptions.h" />
+    <ClInclude Include="TileOptions.h" />
     <ClInclude Include="Date.h" />
     <ClInclude Include="ElapsedTime.h" />
     <ClInclude Include="Matrix.h" />

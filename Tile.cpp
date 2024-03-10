@@ -47,42 +47,95 @@ namespace Nessie {
         { +29, +30, +31,   0,   0,   0,   0 }
     };
 
+    // The same as before, plus 100 for not used, 101 for Sunday, 102 for Monday, ...., 107 for Saturday
+    const TableLayout MainTable6 = {
+        {   0,   0,   0,   0,  -5,   0,  -6,   0, 100,   0,  -7,   0,  -8,   0,   0,   0,   0 },
+        {   0,   0,   0,  -4,   0, 101,   0, 102,   0, 103,   0, 104,   0,  -9,   0,   0,   0 },
+        {   0,   0,  -3,   0, 100,   0, 105,   0, 106,   0, 107,   0, 100,   0, -10,   0,   0 },
+        {   0,  -2,   0,   1,   0,   2,   0,   3,   0,   4,   0,   5,   0,   6,   0, -11,   0 },
+        {  -1,   0,   7,   0,   8,   0,   9,   0,  10,   0,  11,   0,  12,   0,  13,   0, -12 },
+        {   0, 100,   0,  14,   0,  15,   0,  16,   0,  17,   0,  18,   0,  19,   0, 100,   0 },
+        {   0,   0, 100,   0,  20,   0,  21,   0,  22,   0,  23,   0,  24,   0, 100,   0,   0 },
+        {   0,   0,   0, 100,   0,  25,   0,  26,   0,  27,   0,  28,   0, 100,   0,   0,   0 },
+        {   0,   0,   0,   0, 100,   0,  29,   0,  30,   0,  31,   0, 100,   0,   0,   0,   0 },
+    };
+
     const ShapeCollection Shapes = {
 
         {{ 1, 0, 1 },
-         { 1, 1, 1 }},
+         { 1, 1, 1 }},      // sh01
 
         {{ 1, 1, 1 },
-         { 1, 1, 1 }},
+         { 1, 1, 1 }},      // sh02
 
         {{ 1, 1, 1 },
-         { 1, 1, 0 }},
+         { 1, 1, 0 }},      // sh03
 
         {{ 1, 0, 0 },
          { 1, 0, 0 },
-         { 1, 1, 1 }},
+         { 1, 1, 1 }},      // sh04
 
         {{ 1, 1, 0 },
          { 0, 1, 0 },
-         { 0, 1, 1 }},
+         { 0, 1, 1 }},      // sh05
 
         {{ 1, 1, 1, 1 },
-         { 0, 1, 0, 0 }},
+         { 0, 1, 0, 0 }},   // sh06
 
         {{ 1, 1, 1, 0 },
-         { 0, 0, 1, 1 }},
+         { 0, 0, 1, 1 }},   // sh07
 
         {{ 1, 1, 1, 1 },
-         { 1, 0, 0, 0 }}
+         { 1, 0, 0, 0 }}    // sh08
     };
 
-    const string    ShapeLetters{ "ABCDEFGH" };
-    const string    ShapeChars{ "@#$*+ox&" };
+    const ShapeCollection Shape6s = {
+
+        {{ 1, 0, 1, 0, 1, 0, 1, 0, 1 }},    // sh01
+
+        {{ 0, 0, 0, 1, 0, 1 },
+         { 1, 0, 1, 0, 1, 0 }},             // sh02
+
+        {{ 0, 0, 0, 1, 0, 1, 0, 1 },
+         { 1, 0, 1, 0, 0, 0, 0, 0 }},       // sh03
+
+        {{ 1, 0, 1, 0, 1, 0, 1, 0 },
+         { 0, 0, 0, 0, 0, 0, 0, 1 }},       // sh04
+
+        {{ 1, 0, 1, 0, 1, 0, 0, 0 },
+         { 0, 0, 0, 1, 0, 1, 0, 1 }},       // sh05
+
+        {{ 0, 1, 0, 1, 0, 1 },
+         { 1, 0, 1, 0, 1, 0 }},             // sh06
+
+        {{ 0, 1, 0, 1, 0 },
+         { 1, 0, 1, 0, 1 }},                // sh07
+
+        {{ 1, 0, 0, 0, 0, 0, 0 },
+         { 0, 1, 0, 1, 0, 1, 0 },
+         { 0, 0, 0, 0, 0, 0, 1 }},          // sh08
+
+        {{ 1, 0, 0, 0, 0, 0, 0 },
+         { 0, 1, 0, 0, 0, 0, 0 },
+         { 0, 0, 1, 0, 1, 0, 1 }},          // sh09
+
+        {{ 1, 0, 1 },
+         { 0, 1, 0 },
+         { 1, 0, 1 }},                      // sh10
+
+        {{ 0, 0, 1, 0, 0 },
+         { 0, 1, 0, 1, 0 },
+         { 1, 0, 1, 0, 1 }}                 // sh11
+
+    };
+
+    const string    ShapeLetters{ "ABCDEFGHIJKL" };
+    const string    ShapeChars  { "@#$*+ox&abcd" };
 
     // constructors
-    Tile::Tile (const TableLayout                 & table,
-                const ShapeCollection             & shapes,
-                const ApplicationSpecificOptions  & options)
+    Tile::Tile (const TableLayout       & table,
+                const ShapeCollection   & shapes,
+                const TileOptions       & options)
      : m_tableLayout        (table)
      , m_shapes             (shapes)
      , m_options            (options)
@@ -90,6 +143,7 @@ namespace Nessie {
                              table.NumCols())
      , m_monthMap           ()
      , m_dayMap             ()
+     , m_dayOfWeekMap       ()
      , m_shapeCollections   ()
      , m_tableResult        (table.NumRows(),
                              table.NumCols())
@@ -98,18 +152,27 @@ namespace Nessie {
         // fill m_shapesSet so that it will contain all the different shapes
         for (auto   & shape : m_shapes) {
             ShapeSet    shapeSet;
-            bool succi = shapeSet.insert(shape).second;
-            if (succi) {
-                auto horiFlipped = shape.CreateHorizontallyFlipped();
-                auto vertFlipped = shape.CreateVerticallyFlipped();
+            auto OrtogonalTransform = [&] (const TableResult   & sh) -> void
+            {
+                auto horiFlipped = sh.CreateHorizontallyFlipped();
+                auto vertFlipped = sh.CreateVerticallyFlipped();
                 auto bothFlipped = horiFlipped.CreateVerticallyFlipped();
                 (void) shapeSet.insert(horiFlipped);
                 (void) shapeSet.insert(vertFlipped);
                 (void) shapeSet.insert(bothFlipped);
-                (void) shapeSet.insert(shape.CreateTransposed());
+                (void) shapeSet.insert(sh.CreateTransposed());
                 (void) shapeSet.insert(horiFlipped.CreateTransposed());
                 (void) shapeSet.insert(vertFlipped.CreateTransposed());
                 (void) shapeSet.insert (bothFlipped.CreateTransposed());
+            };
+            bool succi = shapeSet.insert(shape).second;
+            if (succi) {
+                if (options.IsHexagonal()) {
+                    auto rotatedby45Deg = shape.CreateRotatedBy45Deg();
+                    (void) shapeSet.insert(rotatedby45Deg);
+                    OrtogonalTransform(rotatedby45Deg);
+                }
+                OrtogonalTransform(shape);
                 ShapeCollection shapeCollection;
                 for (auto& uniqueShape : shapeSet) {
                     shapeCollection.push_back(uniqueShape);
@@ -141,7 +204,12 @@ namespace Nessie {
                     m_monthMap[MonthEnum(-newValue)] = pos;
                 } else
                 if (newValue > 0) {
-                    m_dayMap[newValue] = pos;
+                    if (newValue < 100) {
+                        m_dayMap[newValue] = pos;
+                    }
+                    if (newValue > 100) {
+                        m_dayOfWeekMap[DayOfWeekEnum(newValue - 100)] = pos;
+                    }
                 }
             }
         }
@@ -150,6 +218,9 @@ namespace Nessie {
         // Setting the additional element cells:
         m_tableShape.SetData(m_monthMap[m_options.GetDate().GetMonth()], true);
         m_tableShape.SetData(m_dayMap[m_options.GetDate().GetDay()], true);
+        if (m_options.IsHexagonal()) {
+            m_tableShape.SetData(m_dayOfWeekMap[m_options.GetDate().GetDayOfWeek()], true);
+        }
 
         // Setting the initial valu of the resulting table and the
         // required return value for the out of bound positions
@@ -163,7 +234,7 @@ namespace Nessie {
         return m_options.GetDate();
     }
 
-    inline const AppSpecOpts    & Tile::GetOptions ()   const
+    inline const TileOptions    & Tile::GetOptions ()   const
     {
         return m_options;
     }
@@ -335,13 +406,13 @@ namespace Nessie {
 
 using namespace Nessie;
 
-int main (int argc,
-          char *argv[],
-          char *arge[])
+int main (int   argc,
+          char  * argv[],
+          char  * arge[])
 {
     ElapsedTime et;
 
-    ApplicationSpecificOptions options(argc, argv, arge);
+    TileOptions options(argc, argv, arge);
     options.Evaluate();
     options.SetOpted();
     if (options.AskedForHelp()) {
@@ -349,6 +420,7 @@ int main (int argc,
             << "  Tile [options]\n"
             << " where options can be:\n"
             << "  -h or --help for this help\n"
+            << "  -6 or --hexagonal to use the hexagonal tiling riddle\n"
             << "  -r or --random to find a random solution\n"
             << "  -v or --verbose for more detailed output\n"
             << "  -a or --all for finding all solution\n"
@@ -362,12 +434,22 @@ int main (int argc,
         if (options.IsValid()) {
             Date date{ options.GetDate() };
             if (date.IsValidDate()) {
-                Tile tile (MainTable,
-                           Shapes,
-                           options);
-                Riddle riddle(tile.GetTableResult());
-                tile.Solve (riddle);
-                cout << tile << "\n";
+                if (options.IsHexagonal()) {
+                    Tile tile (MainTable6,
+                               Shape6s,
+                               options);
+                    cout << tile.GetTableResult();
+                    Riddle riddle(tile.GetTableResult(), Shape6s.size());
+                    tile.Solve (riddle);
+                    cout << tile << "\n";
+                } else {
+                    Tile tile (MainTable,
+                               Shapes,
+                               options);
+                    Riddle riddle(tile.GetTableResult(), Shapes.size());
+                    tile.Solve (riddle);
+                    cout << tile << "\n";
+                }
             } else {
                 cout << "No such date as " << date.DateStr() << endl;
             }

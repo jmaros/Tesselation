@@ -32,6 +32,7 @@ namespace LinAlg {
         inline const vector<Row<T>> & GetRows                   ()                              const;
 
     // creators
+        Matrix<T>                   CreateRotatedBy45Deg        ()                              const;
         Matrix<T>                   CreateTransposed            ()                              const;
         Matrix<T>                   CreateHorizontallyFlipped   ()                              const;
         Matrix<T>                   CreateVerticallyFlipped     ()                              const;
@@ -158,6 +159,21 @@ namespace LinAlg {
     const Row<T>& Matrix<T>::operator [] (size_t    rowIndex) const
     {
         return m_rows[rowIndex];
+    }
+
+    template <typename T>
+    Matrix<T> Matrix<T>::CreateRotatedBy45Deg () const
+    {
+        size_t rotSize = ColSize() + RowSize() - 1;
+        Matrix<T> rotatedBy45Deg(rotSize, rotSize, m_initialValue);
+        for (auto rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
+            for (auto colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
+                Position    srcPos(rowIndex, colIndex);
+                Position    dstPos(colIndex, rowIndex);
+                rotatedBy45Deg.SetData(dstPos, Value(srcPos));
+            }
+        }
+        return rotatedBy45Deg;
     }
 
     template <typename T>

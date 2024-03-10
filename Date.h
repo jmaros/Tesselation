@@ -31,6 +31,7 @@ namespace Nessie {
     using std::smatch;
     using std::string;
     using std::stringstream;
+    using std::underlying_type;
 
     enum class MonthEnum : int {
         Unknown        =  0,
@@ -82,6 +83,27 @@ namespace Nessie {
         { MonthEnum::December,  "December"     }
     };
 
+    enum class DayOfWeekEnum : int {
+        Unknown         = 0,
+        Sunday,     //  = 1,
+        Monday,     //  = 2,
+        Tuesday,    //  = 3,
+        Wednesday,  //  = 4,
+        Thursday,   //  = 5,
+        Friday,     //  = 6,
+        Saturday    //  = 7
+    };
+
+    const map<DayOfWeekEnum, string> DayNames {
+        { DayOfWeekEnum::Unknown,     "Admittedly Unknown"    },
+        { DayOfWeekEnum::Sunday,      "Sunday"                },
+        { DayOfWeekEnum::Monday,      "Monday"                },
+        { DayOfWeekEnum::Tuesday,     "Tuesday"               },
+        { DayOfWeekEnum::Wednesday,   "Wednesday"             },
+        { DayOfWeekEnum::Thursday,    "Thursday"              },
+        { DayOfWeekEnum::Friday,      "Friday"                },
+        { DayOfWeekEnum::Saturday,    "Saturday"              }
+    };
 
 class Date {
 public:
@@ -89,27 +111,39 @@ public:
     Date (int                    year,
           MonthEnum              month,
           int                    day)
-     : m_year   (year)
-     , m_month  (month)
-     , m_day    (day)
+     : m_year       (year)
+     , m_month      (month)
+     , m_day        (day)
+     , m_dayOfWeek  (DayOfWeekEnum::Unknown)
     {
-        AdjustLeapMonth();
+        AdjustLeapMonthAndWeekday();
+        cout << DateStr() << endl;
     }
 
     // accessors
-    int         GetYear     () const
+    int             GetYear         () const
     {
         return m_year;
     }
 
-    MonthEnum   GetMonth    () const
+    MonthEnum       GetMonth        () const
     {
         return m_month;
     }
 
-    int          GetDay     () const
+    int             GetDay          () const
     {
         return m_day;
+    }
+
+    DayOfWeekEnum   GetDayOfWeek    () const
+    {
+        uint32_t md = m_day;
+        uint32_t mm = (underlying_type<MonthEnum>::type(m_month) + 9) % 12;
+        uint32_t yy = m_year - (mm / 10);
+        uint64_t dn = 365 * yy + (yy / 4) - (yy / 100) + (yy / 400) + ((306 * mm) + 5) / 10 + md + 2;
+        int dow = (dn % 7) + 1;
+        return DayOfWeekEnum(dow);
     }
 
     bool        IsLeapYear  () const
@@ -129,10 +163,22 @@ public:
         return mnStr;
     }
 
+    string      NameOfDay () const
+    {
+        string wdnStr;
+        auto wdnmCit = DayNames.find(m_dayOfWeek);
+        if (wdnmCit != DayNames.end()) {
+            wdnStr = wdnmCit->second;
+        } else {
+            wdnStr = "***No Such day!***";
+        }
+        return wdnStr;
+    }
+
     string      DateStr     () const
     {
         stringstream dateStream;
-        dateStream << m_year << ' ' << NameOfMonth() << ' ' << m_day;
+        dateStream << m_year << ' ' << NameOfMonth() << ' ' << m_day << ' ' << NameOfDay();
         return dateStream.str();
     }
 
@@ -147,7 +193,7 @@ public:
     }
 
     // modifiers
-    void AdjustLeapMonth ()
+    void AdjustLeapMonthAndWeekday ()
     {
         if (IsLeapYear()) {
             if (m_month == MonthEnum::February) {
@@ -158,13 +204,14 @@ public:
                 m_month = MonthEnum::February;
             }
         }
+        m_dayOfWeek = GetDayOfWeek();
     }
 
     void SetYear (const string   & ys)
     {
         stringstream ios(ys);
         ios >> m_year;
-        AdjustLeapMonth();
+        AdjustLeapMonthAndWeekday();
     }
 
     void SetMonth (const string   & ms)
@@ -173,7 +220,7 @@ public:
         int moi;
         ios >> moi;
         m_month = MonthEnum(moi);
-        AdjustLeapMonth();
+        AdjustLeapMonthAndWeekday();
     }
 
     void SetDay (const string   & ds)
@@ -257,6 +304,7 @@ private:
     int                     m_year;
     MonthEnum               m_month;
     int                     m_day;
+    DayOfWeekEnum           m_dayOfWeek;
 };
 
 } // namespace Nessie

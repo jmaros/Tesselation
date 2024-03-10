@@ -2,7 +2,7 @@
 //
 // Tile.h
 //
-#include "ApplicationSpecificOptions.h"
+#include "TileOptions.h"
 #include "Shape.h"
 #include "Date.h"
 
@@ -18,15 +18,17 @@ namespace Nessie {
     using std::shuffle;
     using std::uniform_int_distribution;
 
-    using TableLayout       = Geom::Shape<int>;
+    using TableLayout       = Geom::Shape<int8_t, int16_t>; // int16_t - the second type -
+                                                            // determines the print format
+                                                            // (to print as int instead of char)
     using TableResult       = Geom::Shape<bool>;
     using ShapeCollection   = vector<TableResult>;
     using MonthMap          = map<MonthEnum, Position>;
     using DayMap            = map<int, Position>;
+    using DayOfWeekMap      = map<DayOfWeekEnum, Position>;
     using ShapeSet          = set<TableResult>;
     using ShapeCollections  = vector<ShapeCollection>;
     using TableResultChars  = Geom::Shape<char>;
-    using AppSpecOpts       = ApplicationSpecificOptions;
 
         struct SolutionStep {
         explicit SolutionStep (const TableResult& tableResult)
@@ -43,18 +45,17 @@ namespace Nessie {
         TableResult     m_tableResult;
     };
 
-    constexpr size_t NumberOfShapes = 8;
-
     using Solution      = vector<SolutionStep>;
     using Solutions     = vector<Solution>;
 
     class Riddle {
     public:
     // constructors
-        explicit Riddle (const TableResult& tableResult)
+        explicit Riddle (const TableResult      & tableResult,
+                         const size_t           numberOfShapes)
         {
             SolutionStep solutionStep(tableResult);
-            for (size_t idx = 0; idx < NumberOfShapes; ++idx) {
+            for (size_t idx = 0; idx < numberOfShapes; ++idx) {
                 m_solution.push_back(solutionStep);
             }
         }
@@ -110,13 +111,13 @@ namespace Nessie {
     class Tile {
     public:
     // constructors
-        Tile (const TableLayout                  & tableLayout,
-              const ShapeCollection              & shapes,
-              const ApplicationSpecificOptions   & options);
+        Tile (const TableLayout         & tableLayout,
+              const ShapeCollection     & shapes,
+              const TileOptions         & options);
 
     // accessors
         inline const Date           & GetDate               ()                                  const;
-        inline const AppSpecOpts    & GetOptions            ()                                  const;
+        inline const TileOptions    & GetOptions            ()                                  const;
         string                      GetTableResultStr       (const Solution     & solution,
                                                              size_t             index = 0u)     const;
         string                      Result                  ()                                  const;
@@ -133,15 +134,16 @@ namespace Nessie {
         bool                        Solve                   (Riddle     & riddle);
     private:
     // data members
-        const TableLayout           & m_tableLayout;
-        ShapeCollection             m_shapes;
-        ApplicationSpecificOptions  m_options;
-        TableResult                 m_tableShape;
-        MonthMap                    m_monthMap;
-        DayMap                      m_dayMap;
-        ShapeCollections            m_shapeCollections;
-        TableResult                 m_tableResult;
-        Solutions                   m_solutions;
+        const TableLayout   & m_tableLayout;
+        ShapeCollection     m_shapes;
+        TileOptions         m_options;
+        TableResult         m_tableShape;
+        MonthMap            m_monthMap;
+        DayMap              m_dayMap;
+        DayOfWeekMap        m_dayOfWeekMap;
+        ShapeCollections    m_shapeCollections;
+        TableResult         m_tableResult;
+        Solutions           m_solutions;
     };
 
     template<typename Container>
