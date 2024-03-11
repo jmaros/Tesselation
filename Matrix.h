@@ -179,11 +179,11 @@ namespace LinAlg {
         for (auto srcRowIndex = MinRow(); srcRowIndex < RowUpperLimit(); srcRowIndex += 2) {
             for (auto srcColIndex = MinCol(); srcColIndex < ColUpperLimit(); srcColIndex += 2) {
                 Position    srcPos(srcRowIndex, srcColIndex);
-                size_t dstRowIndex = (r0 + srcColIndex - srcRowIndex) / 2;
-                size_t dstColIndex = (c0 + srcColIndex + srcRowIndex) / 2;
+                size_t dstRowIndex = (2 * r0 + srcColIndex - srcRowIndex) / 2;
+                size_t dstColIndex = (2 * c0 + srcColIndex + srcRowIndex) / 2;
                 Position    dstPos(dstRowIndex, dstColIndex);
-                cout << " srcPos = " << srcPos
-                     << " dstPos = " << dstPos << endl;
+                cout << " src-" << srcPos
+                     << " dst-" << dstPos << endl;
                 bool isRot45Succ = rotatedBy45Deg.SetData(dstPos, Value(srcPos));
                 if (!isRot45Succ) {
                     cout << "Rotate failed!" << endl;
