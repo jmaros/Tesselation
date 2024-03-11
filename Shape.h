@@ -25,15 +25,15 @@ namespace Geom {
     public:
     // constructors
         Shape () = delete;
-        Shape (size_t   numCols,
-               size_t   numRows,
+        Shape (size_t   numRows,
+               size_t   numCols,
                const T  & initialValue ={});
 
         Shape (initializer_list<initializer_list<T>>    ili);
 
     // accessors
-        size_t                          NumCols                     ()              const;
         size_t                          NumRows                     ()              const;
+        size_t                          NumCols                     ()              const;
 
         inline bool                     CanAccomodate  (const Position     & pos,
                                                         const Shape<T, U>  & shape) const;
@@ -77,12 +77,12 @@ namespace Geom {
     // constructors
 
     template <typename T, typename U>
-    Shape<T, U>::Shape (size_t     numCols,
-                        size_t     numRows,
+    Shape<T, U>::Shape (size_t     numRows,
+                        size_t     numCols,
                         const T    & initialValue)
         : m_shapeName       ("Shape")
-        , m_matrix          (numCols,
-                             numRows,
+        , m_matrix          (numRows,
+                             numCols,
                              initialValue)
         , m_showZeros       ()
     {
@@ -160,7 +160,7 @@ namespace Geom {
     Shape<T, U> Shape<T, U>::CreateRotatedBy45Deg ()                    const
     {
         auto transposed = *this;
-        transposed.m_matrix = m_matrix.CreateTransposed();
+        transposed.m_matrix = m_matrix.CreateRotatedBy45Deg();
         return transposed;
     }
 

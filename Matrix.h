@@ -164,13 +164,31 @@ namespace LinAlg {
     template <typename T>
     Matrix<T> Matrix<T>::CreateRotatedBy45Deg () const
     {
-        size_t rotSize = ColSize() + RowSize() - 1;
+        size_t rs = (RowSize() + 1) / 2;
+        size_t cs = (ColSize() + 1) / 2;
+        size_t r0 = rs - 1;
+        size_t c0 = 0;
+        size_t rotSize = (RowSize() + ColSize() + 1) / 2;
+        cout << " RowSize() = " << RowSize()
+             << " ColSize() = " << ColSize()
+             << " r0        = " << r0
+             << " rs        = " << rs
+             << " cs        = " << cs
+             << " rotSize   = " << rotSize << endl;
         Matrix<T> rotatedBy45Deg(rotSize, rotSize, m_initialValue);
-        for (auto rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
-            for (auto colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
-                Position    srcPos(rowIndex, colIndex);
-                Position    dstPos(colIndex, rowIndex);
-                rotatedBy45Deg.SetData(dstPos, Value(srcPos));
+        for (auto srcRowIndex = MinRow(); srcRowIndex < RowUpperLimit(); srcRowIndex += 2) {
+            for (auto srcColIndex = MinCol(); srcColIndex < ColUpperLimit(); srcColIndex += 2) {
+                Position    srcPos(srcRowIndex, srcColIndex);
+                size_t dstRowIndex = (r0 + srcColIndex - srcRowIndex) / 2;
+                size_t dstColIndex = (c0 + srcColIndex + srcRowIndex) / 2;
+                Position    dstPos(dstRowIndex, dstColIndex);
+                cout << " srcPos = " << srcPos
+                     << " dstPos = " << dstPos << endl;
+                bool isRot45Succ = rotatedBy45Deg.SetData(dstPos, Value(srcPos));
+                if (!isRot45Succ) {
+                    cout << "Rotate failed!" << endl;
+                    return rotatedBy45Deg;
+                }
             }
         }
         return rotatedBy45Deg;

@@ -167,12 +167,13 @@ namespace Nessie {
             };
             bool succi = shapeSet.insert(shape).second;
             if (succi) {
+                OrtogonalTransform(shape);
                 if (options.IsHexagonal()) {
+                    cout << "Haho" << endl;
                     auto rotatedby45Deg = shape.CreateRotatedBy45Deg();
                     (void) shapeSet.insert(rotatedby45Deg);
                     OrtogonalTransform(rotatedby45Deg);
                 }
-                OrtogonalTransform(shape);
                 ShapeCollection shapeCollection;
                 for (auto& uniqueShape : shapeSet) {
                     shapeCollection.push_back(uniqueShape);
