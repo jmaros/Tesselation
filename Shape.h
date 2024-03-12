@@ -8,78 +8,80 @@ namespace Nessie {
 namespace Geom {
 // declarations
     // forward declarations
-    template <typename T, typename U = T>
+    template <typename T,
+              typename U    = T,
+              typename CT   = size_t>
     class Shape;
 
     // global operators
-    template <typename T, typename U>
-    ostream& operator << (ostream            & os,
-                          const Shape<T, U>  & shape);
+    template <typename T, typename U, typename CT>
+    ostream& operator << (ostream                & os,
+                          const Shape<T, U, CT>  & shape);
 
-    template <typename T, typename U>
-    bool operator < (const Shape<T, U>  & lShape,
-                     const Shape<T, U>  & rShape);
+    template <typename T, typename U, typename CT>
+    bool operator < (const Shape<T, U, CT>  & lShape,
+                     const Shape<T, U, CT>  & rShape);
 
-    template <typename T, typename U>
+    template <typename T, typename U, typename CT>
     class Shape {
     public:
     // constructors
         Shape () = delete;
-        Shape (size_t   numRows,
-               size_t   numCols,
+        Shape (CT       numRows,
+               CT       numCols,
                const T  & initialValue ={});
 
         Shape (initializer_list<initializer_list<T>>    ili);
 
     // accessors
-        size_t                          NumRows                     ()              const;
-        size_t                          NumCols                     ()              const;
+        CT                                  NumRows                     ()                  const;
+        CT                                  NumCols                     ()                  const;
 
-        inline bool                     CanAccomodate  (const Position     & pos,
-                                                        const Shape<T, U>  & shape) const;
+        inline bool                         CanAccomodate  (const Position<CT>  & pos,
+                                                            const Shape<T, U>   & shape)    const;
 
-        inline const T                  Value                       (Position  pos) const;
-        inline const LinAlg::Matrix<T>  & Matrix                    ()              const;
-        inline bool                     ShowZeros                   ()              const;
-        Shape<T, U>                     CreateRotatedBy45Deg        ()              const;
-        Shape<T, U>                     CreateTransposed            ()              const;
-        Shape<T, U>                     CreateHorizontallyFlipped   ()              const;
-        Shape<T, U>                     CreateVerticallyFlipped     ()              const;
-        inline bool                     SetMutableShowZeros         (bool    bShow) const;
-        const string                    & GetShapeName              ()              const;
+        inline const T                      Value                       (Position<CT>  pos) const;
+        inline const LinAlg::Matrix<T, CT>  & Matrix                    ()                  const;
+        inline bool                         ShowZeros                   ()                  const;
+        Shape<T, U, CT>                     CreateRotatedBy45Deg        ()                  const;
+        Shape<T, U, CT>                     CreateTransposed            ()                  const;
+        Shape<T, U, CT>                     CreateHorizontallyFlipped   ()                  const;
+        Shape<T, U, CT>                     CreateVerticallyFlipped     ()                  const;
+        inline bool                         SetMutableShowZeros         (bool    bShow)     const;
+        const string                        & GetShapeName              ()                  const;
 
         // operators
-        const LinAlg::Row<T>            & operator []               (size_t  index) const;
+        const LinAlg::Row<T>                & operator []               (CT      index)     const;
 
     // modifiers
-        inline void     SetShapeName        (const string       & shana,
-                                             size_t             index = 0);
+        inline void     SetShapeName        (const string           & shana,
+                                             CT                     index = 0);
 
-        inline bool     SetData             (Position           pos,
-                                             const T            & newValue);
+        inline bool     SetData             (Position<CT>           pos,
+                                             const T                & newValue);
 
-        inline bool Accomodate              (const Position     & pos,
-                                            const Shape<T, U>   & shape);
+        inline bool Accomodate              (const Position<CT>     & pos,
+                                            const Shape<T, U, CT>   & shape);
 
-        inline void     SetOutOfBoundValue  (const T            & newValue);
+        inline void     SetOutOfBoundValue  (const T                & newValue);
 
         // operators
-        LinAlg::Row<T>  & operator []       (size_t             index);
+        LinAlg::Row<T>  & operator []       (CT                     index);
 
     private:
     // data members
-        string              m_shapeName{ "Shape" };
-        LinAlg::Matrix<T>   m_matrix;
-        mutable bool        m_showZeros{};
+        string                  m_shapeName{ "Shape" };
+        LinAlg::Matrix<T, CT>   m_matrix;
+        mutable bool            m_showZeros{};
     };
 
 // definitions
     // constructors
 
-    template <typename T, typename U>
-    Shape<T, U>::Shape (size_t     numRows,
-                        size_t     numCols,
-                        const T    & initialValue)
+    template <typename T, typename U, typename CT>
+    Shape<T, U, CT>::Shape (CT          numRows,
+                            CT          numCols,
+                            const T    & initialValue)
         : m_shapeName       ("Shape")
         , m_matrix          (numRows,
                              numCols,
@@ -88,8 +90,8 @@ namespace Geom {
     {
     }
 
-    template <typename T, typename U>
-    Shape<T, U>::Shape (initializer_list<initializer_list<T>>    ili)
+    template <typename T, typename U, typename CT>
+    Shape<T, U, CT>::Shape (initializer_list<initializer_list<T>>    ili)
      : m_shapeName      ("Shape")
      , m_matrix         (0u,0u)
      , m_showZeros      ()
@@ -115,39 +117,39 @@ namespace Geom {
 
     // accessors
 
-    template <typename T, typename U>
-    size_t Shape<T, U>::NumRows ()                                      const
+    template <typename T, typename U, typename CT>
+    CT Shape<T, U, CT>::NumRows () const
     {
         return m_matrix.RowSize();
     }
 
-    template <typename T, typename U>
-    size_t Shape<T, U>::NumCols ()                                      const
+    template <typename T, typename U, typename CT>
+    CT Shape<T, U, CT>::NumCols () const
     {
         return m_matrix.ColSize();
     }
 
-    template <typename T, typename U>
-    inline bool Shape<T, U>::CanAccomodate (const Position     & pos,
-                                            const Shape<T, U>  & shape) const
+    template <typename T, typename U, typename CT>
+    inline bool Shape<T, U, CT>::CanAccomodate (const Position<CT> & pos,
+                                                const Shape<T, U>  & shape) const
     {
         return m_matrix.CanAccomodate(pos, shape.m_matrix);
     }
 
-    template <typename T, typename U>
-    inline const T    Shape<T, U>::Value (Position  pos)                const
+    template <typename T, typename U, typename CT>
+    inline const T    Shape<T, U, CT>::Value (Position<CT>  pos) const
     {
         return m_matrix.Value(pos);
     }
 
-    template <typename T, typename U>
-    inline const LinAlg::Matrix<T>  & Shape<T, U>::Matrix ()            const
+    template <typename T, typename U, typename CT>
+    inline const LinAlg::Matrix<T, CT>  & Shape<T, U, CT>::Matrix () const
     {
         return m_matrix;
     }
 
-    template <typename T, typename U>
-    inline bool     Shape<T, U>::ShowZeros ()                           const
+    template <typename T, typename U, typename CT>
+    inline bool     Shape<T, U, CT>::ShowZeros () const
     {
         if (m_showZeros) {
             return m_showZeros;
@@ -156,64 +158,64 @@ namespace Geom {
         }
     }
 
-    template <typename T, typename U>
-    Shape<T, U> Shape<T, U>::CreateRotatedBy45Deg ()                    const
+    template <typename T, typename U, typename CT>
+    Shape<T, U, CT> Shape<T, U, CT>::CreateRotatedBy45Deg () const
     {
         auto transposed = *this;
         transposed.m_matrix = m_matrix.CreateRotatedBy45Deg();
         return transposed;
     }
 
-    template <typename T, typename U>
-    Shape<T, U> Shape<T, U>::CreateTransposed ()                        const
+    template <typename T, typename U, typename CT>
+    Shape<T, U, CT> Shape<T, U, CT>::CreateTransposed () const
     {
         auto transposed = *this;
         transposed.m_matrix = m_matrix.CreateTransposed();
         return transposed;
     }
 
-    template <typename T, typename U>
-    Shape<T, U> Shape<T, U>::CreateHorizontallyFlipped ()               const
+    template <typename T, typename U, typename CT>
+    Shape<T, U, CT> Shape<T, U, CT>::CreateHorizontallyFlipped () const
     {
         auto horizontallyFlipped = *this;
         horizontallyFlipped.m_matrix = m_matrix.CreateHorizontallyFlipped();
         return horizontallyFlipped;
     }
 
-    template <typename T, typename U>
-    Shape<T, U> Shape<T, U>::CreateVerticallyFlipped ()                 const
+    template <typename T, typename U, typename CT>
+    Shape<T, U, CT> Shape<T, U, CT>::CreateVerticallyFlipped () const
     {
         auto verticallyFlipped = *this;
         verticallyFlipped.m_matrix = m_matrix.CreateVerticallyFlipped();
         return verticallyFlipped;
     }
 
-    template <typename T, typename U>
-    inline bool Shape<T, U>::SetMutableShowZeros (bool     bShow)       const
+    template <typename T, typename U, typename CT>
+    inline bool Shape<T, U, CT>::SetMutableShowZeros (bool     bShow)  const
     {
         bool bPrev{ m_showZeros };
         m_showZeros = bShow;
         return bPrev;
     }
 
-    template <typename T, typename U>
-    const string& Shape<T, U>::GetShapeName ()                          const
+    template <typename T, typename U, typename CT>
+    const string& Shape<T, U, CT>::GetShapeName () const
     {
         return m_shapeName;
 
     }
 
     // operators
-    template <typename T, typename U>
-    const LinAlg::Row<T>   & Shape<T, U>::operator [] (size_t  index)   const
+    template <typename T, typename U, typename CT>
+    const LinAlg::Row<T>   & Shape<T, U, CT>::operator [] (CT  index)   const
     {
         return m_matrix[index];
     }
 
     // modifiers
-    template <typename T, typename U>
-    inline void Shape<T, U>::SetShapeName (const string    & shana,
-                                           size_t          index)
+    template <typename T, typename U, typename CT>
+    inline void Shape<T, U, CT>::SetShapeName (const string     & shana,
+                                               CT               index)
     {
         stringstream    ass;
         ass << shana;
@@ -223,37 +225,37 @@ namespace Geom {
         m_shapeName = ass.str();
     }
 
-    template <typename T, typename U>
-    inline bool Shape<T, U>::SetData (Position     pos,
-                                      const T      & newValue)
+    template <typename T, typename U, typename CT>
+    inline bool Shape<T, U, CT>::SetData (Position<CT>  pos,
+                                          const T       & newValue)
     {
         return m_matrix.SetData(pos, newValue);
     }
 
-    template <typename T, typename U>
-    inline bool Shape<T, U>::Accomodate (const Position     & pos,
-                                         const Shape<T, U>  & shape)
+    template <typename T, typename U, typename CT>
+    inline bool Shape<T, U, CT>::Accomodate (const Position<CT>     & pos,
+                                             const Shape<T, U, CT>  & shape)
     {
         return m_matrix.Accomodate(pos, shape.m_matrix);
     }
 
-    template <typename T, typename U>
-    inline void Shape<T, U>::SetOutOfBoundValue (const T    & newValue)
+    template <typename T, typename U, typename CT>
+    inline void Shape<T, U, CT>::SetOutOfBoundValue (const T    & newValue)
     {
         return m_matrix.SetOutOfBoundValue(newValue);
     }
 
     // operators
-    template <typename T, typename U>
-    LinAlg::Row<T>& Shape<T, U>::operator [] (size_t    index)
+    template <typename T, typename U, typename CT>
+    LinAlg::Row<T>& Shape<T, U, CT>::operator [] (CT    index)
     {
         return m_matrix[index];
     }
 
     // global operators
-    template <typename T, typename U>
-    ostream& operator << (ostream            & os,
-                          const Shape<T, U>  & shape)
+    template <typename T, typename U, typename CT>
+    ostream& operator << (ostream               & os,
+                          const Shape<T, U, CT> & shape)
     {
         constexpr bool IsBool{ std::is_same<T, bool>::value };
         constexpr bool IsChar{ std::is_same<T, char>::value };
@@ -276,9 +278,9 @@ namespace Geom {
         return os;
     }
 
-    template <typename T>
-    bool operator < (const Shape<T>     & lShape,
-                     const Shape<T>     & rShape)
+    template <typename T, typename U, typename CT>
+    bool operator < (const Shape<T, U, CT>     & lShape,
+                     const Shape<T, U, CT>     & rShape)
     {
         auto numRows = lShape.NumRows();
         if (numRows != rShape.NumRows()) {
@@ -288,9 +290,9 @@ namespace Geom {
         if (numCols != rShape.NumCols()) {
             return numCols < rShape.NumCols ();
         }
-        for (size_t idx = 0; idx < numRows; ++idx) {
-            for (size_t idy = 0; idy < numCols; ++idy) {
-                Position pos(idx, idy);
+        for (CT idx = 0; idx < numRows; ++idx) {
+            for (CT idy = 0; idy < numCols; ++idy) {
+                Position<CT> pos(idx, idy);
                 auto lValue = lShape.Value(pos);
                 auto rValue = rShape.Value(pos);
                 if (lValue != rValue) {

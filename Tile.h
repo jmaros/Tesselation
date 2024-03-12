@@ -23,9 +23,9 @@ namespace Nessie {
                                                             // (to print as int instead of char)
     using TableResult       = Geom::Shape<bool>;
     using ShapeCollection   = vector<TableResult>;
-    using MonthMap          = map<MonthEnum, Position>;
-    using DayMap            = map<int, Position>;
-    using DayOfWeekMap      = map<DayOfWeekEnum, Position>;
+    using MonthMap          = map<MonthEnum, Position<size_t>>;
+    using DayMap            = map<int, Position<size_t>>;
+    using DayOfWeekMap      = map<DayOfWeekEnum, Position<size_t>>;
     using ShapeSet          = set<TableResult>;
     using ShapeCollections  = vector<ShapeCollection>;
     using TableResultChars  = Geom::Shape<char>;
@@ -39,10 +39,10 @@ namespace Nessie {
         {
         }
 
-        size_t          m_indexOfShapeSet{};
-        size_t          m_shapeIndexInSet{};
-        Position        m_position{};
-        TableResult     m_tableResult;
+        size_t              m_indexOfShapeSet{};
+        size_t              m_shapeIndexInSet{};
+        Position<size_t>    m_position{};
+        TableResult         m_tableResult;
     };
 
     using Solution      = vector<SolutionStep>;
@@ -153,6 +153,6 @@ namespace Nessie {
         shuffle(container.begin(), container.end(), mt);
     }
 
-    ostream     & operator << (const ostream        & os,
-                               const Tile    & tile);
+    ostream     & operator << (const ostream    & os,
+                               const Tile       & tile);
 } // namespace Nessie

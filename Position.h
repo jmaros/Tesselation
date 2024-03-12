@@ -27,40 +27,41 @@ namespace Nessie {
     using std::stringstream;
     using std::vector;
 
+template <typename TS>
 class Position {
 public:
     // constructors
     Position () = default;
-    Position (size_t rowIndex,
-              size_t colIndex)
+    Position (TS rowIndex,
+              TS colIndex)
         : m_rowIndex (rowIndex)
         , m_colIndex (colIndex)
     {
     }
 
     // accessors
-    size_t GetRowIndex () const
+    TS GetRowIndex () const
     {
         return m_rowIndex;
     }
 
-    size_t GetColIndex () const
+    TS GetColIndex () const
     {
         return m_colIndex;
     }
 
     // modifiers
-    void SetRowIndex (size_t    rowIndex)
+    void SetRowIndex (TS    rowIndex)
     {
         m_rowIndex = rowIndex;
     }
 
-    void SetColIndex (size_t    colIndex)
+    void SetColIndex (TS    colIndex)
     {
         m_colIndex = colIndex;
     }
-    void SetPosition (size_t    rowIndex,
-                      size_t    colIndex)
+    void SetPosition (TS    rowIndex,
+                      TS    colIndex)
     {
         m_rowIndex = rowIndex;
         m_colIndex = colIndex;
@@ -77,13 +78,14 @@ public:
     }
 
 private:
-    size_t m_rowIndex{};
-    size_t m_colIndex{};
+    TS m_rowIndex{};
+    TS m_colIndex{};
 };
 
 // global operator
-ostream& operator << (ostream            & os,
-                      const Position     & pos)
+template <typename TS>
+ostream& operator << (ostream             & os,
+                      const Position<TS>  & pos)
 {
     stringstream sos;
     sos << "Position = (";
@@ -96,11 +98,12 @@ ostream& operator << (ostream            & os,
     return os;
 }
 
-Position operator+ (const Position  & lPos,
-                    const Position  & rPos)
+template <typename TS>
+Position<TS> operator+ (const Position<TS>  & lPos,
+                        const Position<TS>  & rPos)
 {
-    return Position (lPos.GetRowIndex() + rPos.GetRowIndex(),
-                     lPos.GetColIndex() + rPos.GetColIndex());
+    return Position<TS> (lPos.GetRowIndex() + rPos.GetRowIndex(),
+                         lPos.GetColIndex() + rPos.GetColIndex());
 }
 
 } // namespace Nessie

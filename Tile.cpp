@@ -198,7 +198,7 @@ namespace Nessie {
         // Fill up m_tableShape, and create the month and day maps to position:
         for (size_t row = 0; row < m_tableLayout.NumRows(); ++row) {
             for (size_t col = 0; col < m_tableLayout.NumCols(); ++col) {
-                Position pos(row, col);
+                Position<size_t> pos(row, col);
                 auto newValue = m_tableLayout.Value(pos);
                 m_tableShape.SetData(pos, newValue == 0);
                 if (newValue < 0) {
@@ -257,7 +257,7 @@ namespace Nessie {
 
             for (size_t r = 0; r < chrep.NumRows(); ++r) {
                 for (size_t c = 0; c < chrep.NumCols(); ++c) {
-                    Position chPos(r, c);
+                    Position<size_t> chPos(r, c);
                     if (theShape.Value(chPos)) {
                         if (m_options.GetOpted().m_useLetters) {
                             chrep.SetData(chPos, ShapeLetters[solStep.m_indexOfShapeSet]);
@@ -352,7 +352,7 @@ namespace Nessie {
                     // Try to use the current shape's all possible rotations
                     actualStep.m_shapeIndexInSet = shIdxIS;
                     const auto& currentShape = currentShapeSet[shIdxIS];
-                    Position& pos{ actualStep.m_position };
+                    Position<size_t>& pos{ actualStep.m_position };
                     pos.SetPosition(row, col);
                     if (actualStep.m_tableResult.CanAccomodate(pos, currentShape)) {
                         actualStep.m_tableResult.Accomodate(pos, currentShape);
