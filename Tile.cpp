@@ -150,6 +150,7 @@ namespace Nessie {
      , m_solutions          ()
     {
         // fill m_shapesSet so that it will contain all the different shapes
+        size_t seti{};
         for (auto   & shape : m_shapes) {
             ShapeSet    shapeSet;
             auto OrtogonalTransform = [&] (const TableResult   & sh) -> void
@@ -169,7 +170,13 @@ namespace Nessie {
             if (succi) {
                 OrtogonalTransform(shape);
                 if (options.IsHexagonal()) {
-                    cout << "Haho" << endl;
+                    bool verbose = true;
+                    if (verbose) {
+                        cout << "Hexagonal Shape Set-" << ++seti
+                             << "(" << shapeSet.size()
+                             << ((shapeSet.size() > 1) ? " shapes)" : " shape)")
+                             << endl;
+                    }
                     auto rotatedby45Deg = shape.CreateRotatedBy45Deg();
                     (void) shapeSet.insert(rotatedby45Deg);
                     OrtogonalTransform(rotatedby45Deg);
