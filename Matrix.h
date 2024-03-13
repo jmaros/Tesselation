@@ -10,51 +10,51 @@ namespace LinAlg {
 
     // declarations
 
-    template <typename T, typename CT>
+    template <typename T, typename ST>
     class Matrix {
     public:
-        Matrix (CT        numRows,
-                CT        numCols,
+        Matrix (ST        numRows,
+                ST        numCols,
                 const T   & initialValue    = T{});
 
     // accessors
-        inline CT                   MinRow                      ()                                  const;
-        inline CT                   MinCol                      ()                                  const;
-        inline CT                   RowSize                     ()                                  const;
-        inline CT                   ColSize                     (CT                     row = 0)    const;
-        inline CT                   RowUpperLimit               ()                                  const;
-        inline CT                   ColUpperLimit               ()                                  const;
-        inline bool                 IsLegalPosition             (const Position<CT>& pos)           const;
-        inline bool                 IsEmptyPosition             (const Position<CT>& pos)           const;
+        inline ST                   MinRow                      ()                                  const;
+        inline ST                   MinCol                      ()                                  const;
+        inline ST                   RowSize                     ()                                  const;
+        inline ST                   ColSize                     (ST                     row = 0)    const;
+        inline ST                   RowUpperLimit               ()                                  const;
+        inline ST                   ColUpperLimit               ()                                  const;
+        inline bool                 IsLegalPosition             (const Position<ST>& pos)           const;
+        inline bool                 IsEmptyPosition             (const Position<ST>& pos)           const;
 
-        inline bool                 CanAccomodate               (const Position<CT>     & pos,
-                                                                 const Matrix<T, CT>    & mat)      const;
+        inline bool                 CanAccomodate               (const Position<ST>     & pos,
+                                                                 const Matrix<T, ST>    & mat)      const;
 
-        inline const T              Value                       (const Position<CT>     & pos)      const;
+        inline const T              Value                       (const Position<ST>     & pos)      const;
         inline const vector<Row<T>> & GetRows                   ()                                  const;
 
     // creators
-        Matrix<T, CT>               CreateSubMatrix             (const BoundingBox<CT>  & bb)       const;
-        Matrix<T, CT>               CreateRotatedBy45Deg        ()                                  const;
-        Matrix<T, CT>               CreateTransposed            ()                                  const;
-        Matrix<T, CT>               CreateHorizontallyFlipped   ()                                  const;
-        Matrix<T, CT>               CreateVerticallyFlipped     ()                                  const;
+        Matrix<T, ST>               CreateSubMatrix             (const BoundingBox<ST>  & bb)       const;
+        Matrix<T, ST>               CreateRotatedBy45Deg        ()                                  const;
+        Matrix<T, ST>               CreateTransposed            ()                                  const;
+        Matrix<T, ST>               CreateHorizontallyFlipped   ()                                  const;
+        Matrix<T, ST>               CreateVerticallyFlipped     ()                                  const;
 
     // operators
-        const Row<T>& operator []       (CT                     index)                              const;
+        const Row<T>& operator []       (ST                     index)                              const;
 
     // modifiers
-        inline bool SetData             (Position<CT>           pos,
+        inline bool SetData             (Position<ST>           pos,
                                          const T                & newValue);
 
         inline void SetOutOfBoundValue  (const T                & newValue);
         inline void PushBack            (const Row<T>           & row);
 
-        inline bool Accomodate          (const Position<CT>     & pos,
-                                         const Matrix<T, CT>    & mat);
+        inline bool Accomodate          (const Position<ST>     & pos,
+                                         const Matrix<T, ST>    & mat);
 
         // operators
-        Row<T>& operator [] (CT         index);
+        Row<T>& operator [] (ST         index);
 
     private:
         vector<Row<T>>        m_rows;
@@ -66,9 +66,9 @@ namespace LinAlg {
 // definitions
     // constructors
     template <typename T,
-              typename CT>
-    Matrix<T, CT>::Matrix (CT       numRows,
-                           CT       numCols,
+              typename ST>
+    Matrix<T, ST>::Matrix (ST       numRows,
+                           ST       numCols,
                            const T   & initialValue)
      : m_rows               ()
      , m_initialValue       (initialValue)
@@ -80,57 +80,57 @@ namespace LinAlg {
 
     // accessors
     template <typename T,
-              typename CT>
-    inline CT  Matrix<T, CT>::MinRow () const
+              typename ST>
+    inline ST  Matrix<T, ST>::MinRow () const
     {
         return 0;
     }
 
-    template <typename T, typename CT>
-    inline CT  Matrix<T, CT>::MinCol () const
+    template <typename T, typename ST>
+    inline ST  Matrix<T, ST>::MinCol () const
     {
         return 0;
     }
 
-    template <typename T, typename CT>
-    inline CT  Matrix<T, CT>::RowSize () const
+    template <typename T, typename ST>
+    inline ST  Matrix<T, ST>::RowSize () const
     {
         return m_rows.size();
     }
 
-    template <typename T, typename CT>
-    inline CT  Matrix<T, CT>::ColSize (CT row) const
+    template <typename T, typename ST>
+    inline ST  Matrix<T, ST>::ColSize (ST row) const
     {
         return (RowSize() > row) ? m_rows[row].Size() : 0;
     }
 
-    template <typename T, typename CT>
-    inline const vector<Row<T>> & Matrix<T, CT>::GetRows () const
+    template <typename T, typename ST>
+    inline const vector<Row<T>> & Matrix<T, ST>::GetRows () const
     {
         return m_rows;
     }
 
-    template <typename T, typename CT>
-    inline CT  Matrix<T, CT>::RowUpperLimit () const
+    template <typename T, typename ST>
+    inline ST  Matrix<T, ST>::RowUpperLimit () const
     {
         return RowSize() + MinRow();
     }
 
-    template <typename T, typename CT>
-    inline CT  Matrix<T, CT>::ColUpperLimit () const
+    template <typename T, typename ST>
+    inline ST  Matrix<T, ST>::ColUpperLimit () const
     {
         return ColSize() + MinCol();
     }
 
-    template <typename T, typename CT>
-    inline bool Matrix<T, CT>::IsLegalPosition (const Position<CT>  & pos) const
+    template <typename T, typename ST>
+    inline bool Matrix<T, ST>::IsLegalPosition (const Position<ST>  & pos) const
     {
         return (MinRow () <= pos.GetRowIndex() && pos.GetRowIndex() < RowUpperLimit () &&
                 MinCol () <= pos.GetColIndex() && pos.GetColIndex() < ColUpperLimit ());
     }
 
-    template <typename T, typename CT>
-    inline bool Matrix<T, CT>::IsEmptyPosition (const Position<CT>& pos) const
+    template <typename T, typename ST>
+    inline bool Matrix<T, ST>::IsEmptyPosition (const Position<ST>& pos) const
     {
         bool isEmpty = false;
         if (IsLegalPosition(pos)) {
@@ -139,19 +139,19 @@ namespace LinAlg {
         return isEmpty;
     }
 
-    template <typename T, typename CT>
-    inline bool Matrix<T, CT>::CanAccomodate (const Position<CT>    & pos,
-                                              const Matrix<T, CT>   & mat) const
+    template <typename T, typename ST>
+    inline bool Matrix<T, ST>::CanAccomodate (const Position<ST>    & pos,
+                                              const Matrix<T, ST>   & mat) const
     {
         const T     EVI{mat.m_initialValue};
         const T     EVO{ m_initialValue };
-        const CT    ru{mat.RowUpperLimit ()};
-        const CT    cu{mat.ColUpperLimit ()};
+        const ST    ru{mat.RowUpperLimit ()};
+        const ST    cu{mat.ColUpperLimit ()};
 
-        for (CT row = 0; row < ru; ++row) {
-            for (CT col = 0; col < cu; ++col) {
-                Position<CT> inPos(row, col);
-                Position<CT> ouPos{pos + inPos};
+        for (ST row = 0; row < ru; ++row) {
+            for (ST col = 0; col < cu; ++col) {
+                Position<ST> inPos(row, col);
+                Position<ST> ouPos{pos + inPos};
                 if (Value(ouPos) != EVO && mat.Value(inPos) != EVI) {
                     return false;
                 }
@@ -160,8 +160,8 @@ namespace LinAlg {
         return true;
     }
 
-    template <typename T, typename CT>
-    inline const T    Matrix<T, CT>::Value (const Position<CT>      & pos) const
+    template <typename T, typename ST>
+    inline const T    Matrix<T, ST>::Value (const Position<ST>      & pos) const
     {
         T retVal{ m_outOfBoundValue };
         if (IsLegalPosition(pos)) {
@@ -170,22 +170,22 @@ namespace LinAlg {
         return retVal;
     }
 
-    template <typename T, typename CT>
-    const Row<T>& Matrix<T, CT>::operator [] (CT    rowIndex) const
+    template <typename T, typename ST>
+    const Row<T>& Matrix<T, ST>::operator [] (ST    rowIndex) const
     {
         return m_rows[rowIndex];
     }
 
-    template <typename T, typename CT>
-    Matrix<T, CT> Matrix<T, CT>::CreateSubMatrix (const BoundingBox<CT>     & bb) const
+    template <typename T, typename ST>
+    Matrix<T, ST> Matrix<T, ST>::CreateSubMatrix (const BoundingBox<ST>     & bb) const
     {
             // Extract non-empty submatrix by using the bounding box of the non-empty elements
-        Matrix<T, CT> result(bb.RowNum(), bb.ColNum(), m_initialValue);
-        Position<CT> posOffset(bb.GetMinRow(), bb.GetMinCol());
-        for (CT dstRowIndex = 0; dstRowIndex < bb.RowNum(); ++dstRowIndex) {
-            for (CT dstColIndex = 0; dstColIndex < bb.ColNum(); ++dstColIndex) {
-                Position<CT>    dstPos(dstRowIndex, dstColIndex);
-                Position<CT>    srcPos{ dstPos + posOffset };
+        Matrix<T, ST> result(bb.RowNum(), bb.ColNum(), m_initialValue);
+        Position<ST> posOffset(bb.GetMinRow(), bb.GetMinCol());
+        for (ST dstRowIndex = 0; dstRowIndex < bb.RowNum(); ++dstRowIndex) {
+            for (ST dstColIndex = 0; dstColIndex < bb.ColNum(); ++dstColIndex) {
+                Position<ST>    dstPos(dstRowIndex, dstColIndex);
+                Position<ST>    srcPos{ dstPos + posOffset };
                 if (IsLegalPosition(srcPos)) {
                     result.SetData(dstPos, Value(srcPos));
                 }
@@ -195,14 +195,14 @@ namespace LinAlg {
     }
 
     // Extract non-empty submatrix of the rotated matrix by using the bounding box of the non-empty elements
-    template <typename T, typename CT>
-    Matrix<T, CT> Matrix<T, CT>::CreateRotatedBy45Deg () const
+    template <typename T, typename ST>
+    Matrix<T, ST> Matrix<T, ST>::CreateRotatedBy45Deg () const
     {
-        CT rs = (RowSize() + 1) / 2;
-        CT cs = (ColSize() + 1) / 2;
-        CT r0 = rs - 1;
-        CT c0 = 0;
-        CT rotSize = (RowSize() + ColSize() + 1) / 2;
+        ST rs = (RowSize() + 1) / 2;
+        ST cs = (ColSize() + 1) / 2;
+        ST r0 = rs - 1;
+        ST c0 = 0;
+        ST rotSize = (RowSize() + ColSize() + 1) / 2;
         bool verbose = true;
         if (verbose) {
             cout << " RowSize() = " << RowSize()
@@ -212,14 +212,14 @@ namespace LinAlg {
                 << " cs        = " << cs
                 << " rotSize   = " << rotSize << endl;
         }
-        Matrix<T, CT> rotatedBy45Deg(rotSize, rotSize, m_initialValue);
-        BoundingBox<CT> dstBB;
-        for (CT srcRowIndex = MinRow(); srcRowIndex < RowUpperLimit(); srcRowIndex += 2) {
-            for (CT srcColIndex = MinCol(); srcColIndex < ColUpperLimit(); srcColIndex += 2) {
-                Position<CT>    srcPos(srcRowIndex, srcColIndex);
-                CT dstRowIndex = (2 * r0 + srcColIndex - srcRowIndex) / 2;
-                CT dstColIndex = (2 * c0 + srcColIndex + srcRowIndex) / 2;
-                Position<CT>    dstPos(dstRowIndex, dstColIndex);
+        Matrix<T, ST> rotatedBy45Deg(rotSize, rotSize, m_initialValue);
+        BoundingBox<ST> dstBB;
+        for (ST srcRowIndex = MinRow(); srcRowIndex < RowUpperLimit(); srcRowIndex += 2) {
+            for (ST srcColIndex = MinCol(); srcColIndex < ColUpperLimit(); srcColIndex += 2) {
+                Position<ST>    srcPos(srcRowIndex, srcColIndex);
+                ST dstRowIndex = (2 * r0 + srcColIndex - srcRowIndex) / 2;
+                ST dstColIndex = (2 * c0 + srcColIndex + srcRowIndex) / 2;
+                Position<ST>    dstPos(dstRowIndex, dstColIndex);
                 if (verbose) {
                     cout << " src-" << srcPos
                     << " dst-" << dstPos << endl;
@@ -237,42 +237,42 @@ namespace LinAlg {
         return rotatedBy45Deg.CreateSubMatrix(dstBB);
     }
 
-    template <typename T, typename CT>
-    Matrix<T, CT> Matrix<T, CT>::CreateTransposed () const
+    template <typename T, typename ST>
+    Matrix<T, ST> Matrix<T, ST>::CreateTransposed () const
     {
-        Matrix<T, CT> transposed(ColSize(), RowSize());
+        Matrix<T, ST> transposed(ColSize(), RowSize());
         for (auto rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
             for (auto colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
-                Position<CT>    srcPos(rowIndex, colIndex);
-                Position<CT>    dstPos(colIndex, rowIndex);
+                Position<ST>    srcPos(rowIndex, colIndex);
+                Position<ST>    dstPos(colIndex, rowIndex);
                 transposed.SetData(dstPos, Value(srcPos));
             }
         }
         return transposed;
     }
 
-    template <typename T, typename CT>
-    Matrix<T, CT> Matrix<T, CT>::CreateHorizontallyFlipped () const
+    template <typename T, typename ST>
+    Matrix<T, ST> Matrix<T, ST>::CreateHorizontallyFlipped () const
     {
-        Matrix<T, CT> horizontallyFlipped(RowSize(), ColSize());
-        for (CT rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
-            for (CT colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
-                Position<CT>    srcPos(rowIndex, colIndex);
-                Position<CT>    dstPos(RowUpperLimit() - (rowIndex + 1), colIndex);
+        Matrix<T, ST> horizontallyFlipped(RowSize(), ColSize());
+        for (ST rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
+            for (ST colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
+                Position<ST>    srcPos(rowIndex, colIndex);
+                Position<ST>    dstPos(RowUpperLimit() - (rowIndex + 1), colIndex);
                 horizontallyFlipped.SetData(dstPos, Value(srcPos));
             }
         }
         return horizontallyFlipped;
     }
 
-    template <typename T, typename CT>
-    Matrix<T, CT> Matrix<T, CT>::CreateVerticallyFlipped () const
+    template <typename T, typename ST>
+    Matrix<T, ST> Matrix<T, ST>::CreateVerticallyFlipped () const
     {
-        Matrix<T, CT> verticallyFlipped(RowSize(), ColSize());
+        Matrix<T, ST> verticallyFlipped(RowSize(), ColSize());
         for (auto rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
             for (auto colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
-                Position<CT>    srcPos(rowIndex, colIndex);
-                Position<CT>    dstPos(rowIndex, ColUpperLimit() - (colIndex + 1));
+                Position<ST>    srcPos(rowIndex, colIndex);
+                Position<ST>    dstPos(rowIndex, ColUpperLimit() - (colIndex + 1));
                 verticallyFlipped.SetData(dstPos, Value(srcPos));
             }
         }
@@ -280,12 +280,12 @@ namespace LinAlg {
     }
 
 // modifiers
-    template <typename T, typename CT>
-    inline bool Matrix<T, CT>::SetData  (Position<CT>  pos,
+    template <typename T, typename ST>
+    inline bool Matrix<T, ST>::SetData  (Position<ST>  pos,
                                          const T       & newValue)
     {
-        CT      row{pos.GetRowIndex()};
-        CT      col{pos.GetColIndex()};
+        ST      row{pos.GetRowIndex()};
+        ST      col{pos.GetColIndex()};
         bool    bOk{row < RowSize() &&
                     col < operator[](row).Size()};
         if (bOk) {
@@ -296,31 +296,31 @@ namespace LinAlg {
         return bOk;
     }
 
-    template <typename T, typename CT>
-    inline void Matrix<T, CT>::SetOutOfBoundValue  (const T     & newValue)
+    template <typename T, typename ST>
+    inline void Matrix<T, ST>::SetOutOfBoundValue  (const T     & newValue)
     {
         m_outOfBoundValue = newValue;
     }
 
-    template <typename T, typename CT>
-    inline void Matrix<T, CT>::PushBack (const Row<T>        & row)
+    template <typename T, typename ST>
+    inline void Matrix<T, ST>::PushBack (const Row<T>        & row)
     {
         m_rows.push_back(row);
     }
 
-    template <typename T, typename CT>
-    inline bool Matrix<T, CT>::Accomodate (const Position<CT>   & pos,
-                                           const Matrix<T, CT>  & mat)
+    template <typename T, typename ST>
+    inline bool Matrix<T, ST>::Accomodate (const Position<ST>   & pos,
+                                           const Matrix<T, ST>  & mat)
     {
         const T     EVI{ mat.m_initialValue };
         const T     EVO{ m_initialValue };
-        const CT    ru{ mat.RowUpperLimit () };
-        const CT    cu{ mat.ColUpperLimit () };
+        const ST    ru{ mat.RowUpperLimit () };
+        const ST    cu{ mat.ColUpperLimit () };
 
-        for (CT row = 0u; row < ru; ++row) {
-            for (CT col = 0u; col < cu; ++col) {
-                Position<CT> inPos(row, col);
-                Position<CT> ouPos{ pos + inPos };
+        for (ST row = 0u; row < ru; ++row) {
+            for (ST col = 0u; col < cu; ++col) {
+                Position<ST> inPos(row, col);
+                Position<ST> ouPos{ pos + inPos };
                 if (Value(ouPos) != EVO && mat.Value(inPos) != EVI) {
                     cout << "Unexpexted collision at " << pos << endl;
                     return false;
@@ -337,8 +337,8 @@ namespace LinAlg {
         return true;
     }
 
-    template <typename T, typename CT>
-    Row<T>& Matrix<T, CT>::operator [] (CT    rowIndex)
+    template <typename T, typename ST>
+    Row<T>& Matrix<T, ST>::operator [] (ST    rowIndex)
     {
         return m_rows[rowIndex];
     }

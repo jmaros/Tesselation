@@ -10,14 +10,14 @@ namespace Nessie {
 
     using std::numeric_limits;
 
-template <typename S>
+template <typename STB>
 class BoundingBox {
 public:
     // constructors
     BoundingBox () = default;
 
-    template <typename ST>
-    explicit BoundingBox (const Position<ST> & pos)
+    template <typename STP>
+    explicit BoundingBox (const Position<STP> & pos)
      : m_minRow    (pos.GetRowIndex())
      , m_maxRow    (pos.GetRowIndex())
      , m_minCol    (pos.GetColIndex())
@@ -26,29 +26,29 @@ public:
     }
 
     // accessors
-    S GetMinRow () const
+    STB GetMinRow () const
     {
         return m_minRow;
     }
 
-    S GetMaxRow () const
+    STB GetMaxRow () const
     {
         return m_maxRow;
     }
 
-    S GetMinCol () const
+    STB GetMinCol () const
     {
         return m_minCol;
     }
 
-    S GetMaxCol () const
+    STB GetMaxCol () const
     {
         return m_maxCol;
     }
 
-    S RowNum () const
+    STB RowNum () const
     {
-        S result{};
+        STB result{};
         if (m_minRow <= m_maxRow) {
             result = m_maxRow - m_minRow;
             ++result;
@@ -56,9 +56,9 @@ public:
         return result;
     }
 
-    S ColNum () const
+    STB ColNum () const
     {
-        S result{};
+        STB result{};
         if (m_minCol <= m_maxCol) {
             result = m_maxCol - m_minCol;
             ++result;
@@ -67,8 +67,8 @@ public:
     }
 
     // modifiers
-    void AddPosition (S    row,
-                      S    col)
+    void AddPosition (STB    row,
+                      STB    col)
     {
         if (row < m_minRow) {
             m_minRow = row;
@@ -77,24 +77,24 @@ public:
             m_maxRow = row;
         }
         if (col < m_minCol) {
-            m_minCol = row;
+            m_minCol = col;
         }
         if (col > m_maxCol) {
             m_maxCol = col;
         }
     }
-    template <typename ST>
-    void AddPosition (const Position<ST> & pos)
+    template <typename STP>
+    void AddPosition (const Position<STP> & pos)
     {
         AddPosition (pos.GetRowIndex(),
                      pos.GetColIndex());
     }
 
 private:
-    S m_minRow{numeric_limits<S>::max()};
-    S m_maxRow{numeric_limits<S>::min()};
-    S m_minCol{numeric_limits<S>::max()};
-    S m_maxCol{numeric_limits<S>::min()};
+    STB m_minRow{numeric_limits<STB>::max()};
+    STB m_maxRow{numeric_limits<STB>::min()};
+    STB m_minCol{numeric_limits<STB>::max()};
+    STB m_maxCol{numeric_limits<STB>::min()};
 };
 
 } // namespace Nessie

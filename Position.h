@@ -27,41 +27,41 @@ namespace Nessie {
     using std::stringstream;
     using std::vector;
 
-template <typename TS>
+template <typename STP>
 class Position {
 public:
     // constructors
     Position () = default;
-    Position (TS rowIndex,
-              TS colIndex)
+    Position (STP rowIndex,
+              STP colIndex)
         : m_rowIndex (rowIndex)
         , m_colIndex (colIndex)
     {
     }
 
     // accessors
-    TS GetRowIndex () const
+    STP GetRowIndex () const
     {
         return m_rowIndex;
     }
 
-    TS GetColIndex () const
+    STP GetColIndex () const
     {
         return m_colIndex;
     }
 
     // modifiers
-    void SetRowIndex (TS    rowIndex)
+    void SetRowIndex (STP    rowIndex)
     {
         m_rowIndex = rowIndex;
     }
 
-    void SetColIndex (TS    colIndex)
+    void SetColIndex (STP    colIndex)
     {
         m_colIndex = colIndex;
     }
-    void SetPosition (TS    rowIndex,
-                      TS    colIndex)
+    void SetPosition (STP    rowIndex,
+                      STP    colIndex)
     {
         m_rowIndex = rowIndex;
         m_colIndex = colIndex;
@@ -78,14 +78,14 @@ public:
     }
 
 private:
-    TS m_rowIndex{};
-    TS m_colIndex{};
+    STP m_rowIndex{};
+    STP m_colIndex{};
 };
 
 // global operator
-template <typename TS>
+template <typename STP>
 ostream& operator << (ostream             & os,
-                      const Position<TS>  & pos)
+                      const Position<STP>  & pos)
 {
     stringstream sos;
     sos << "Position = (";
@@ -98,11 +98,11 @@ ostream& operator << (ostream             & os,
     return os;
 }
 
-template <typename TS>
-Position<TS> operator+ (const Position<TS>  & lPos,
-                        const Position<TS>  & rPos)
+template <typename STP>
+Position<STP> operator+ (const Position<STP>  & lPos,
+                         const Position<STP>  & rPos)
 {
-    return Position<TS> (lPos.GetRowIndex() + rPos.GetRowIndex(),
+    return Position<STP> (lPos.GetRowIndex() + rPos.GetRowIndex(),
                          lPos.GetColIndex() + rPos.GetColIndex());
 }
 
