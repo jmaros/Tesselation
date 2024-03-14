@@ -205,12 +205,9 @@ namespace LinAlg {
         ST rotSize = (RowSize() + ColSize() + 1) / 2;
         bool verbose = true;
         if (verbose) {
-            cout << " RowSize() = " << RowSize()
-                << " ColSize() = " << ColSize()
-                << " r0        = " << r0
-                << " rs        = " << rs
-                << " cs        = " << cs
-                << " rotSize   = " << rotSize << endl;
+            cout << " RowSize() = " << RowSize() << " ColSize() = " << ColSize()
+                 << " r0 = " << r0  << " rs = "  << rs << " cs = " << cs
+                 << " rotSize = " << rotSize << endl;
         }
         Matrix<T, ST> rotatedBy45Deg(rotSize, rotSize, m_initialValue);
         BoundingBox<ST> dstBB;
