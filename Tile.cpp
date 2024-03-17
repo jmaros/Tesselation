@@ -5,10 +5,10 @@
 // You can compile this code by using Visual Studio (2022 Community Edition)
 //
 // or you can compile on Windows using MinGW and a specific c++ version:
-// test Tile c++23
+// test Tile P3Vector.cpp c++23
 //
 // or you can compile on Linux using a specific c++ version:
-// ./test.sh Tile c++23
+// ./test.sh Tile P3Vector.cpp c++23
 //
 // (optionally you can add " -D VERBOSE" at the end of the command line)
 //
@@ -151,17 +151,11 @@ namespace Nessie {
     {
         // fill m_shapesSet so that it will contain all the different shapes
         size_t seti{};
-        for (auto   & shape : m_shapes) {
+        for (auto   & originShape : m_shapes) {
             ShapeSet    shapeSet;
-            bool succi = shapeSet.insert(shape).second;
+            bool succi = shapeSet.insert(originShape).second;
             if (succi) {
-                // shape is unique in shapeSet
-                auto horiFlipped = shape.CreateHorizontallyFlipped();
-                auto vertFlipped = shape.CreateVerticallyFlipped();
-                auto bothFlipped = horiFlipped.CreateVerticallyFlipped();
-                (void)shapeSet.insert(horiFlipped);
-                (void)shapeSet.insert(vertFlipped);
-                (void)shapeSet.insert(bothFlipped);
+                // originShape is unique in shapeSet
                 if (options.IsHexagonal()) {
                     bool verbose = true;
                     if (verbose) {
@@ -170,15 +164,40 @@ namespace Nessie {
                              << ((shapeSet.size() > 1) ? " shapes)" : " shape)")
                              << endl;
                     }
-                    (void)shapeSet.insert(shape.CreateRotatedBy45Deg());
-                    (void)shapeSet.insert(horiFlipped.CreateRotatedBy45Deg());
-                    (void)shapeSet.insert(vertFlipped.CreateRotatedBy45Deg());
-                    (void)shapeSet.insert(bothFlipped.CreateRotatedBy45Deg());
+                    auto horiFlipped = originShape.CreateHorizontallyFlipped();
+                    auto vertFlipped = originShape.CreateVerticallyFlipped();
+                    auto bothFlipped = horiFlipped.CreateVerticallyFlipped();
+                    (void)shapeSet.insert(horiFlipped);
+                    (void)shapeSet.insert(vertFlipped);
+                    (void)shapeSet.insert(bothFlipped);
+
+                    auto originShapeRot60 = originShape.CreateRotatedBy45Deg();
+                    auto horiFlippedRot60 = horiFlipped.CreateRotatedBy45Deg();
+                    auto vertFlippedRot60 = vertFlipped.CreateRotatedBy45Deg();
+                    auto bothFlippedRot60 = bothFlipped.CreateRotatedBy45Deg();
+                    (void)shapeSet.insert(originShapeRot60);
+                    (void)shapeSet.insert(horiFlippedRot60);
+                    (void)shapeSet.insert(vertFlippedRot60);
+                    (void)shapeSet.insert(bothFlippedRot60);
+                    auto originShapeRot120 = originShapeRot60.CreateTransposed();
+                    auto horiFlippedRot120 = horiFlippedRot60.CreateTransposed();
+                    auto vertFlippedRot120 = vertFlippedRot60.CreateTransposed();
+                    auto bothFlippedRot120 = bothFlippedRot60.CreateTransposed();
+                    (void)shapeSet.insert(originShapeRot120);
+                    (void)shapeSet.insert(horiFlippedRot120);
+                    (void)shapeSet.insert(vertFlippedRot120);
+                    (void)shapeSet.insert(bothFlippedRot120);
                 } else {
-                    (void)shapeSet.insert(shape.CreateTransposed());
+                    auto horiFlipped = originShape.CreateHorizontallyFlipped();
+                    auto vertFlipped = originShape.CreateVerticallyFlipped();
+                    auto bothFlipped = horiFlipped.CreateVerticallyFlipped();
+                    (void)shapeSet.insert(horiFlipped);
+                    (void)shapeSet.insert(vertFlipped);
+                    (void)shapeSet.insert(bothFlipped);
+                    (void)shapeSet.insert(originShape.CreateTransposed());
                     (void)shapeSet.insert(horiFlipped.CreateTransposed());
                     (void)shapeSet.insert(vertFlipped.CreateTransposed());
-                    (void)shapeSet.insert (bothFlipped.CreateTransposed());
+                    (void)shapeSet.insert(bothFlipped.CreateTransposed());
                 }
                 ShapeCollection shapeCollection;
                 for (auto& uniqueShape : shapeSet) {
