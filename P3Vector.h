@@ -3,26 +3,18 @@
 
 #pragma once
 
-#include	<cmath>
-#include    <cstdint>
+#include	"Real.h"
 
 namespace Nessie {
 
-    constexpr double	Eps = 1.E-5;
-    constexpr double	SmallEps = 1.E-7;
-    constexpr double	SmallerEps = 1.E-12;
-    constexpr double	Pi = 3.14159265358979323846;
-    constexpr double	Deg2Rad = Pi / 180.0;
-    constexpr double	Ang60InRad = Pi / 3.0;
+
+    /****************************************************************************/
+    /*                        Helper functions                                  */
+    /****************************************************************************/
 
     inline void WASSERT (bool  a)
     {
         (void)(a); // You may want to put a conditional breakpiont here...
-    }
-
-    inline bool IsPositive (double v, double tolerance = Eps)
-    {
-        return (v > tolerance);
     }
 
     inline double SmallFilter (double	a)
@@ -36,68 +28,8 @@ namespace Nessie {
         return a;
     }
 
-    // Templates
-    template <typename T> inline bool IsSmallEnough (const T& a)
-    {
-        return (a < SmallEps && a > -SmallEps);
-    }
-
-    template <typename T> inline bool IsSmallEnough (const T& a,
-                                                     const T& b)
-    {
-        return (a < b && a > (-b));
-    }
-
-    inline bool IsNear (const double	a,
-                        const double	b)
-    {
-        return (a + Eps > b && a < b + Eps);
-    }
-
-    inline bool IsNearZero (const double a,
-                            const double tolerance = Eps)
-    {
-        return (a + tolerance > 0 && a < tolerance);
-    }
-
-    template <typename T> inline bool IsNear (const T& a,
-                                              const T& b,
-                                              const T& c)
-    {
-        return (a + c > b && a < b + c);	/* c should be > 0 */
-    }
-
-    template <typename T> inline bool IsNotTooSmall (const T& a)
-    {
-        return (a <= (-SmallEps) || a >= SmallEps);
-    }
-
-    template <typename T> inline bool IsNotTooSmall (const T& a,
-                                                     const T& c)
-    {
-        return (a <= (-c) || a >= c);	/* c should be > 0 */
-    }
-
-    inline bool IsNotNear (const double	a,
-                           const double	b)
-    {
-        return (a + Eps <= b || a >= b + Eps);
-    }
-
-    template <typename T> inline bool IsNotNear (const T& a,
-                                                 const T& b,
-                                                 const T& c)
-    {
-        return (a + c <= b || a >= b + c);	/* c should be > 0 */
-    }
-
-
     /****************************************************************************/
-    /*						P3Vector free operators								*/
-    /****************************************************************************/
-
-    /****************************************************************************/
-    /*								P3Vector									*/
+    /*                              P3Vector                                    */
     /****************************************************************************/
 
     class P3Vector {
@@ -175,7 +107,7 @@ namespace Nessie {
     };
 
     /****************************************************************************/
-    /*					P3Vector Global Scope Operators							*/
+    /*                P3Vector Global Scope Operators                           */
     /****************************************************************************/
 
     P3Vector operator^ (const P3Vector& vLeft,
@@ -187,7 +119,7 @@ namespace Nessie {
 
 
     /****************************************************************************/
-    /*								P3Vector in line							*/
+    /*                              P3Vector in line                            */
     /****************************************************************************/
     inline P3Vector& P3Vector::operator= (const P3Vector& v)
     {
