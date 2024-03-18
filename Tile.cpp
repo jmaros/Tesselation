@@ -157,6 +157,14 @@ namespace Nessie {
             if (succi) {
                 // originShape is unique in shapeSet
                 if (options.IsHexagonal()) {
+                    auto    AddRotated60  = [&shapeSet] (const TableResult  & shape) -> TableResult
+                    {
+                        auto shapeRot60 = shape.CreateRotatedBy60Deg();
+                        (void)shapeSet.insert(shapeRot60);
+                        return shapeRot60;
+                    };
+
+
                     bool verbose = true;
                     if (verbose) {
                         cout << "Hexagonal Shape Set-" << ++seti
@@ -164,29 +172,16 @@ namespace Nessie {
                              << ((shapeSet.size() > 1) ? " shapes)" : " shape)")
                              << endl;
                     }
-                    auto horiFlipped = originShape.CreateHorizontallyFlipped();
-                    auto vertFlipped = originShape.CreateVerticallyFlipped();
-                    auto bothFlipped = horiFlipped.CreateVerticallyFlipped();
-                    (void)shapeSet.insert(horiFlipped);
-                    (void)shapeSet.insert(vertFlipped);
-                    (void)shapeSet.insert(bothFlipped);
 
-                    auto originShapeRot60 = originShape.CreateRotatedBy60Deg();
-                    auto horiFlippedRot60 = horiFlipped.CreateRotatedBy60Deg();
-                    auto vertFlippedRot60 = vertFlipped.CreateRotatedBy60Deg();
-                    auto bothFlippedRot60 = bothFlipped.CreateRotatedBy60Deg();
-                    (void)shapeSet.insert(originShapeRot60);
-                    (void)shapeSet.insert(horiFlippedRot60);
-                    (void)shapeSet.insert(vertFlippedRot60);
-                    (void)shapeSet.insert(bothFlippedRot60);
-                    auto originShapeRot120 = originShapeRot60.CreateTransposed();
-                    auto horiFlippedRot120 = horiFlippedRot60.CreateTransposed();
-                    auto vertFlippedRot120 = vertFlippedRot60.CreateTransposed();
-                    auto bothFlippedRot120 = bothFlippedRot60.CreateTransposed();
-                    (void)shapeSet.insert(originShapeRot120);
-                    (void)shapeSet.insert(horiFlippedRot120);
-                    (void)shapeSet.insert(vertFlippedRot120);
-                    (void)shapeSet.insert(bothFlippedRot120);
+                    auto originShapeRot060 = AddRotated60(originShape);
+                    auto originShapeRot120 = AddRotated60(originShapeRot060);
+                    auto originShapeRot180 = AddRotated60(originShapeRot120);
+                    auto originShapeRot240 = AddRotated60(originShapeRot180);
+                    auto originShapeRot300 = AddRotated60(originShapeRot240);
+
+                    // auto horiFlipped = originShape.CreateHorizontallyFlipped();
+                    // auto vertFlipped = originShape.CreateVerticallyFlipped();
+                    // auto bothFlipped = horiFlipped.CreateVerticallyFlipped();
                 } else {
                     auto horiFlipped = originShape.CreateHorizontallyFlipped();
                     auto vertFlipped = originShape.CreateVerticallyFlipped();

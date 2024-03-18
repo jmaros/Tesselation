@@ -131,7 +131,8 @@ namespace Nessie {
         static void                 RandomShuffle           (Container          & container);
 
      // modifiers
-        bool                        Solve                   (Riddle     & riddle);
+        bool                        Solve                   (Riddle             & riddle);
+
     private:
     // data members
         const TableLayout   & m_tableLayout;

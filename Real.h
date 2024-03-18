@@ -56,7 +56,7 @@ namespace Nessie {
     template <typename T> inline bool IsNearZero (const T a,
                                                   const T tolerance)
     {
-        return (a + tolerance > 0 && a < tolerance);
+        return IsSmallEnough(a, tolerance);
     }
 
     inline bool IsNear (const double	a,
@@ -67,7 +67,7 @@ namespace Nessie {
 
     inline bool IsNearZero (const double a)
     {
-        return IsNearZero(a, Eps);
+        return IsSmallEnough(a, Eps);
     }
 
     template <typename T> inline bool IsNotTooSmall (const T& a,

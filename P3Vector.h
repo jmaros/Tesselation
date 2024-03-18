@@ -16,7 +16,7 @@ namespace Nessie {
     {
 #define DEBUG_SMALL
 #if defined (DEBUG_SMALL)
-        if (fabs (a) < SmallerEps) {
+        if (IsSmallEnough(a, SmallerEps)) {
             a = 0.0;
         }
 #endif
@@ -180,36 +180,36 @@ namespace Nessie {
 
     inline bool P3Vector::IsZeroLength (double	eps /* = SmallEps */) const
     {
-        return (fabs(x) + fabs(y) + fabs(z) <= eps);
+        return IsNearZero(x, eps) && IsNearZero(y, eps) && IsNearZero(z, eps);
     }
 
     inline bool P3Vector::IsNonZeroLength (double	eps /* = SmallEps */) const
     {
-        return (fabs(x) + fabs(y) + fabs(z) > eps);
+        return IsNotTooSmall(x, eps) || IsNotTooSmall(y, eps) || IsNotTooSmall(z, eps);
     }
 
-    inline bool P3Vector::IsEqual (const P3Vector& v,
+    inline bool P3Vector::IsEqual (const P3Vector   & v,
                                    double			eps /* = SmallEps */) const
     {
-        return fabs (x - v.x) < eps && fabs (y - v.y) < eps && fabs (z - v.z) < eps;
+        return IsNear(x, v.x, eps) && IsNear(y, v.y, eps) && IsNear(z, v.z, eps);
     }
 
-    inline bool P3Vector::IsNotEqual (const P3Vector& v,
+    inline bool P3Vector::IsNotEqual (const P3Vector    & v,
                                       double			eps /* = SmallEps */) const
     {
-        return fabs (x - v.x) > eps || fabs (y - v.y) > eps || fabs (z - v.z) > eps;
+        return IsNotNear(x, v.x, eps) || IsNotNear(y, v.y, eps) || IsNotNear(z, v.z, eps);
     }
 
 
     inline bool P3Vector::IsParalell (const P3Vector& v) const
     {
-        return IsNearZero ((*this ^ v).Length ());
+        return IsNearZero((*this ^ v).Length());
     }
 
 
     inline bool P3Vector::IsPerpendicular (const P3Vector& v) const
     {
-        return (this->IsZeroLength () || v.IsZeroLength () || IsNearZero ((*this) * v));
+        return (IsZeroLength () || v.IsZeroLength () || IsNearZero ((*this) * v));
     }
 
 

@@ -19,8 +19,6 @@ namespace LinAlg {
                 const T   & initialValue    = T{});
 
     // accessors
-        inline ST                   MinRow                      ()                                  const;
-        inline ST                   MinCol                      ()                                  const;
         inline ST                   RowSize                     ()                                  const;
         inline ST                   ColSize                     (ST                     row = 0)    const;
         inline ST                   RowUpperLimit               ()                                  const;
@@ -81,19 +79,6 @@ namespace LinAlg {
     }
 
     // accessors
-    template <typename T,
-              typename ST>
-    inline ST  Matrix<T, ST>::MinRow () const
-    {
-        return 0;
-    }
-
-    template <typename T, typename ST>
-    inline ST  Matrix<T, ST>::MinCol () const
-    {
-        return 0;
-    }
-
     template <typename T, typename ST>
     inline ST  Matrix<T, ST>::RowSize () const
     {
@@ -115,20 +100,20 @@ namespace LinAlg {
     template <typename T, typename ST>
     inline ST  Matrix<T, ST>::RowUpperLimit () const
     {
-        return RowSize() + MinRow();
+        return RowSize();
     }
 
     template <typename T, typename ST>
     inline ST  Matrix<T, ST>::ColUpperLimit () const
     {
-        return ColSize() + MinCol();
+        return ColSize();
     }
 
     template <typename T, typename ST>
     inline bool Matrix<T, ST>::IsLegalPosition (const Position<ST>  & pos) const
     {
-        return (MinRow () <= pos.GetRowIndex() && pos.GetRowIndex() < RowUpperLimit () &&
-                MinCol () <= pos.GetColIndex() && pos.GetColIndex() < ColUpperLimit ());
+        return (0 <= pos.GetRowIndex() && pos.GetRowIndex() < RowUpperLimit () &&
+                0 <= pos.GetColIndex() && pos.GetColIndex() < ColUpperLimit ());
     }
 
     template <typename T, typename ST>
@@ -196,78 +181,37 @@ namespace LinAlg {
         return result;
     }
 
-    // Extract non-empty submatrix of the rotated matrix by using the bounding box of the non-empty elements
-    template <typename T, typename ST>
-    Matrix<T, ST> Matrix<T, ST>::CreateRotatedBy45Deg () const
-    {
-        ST rs = (RowSize() + 1) / 2;
-        ST cs = (ColSize() + 1) / 2;
-        ST r0 = rs - 1;
-        ST c0 = 0;
-        ST rotSize = (RowSize() + ColSize() + 1) / 2;
-        bool verbose = true;
-        if (verbose) {
-            cout << " RowSize() = " << RowSize() << " ColSize() = " << ColSize()
-                << " r0 = " << r0 << " rs = " << rs << " cs = " << cs
-                << " rotSize = " << rotSize << endl;
-        }
-        Matrix<T, ST> rotatedBy45Deg(rotSize, rotSize, m_initialValue);
-        BoundingBox<ST> dstBB;
-        for (ST srcRowIndex = MinRow(); srcRowIndex < RowUpperLimit(); srcRowIndex += 2) {
-            for (ST srcColIndex = MinCol(); srcColIndex < ColUpperLimit(); srcColIndex += 2) {
-                Position<ST>    srcPos(srcRowIndex, srcColIndex);
-                ST dstRowIndex = (2 * r0 + srcColIndex - srcRowIndex) / 2;
-                ST dstColIndex = (2 * c0 + srcColIndex + srcRowIndex) / 2;
-                Position<ST>    dstPos(dstRowIndex, dstColIndex);
-                if (verbose) {
-                    cout << " src-" << srcPos
-                        << " dst-" << dstPos << endl;
-                }
-                if (!IsEmptyPosition(srcPos)) {
-                    dstBB.AddPosition(dstPos);
-                    bool isRot45Succ = rotatedBy45Deg.SetData(dstPos, Value(srcPos));
-                    if (!isRot45Succ) {
-                        cout << "Rotate failed!" << endl;
-                        return rotatedBy45Deg;
-                    }
-                }
-            }
-        }
-        return rotatedBy45Deg.CreateSubMatrix(dstBB);
-    }
-
     // Extract non-empty submatrix of the rotated matrix
     // by using the bounding box of the non-empty elements
     template <typename T, typename ST>
     Matrix<T, ST> Matrix<T, ST>::CreateRotatedBy60Deg () const
     {
-        ST rs = (RowSize() + 1) / 2;
-        ST cs = (ColSize() + 1) / 2;
-        ST r0 = rs - 1;
-        ST rotSize = (RowSize() + ColSize() + 1) / 2;
+        ST rotSize = (RowSize() + (RowSize() % 2) + ColSize() + (RowSize() % 2));
         bool verbose = true;
         if (verbose) {
-            cout << " RowSize() = " << RowSize() << " ColSize() = " << ColSize()
-                << " r0 = " << r0 << " rs = " << rs << " cs = " << cs
-                << " rotSize = " << rotSize << endl;
+            cout << " RowSize() = " << RowSize()
+                 << " ColSize() = " << ColSize()
+                 << " rotSize = " << rotSize << endl;
         }
         Matrix<T, ST> rotatedBy60Deg(2 * rotSize, 2 * rotSize, m_initialValue);
         BoundingBox<ST> dstBB;
         double          xFactor{ cos(Ang60InRad) };
         double          yFactor{ sin(Ang60InRad) };
-        for (ST srcRowIndex = MinRow(); srcRowIndex < RowUpperLimit(); srcRowIndex += 2) {
-            for (ST srcColIndex = MinCol(); srcColIndex < ColUpperLimit(); srcColIndex += 2) {
+        for (ST srcRowIndex = 0; srcRowIndex < RowUpperLimit(); ++srcRowIndex) {
+            for (ST srcColIndex = 0; srcColIndex < ColUpperLimit(); ++srcColIndex) {
                 Position<ST>    srcPos(srcRowIndex, srcColIndex);
-                P3Vector        originalPoint{ srcColIndex * xFactor, srcRowIndex * yFactor };
-                P3Vector        rotatedPoint { originalPoint.Rotate2D(Ang60InRad) };
-                ST dstRowIndex = ST(rotatedPoint.Y() / yFactor) + rotSize;
-                ST dstColIndex = ST(rotatedPoint.X() / xFactor) + rotSize;
-                Position<ST>    dstPos(dstRowIndex, dstColIndex);
-                if (verbose) {
-                    cout << " src-" << srcPos
-                        << " dst-" << dstPos << endl;
-                }
                 if (!IsEmptyPosition(srcPos)) {
+                    P3Vector        originalPoint{ srcColIndex * xFactor, srcRowIndex * yFactor };
+                    P3Vector        rotatedPoint { originalPoint.Rotate2D(Ang60InRad) };
+                    ST dstRowIndex = ST((rotatedPoint.Y() / yFactor) + rotSize + 0.5);
+                    ST dstColIndex = ST((rotatedPoint.X() / xFactor) + rotSize + 0.5);
+                    Position<ST>    dstPos(dstRowIndex, dstColIndex);
+                    if (verbose) {
+                        cout << " originalPoint-{" << originalPoint.X() << ", " << originalPoint.Y() << "}"
+                            << " git status--{"  << rotatedPoint.X()  << ", " << rotatedPoint.Y()  << "}" << endl;
+                        cout << " src-" << srcPos
+                            << " dst-" << dstPos << endl;
+                    }
                     dstBB.AddPosition(dstPos);
                     bool isRot60Succ = rotatedBy60Deg.SetData(dstPos, Value(srcPos));
                     if (!isRot60Succ) {
@@ -284,8 +228,8 @@ namespace LinAlg {
     Matrix<T, ST> Matrix<T, ST>::CreateTransposed () const
     {
         Matrix<T, ST> transposed(ColSize(), RowSize());
-        for (auto rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
-            for (auto colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
+        for (ST rowIndex = 0; rowIndex < RowUpperLimit(); ++rowIndex) {
+            for (ST colIndex = 0; colIndex < ColUpperLimit(); ++colIndex) {
                 Position<ST>    srcPos(rowIndex, colIndex);
                 Position<ST>    dstPos(colIndex, rowIndex);
                 transposed.SetData(dstPos, Value(srcPos));
@@ -298,8 +242,8 @@ namespace LinAlg {
     Matrix<T, ST> Matrix<T, ST>::CreateHorizontallyFlipped () const
     {
         Matrix<T, ST> horizontallyFlipped(RowSize(), ColSize());
-        for (ST rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
-            for (ST colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
+        for (ST rowIndex = 0; rowIndex < RowUpperLimit(); ++rowIndex) {
+            for (ST colIndex = 0; colIndex < ColUpperLimit(); ++colIndex) {
                 Position<ST>    srcPos(rowIndex, colIndex);
                 Position<ST>    dstPos(RowUpperLimit() - (rowIndex + 1), colIndex);
                 horizontallyFlipped.SetData(dstPos, Value(srcPos));
@@ -312,8 +256,8 @@ namespace LinAlg {
     Matrix<T, ST> Matrix<T, ST>::CreateVerticallyFlipped () const
     {
         Matrix<T, ST> verticallyFlipped(RowSize(), ColSize());
-        for (auto rowIndex = MinRow(); rowIndex < RowUpperLimit(); ++rowIndex) {
-            for (auto colIndex = MinCol(); colIndex < ColUpperLimit(); ++colIndex) {
+        for (ST rowIndex = 0; rowIndex < RowUpperLimit(); ++rowIndex) {
+            for (ST colIndex = 0; colIndex < ColUpperLimit(); ++colIndex) {
                 Position<ST>    srcPos(rowIndex, colIndex);
                 Position<ST>    dstPos(rowIndex, ColUpperLimit() - (colIndex + 1));
                 verticallyFlipped.SetData(dstPos, Value(srcPos));
