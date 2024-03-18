@@ -12,11 +12,6 @@ namespace Nessie {
     /*                        Helper functions                                  */
     /****************************************************************************/
 
-    inline void WASSERT (bool  a)
-    {
-        (void)(a); // You may want to put a conditional breakpiont here...
-    }
-
     inline double SmallFilter (double	a)
     {
 #define DEBUG_SMALL

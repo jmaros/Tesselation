@@ -43,7 +43,7 @@ namespace Geom {
         inline const T                      Value                       (Position<CT>  pos) const;
         inline const LinAlg::Matrix<T, CT>  & Matrix                    ()                  const;
         inline bool                         ShowZeros                   ()                  const;
-        Shape<T, U, CT>                     CreateRotatedBy45Deg        ()                  const;
+        Shape<T, U, CT>                     CreateRotatedBy60Deg        ()                  const;
         Shape<T, U, CT>                     CreateTransposed            ()                  const;
         Shape<T, U, CT>                     CreateHorizontallyFlipped   ()                  const;
         Shape<T, U, CT>                     CreateVerticallyFlipped     ()                  const;
@@ -159,10 +159,10 @@ namespace Geom {
     }
 
     template <typename T, typename U, typename CT>
-    Shape<T, U, CT> Shape<T, U, CT>::CreateRotatedBy45Deg () const
+    Shape<T, U, CT> Shape<T, U, CT>::CreateRotatedBy60Deg () const
     {
         auto transposed = *this;
-        transposed.m_matrix = m_matrix.CreateRotatedBy45Deg();
+        transposed.m_matrix = m_matrix.CreateRotatedBy60Deg();
         return transposed;
     }
 

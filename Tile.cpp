@@ -171,10 +171,10 @@ namespace Nessie {
                     (void)shapeSet.insert(vertFlipped);
                     (void)shapeSet.insert(bothFlipped);
 
-                    auto originShapeRot60 = originShape.CreateRotatedBy45Deg();
-                    auto horiFlippedRot60 = horiFlipped.CreateRotatedBy45Deg();
-                    auto vertFlippedRot60 = vertFlipped.CreateRotatedBy45Deg();
-                    auto bothFlippedRot60 = bothFlipped.CreateRotatedBy45Deg();
+                    auto originShapeRot60 = originShape.CreateRotatedBy60Deg();
+                    auto horiFlippedRot60 = horiFlipped.CreateRotatedBy60Deg();
+                    auto vertFlippedRot60 = vertFlipped.CreateRotatedBy60Deg();
+                    auto bothFlippedRot60 = bothFlipped.CreateRotatedBy60Deg();
                     (void)shapeSet.insert(originShapeRot60);
                     (void)shapeSet.insert(horiFlippedRot60);
                     (void)shapeSet.insert(vertFlippedRot60);

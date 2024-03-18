@@ -2,8 +2,9 @@
 //
 // Matrix.h
 //
-#include "Row.h"
 #include "BoundingBox.h"
+#include "P3Vector.h"
+#include "Row.h"
 
 namespace Nessie {
 namespace LinAlg {
@@ -36,6 +37,7 @@ namespace LinAlg {
     // creators
         Matrix<T, ST>               CreateSubMatrix             (const BoundingBox<ST>  & bb)       const;
         Matrix<T, ST>               CreateRotatedBy45Deg        ()                                  const;
+        Matrix<T, ST>               CreateRotatedBy60Deg        ()                                  const;
         Matrix<T, ST>               CreateTransposed            ()                                  const;
         Matrix<T, ST>               CreateHorizontallyFlipped   ()                                  const;
         Matrix<T, ST>               CreateVerticallyFlipped     ()                                  const;
@@ -206,8 +208,8 @@ namespace LinAlg {
         bool verbose = true;
         if (verbose) {
             cout << " RowSize() = " << RowSize() << " ColSize() = " << ColSize()
-                 << " r0 = " << r0  << " rs = "  << rs << " cs = " << cs
-                 << " rotSize = " << rotSize << endl;
+                << " r0 = " << r0 << " rs = " << rs << " cs = " << cs
+                << " rotSize = " << rotSize << endl;
         }
         Matrix<T, ST> rotatedBy45Deg(rotSize, rotSize, m_initialValue);
         BoundingBox<ST> dstBB;
@@ -219,7 +221,7 @@ namespace LinAlg {
                 Position<ST>    dstPos(dstRowIndex, dstColIndex);
                 if (verbose) {
                     cout << " src-" << srcPos
-                    << " dst-" << dstPos << endl;
+                        << " dst-" << dstPos << endl;
                 }
                 if (!IsEmptyPosition(srcPos)) {
                     dstBB.AddPosition(dstPos);
@@ -232,6 +234,50 @@ namespace LinAlg {
             }
         }
         return rotatedBy45Deg.CreateSubMatrix(dstBB);
+    }
+
+    // Extract non-empty submatrix of the rotated matrix
+    // by using the bounding box of the non-empty elements
+    template <typename T, typename ST>
+    Matrix<T, ST> Matrix<T, ST>::CreateRotatedBy60Deg () const
+    {
+        ST rs = (RowSize() + 1) / 2;
+        ST cs = (ColSize() + 1) / 2;
+        ST r0 = rs - 1;
+        ST rotSize = (RowSize() + ColSize() + 1) / 2;
+        bool verbose = true;
+        if (verbose) {
+            cout << " RowSize() = " << RowSize() << " ColSize() = " << ColSize()
+                << " r0 = " << r0 << " rs = " << rs << " cs = " << cs
+                << " rotSize = " << rotSize << endl;
+        }
+        Matrix<T, ST> rotatedBy60Deg(2 * rotSize, 2 * rotSize, m_initialValue);
+        BoundingBox<ST> dstBB;
+        double          xFactor{ cos(Ang60InRad) };
+        double          yFactor{ sin(Ang60InRad) };
+        for (ST srcRowIndex = MinRow(); srcRowIndex < RowUpperLimit(); srcRowIndex += 2) {
+            for (ST srcColIndex = MinCol(); srcColIndex < ColUpperLimit(); srcColIndex += 2) {
+                Position<ST>    srcPos(srcRowIndex, srcColIndex);
+                P3Vector        originalPoint{ srcColIndex * xFactor, srcRowIndex * yFactor };
+                P3Vector        rotatedPoint { originalPoint.Rotate2D(Ang60InRad) };
+                ST dstRowIndex = ST(rotatedPoint.Y() / yFactor) + rotSize;
+                ST dstColIndex = ST(rotatedPoint.X() / xFactor) + rotSize;
+                Position<ST>    dstPos(dstRowIndex, dstColIndex);
+                if (verbose) {
+                    cout << " src-" << srcPos
+                        << " dst-" << dstPos << endl;
+                }
+                if (!IsEmptyPosition(srcPos)) {
+                    dstBB.AddPosition(dstPos);
+                    bool isRot60Succ = rotatedBy60Deg.SetData(dstPos, Value(srcPos));
+                    if (!isRot60Succ) {
+                        cout << "Rotate failed!" << endl;
+                        return rotatedBy60Deg;
+                    }
+                }
+            }
+        }
+        return rotatedBy60Deg.CreateSubMatrix(dstBB);
     }
 
     template <typename T, typename ST>
