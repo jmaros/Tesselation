@@ -10,14 +10,15 @@ namespace Nessie
 
     struct Opted
     {
-        bool m_isValid{true};
-        bool m_askedForHelp{};
-        bool m_hexagonal{};
-        bool m_calculateAll{};
-        bool m_random{};
-        bool m_verbose{};
-        bool m_useLetters{true};
-        Date m_date{Date::GetCurrentDate()};
+        bool    m_isValid{true};
+        bool    m_askedForHelp{};
+        bool    m_hexagonal{};
+        bool    m_calculateAll{};
+        bool    m_random{};
+        size_t  m_steps{};
+        bool    m_verbose{};
+        bool    m_useLetters{true};
+        Date    m_date{Date::GetCurrentDate()};
     };
 
     class TileOptions : public Options
@@ -36,6 +37,7 @@ namespace Nessie
                           {"all",                    'a'},
                           {"help",                   'h'},
                           {"random",                 'r'},
+                          {"steps",                  's'},
                           {"verbose",                'v'},
                           {"hexagonal",              '6'}}
          , m_singleCharOpts{'a', 'h', 'r', 'v', '6', '@'}
@@ -62,6 +64,7 @@ namespace Nessie
         inline bool              IsHexagonal            () const;
         inline bool              CalculateAll           () const;
         inline bool              Random                 () const;
+        inline size_t            Steps                  () const;
         inline bool              Verbose                () const;
         const Date               & GetDate              () const override;
 
@@ -123,6 +126,11 @@ namespace Nessie
         return m_opted.m_random;
     }
 
+    inline size_t TileOptions::Steps () const
+    {
+        return m_opted.m_steps;
+    }
+
     inline bool TileOptions::Verbose () const
     {
         return m_opted.m_verbose;
@@ -143,46 +151,58 @@ namespace Nessie
     {
         for (auto am : GetArgsMap()) {
             switch (am.first) {
-            case '6':
-                // Use the hexagonal playground
-                m_opted.m_hexagonal = true;
-                break;
-            case 'a':
-                // calculate all
-                m_opted.m_calculateAll = true;
-                break;
-            case 'h':
-                // help
-                m_opted.m_askedForHelp = true;
-                break;
-            case 'r':
-                // verbose
-                m_opted.m_random = true;
-                break;
-            case 'v':
-                // verbose
-                m_opted.m_verbose = true;
-                break;
-            case '@':
-                // Use special chars instead of letters [A-H] to display the shapes
-                m_opted.m_useLetters = false;
-                break;
-            case 'y':
-                // Override "year"
-                m_opted.m_date.SetYear(am.second.second);
-                break;
-            case 'm':
-                // Override "month"
-                m_opted.m_date.SetMonth(am.second.second);
-                break;
-            case 'd':
-                // Override "day"
-                m_opted.m_date.SetDay(am.second.second);
-                break;
-            default:
-                // Unhandled option
-                m_opted.m_isValid = false;
-                break;
+                case '6':
+                    // Use the hexagonal playground
+                    m_opted.m_hexagonal = true;
+                    break;
+                case 'a':
+                    // calculate all
+                    m_opted.m_calculateAll = true;
+                    break;
+                case 'h':
+                    // help
+                    m_opted.m_askedForHelp = true;
+                    break;
+                case 'r':
+                    // verbose
+                    m_opted.m_random = true;
+                    break;
+                case 's':
+                    {
+                        // steps
+                        stringstream ios(am.second.second);
+                        ios >> m_opted.m_steps;
+                        string rest;
+                        ios >> rest;
+                        if (!rest.empty() || m_opted.m_steps <= 0) {
+                            m_opted.m_isValid = false;
+                        }
+                    }
+                    break;
+                case 'v':
+                    // verbose
+                    m_opted.m_verbose = true;
+                    break;
+                case '@':
+                    // Use special chars instead of letters [A-H] to display the shapes
+                    m_opted.m_useLetters = false;
+                    break;
+                case 'y':
+                    // Override "year"
+                    m_opted.m_date.SetYear(am.second.second);
+                    break;
+                case 'm':
+                    // Override "month"
+                    m_opted.m_date.SetMonth(am.second.second);
+                    break;
+                case 'd':
+                    // Override "day"
+                    m_opted.m_date.SetDay(am.second.second);
+                    break;
+                default:
+                    // Unhandled option
+                    m_opted.m_isValid = false;
+                    break;
             }
         }
     }

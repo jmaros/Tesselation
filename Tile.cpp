@@ -278,7 +278,9 @@ namespace Nessie {
             for (size_t r = 0; r < chrep.NumRows(); ++r) {
                 for (size_t c = 0; c < chrep.NumCols(); ++c) {
                     Position<size_t> chPos(r, c);
-                    if (theShape.Value(chPos)) {
+                    if (theShape.Value(chPos) &&
+                        (m_options.Steps() == 0 ||
+                         solStep.m_indexOfShapeSet < m_options.Steps())) {
                         if (m_options.GetOpted().m_useLetters) {
                             chrep.SetData(chPos, ShapeLetters[solStep.m_indexOfShapeSet]);
                         } else {
@@ -443,6 +445,7 @@ int main (int   argc,
             << "  -h or --help for this help\n"
             << "  -6 or --hexagonal to use the hexagonal tiling riddle\n"
             << "  -r or --random to find a random solution\n"
+            << "  -s or --steps followed by n, the number of requested hints\n"
             << "  -v or --verbose for more detailed output\n"
             << "  -a or --all for finding all solution\n"
             << "  -y or --year followed by yyyy\n"
