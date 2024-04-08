@@ -21,10 +21,8 @@ namespace LinAlg {
     // accessors
         inline ST                   RowSize                     ()                                  const;
         inline ST                   ColSize                     (ST                     row = 0)    const;
-        inline ST                   RowUpperLimit               ()                                  const;
-        inline ST                   ColUpperLimit               ()                                  const;
-        inline bool                 IsLegalPosition             (const Position<ST>& pos)           const;
-        inline bool                 IsEmptyPosition             (const Position<ST>& pos)           const;
+        inline bool                 IsLegalPosition             (const Position<ST>     & pos)      const;
+        inline bool                 IsEmptyPosition             (const Position<ST>     & pos)      const;
 
         inline bool                 CanAccomodate               (const Position<ST>     & pos,
                                                                  const Matrix<T, ST>    & mat)      const;
@@ -32,9 +30,8 @@ namespace LinAlg {
         inline const T              Value                       (const Position<ST>     & pos)      const;
         inline const vector<Row<T>> & GetRows                   ()                                  const;
 
-    // creators
+    // creators                                                                       
         Matrix<T, ST>               CreateSubMatrix             (const BoundingBox<ST>  & bb)       const;
-        Matrix<T, ST>               CreateRotatedBy45Deg        ()                                  const;
         Matrix<T, ST>               CreateRotatedBy60Deg        ()                                  const;
         Matrix<T, ST>               CreateTransposed            ()                                  const;
         Matrix<T, ST>               CreateHorizontallyFlipped   ()                                  const;
@@ -98,22 +95,10 @@ namespace LinAlg {
     }
 
     template <typename T, typename ST>
-    inline ST  Matrix<T, ST>::RowUpperLimit () const
-    {
-        return RowSize();
-    }
-
-    template <typename T, typename ST>
-    inline ST  Matrix<T, ST>::ColUpperLimit () const
-    {
-        return ColSize();
-    }
-
-    template <typename T, typename ST>
     inline bool Matrix<T, ST>::IsLegalPosition (const Position<ST>  & pos) const
     {
-        return (0 <= pos.GetRowIndex() && pos.GetRowIndex() < RowUpperLimit () &&
-                0 <= pos.GetColIndex() && pos.GetColIndex() < ColUpperLimit ());
+        return (0 <= pos.GetRowIndex() && pos.GetRowIndex() < RowSize () &&
+                0 <= pos.GetColIndex() && pos.GetColIndex() < ColSize ());
     }
 
     template <typename T, typename ST>
@@ -132,8 +117,8 @@ namespace LinAlg {
     {
         const T     EVI{mat.m_initialValue};
         const T     EVO{ m_initialValue };
-        const ST    ru{mat.RowUpperLimit ()};
-        const ST    cu{mat.ColUpperLimit ()};
+        const ST    ru{mat.RowSize ()};
+        const ST    cu{mat.ColSize ()};
 
         for (ST row = 0; row < ru; ++row) {
             for (ST col = 0; col < cu; ++col) {
@@ -166,12 +151,14 @@ namespace LinAlg {
     template <typename T, typename ST>
     Matrix<T, ST> Matrix<T, ST>::CreateSubMatrix (const BoundingBox<ST>     & bb) const
     {
-            // Extract non-empty submatrix by using the bounding box of the non-empty elements
-        Matrix<T, ST> result(bb.RowNum(), bb.ColNum(), m_initialValue);
+        ST rLow = 0;
+        ST cLow = 0;
+        // Extract non-empty submatrix by using the bounding box of the non-empty elements
+        Matrix<T, ST> result(bb.RowNum() + rLow, bb.ColNum() + cLow, m_initialValue);
         Position<ST> posOffset(bb.GetMinRow(), bb.GetMinCol());
         for (ST dstRowIndex = 0; dstRowIndex < bb.RowNum(); ++dstRowIndex) {
             for (ST dstColIndex = 0; dstColIndex < bb.ColNum(); ++dstColIndex) {
-                Position<ST>    dstPos(dstRowIndex, dstColIndex);
+                Position<ST>    dstPos(dstRowIndex + rLow, dstColIndex + cLow);
                 Position<ST>    srcPos{ dstPos + posOffset };
                 if (IsLegalPosition(srcPos)) {
                     result.SetData(dstPos, Value(srcPos));
@@ -197,8 +184,8 @@ namespace LinAlg {
         BoundingBox<ST> dstBB;
         double          xFactor{ cos(Ang60InRad) };
         double          yFactor{ sin(Ang60InRad) };
-        for (ST srcRowIndex = 0; srcRowIndex < RowUpperLimit(); ++srcRowIndex) {
-            for (ST srcColIndex = 0; srcColIndex < ColUpperLimit(); ++srcColIndex) {
+        for (ST srcRowIndex = 0; srcRowIndex < RowSize(); ++srcRowIndex) {
+            for (ST srcColIndex = 0; srcColIndex < ColSize(); ++srcColIndex) {
                 Position<ST>    srcPos(srcRowIndex, srcColIndex);
                 if (!IsEmptyPosition(srcPos)) {
                     P3Vector        originalPoint{ srcColIndex * xFactor, srcRowIndex * yFactor };
@@ -208,9 +195,11 @@ namespace LinAlg {
                     Position<ST>    dstPos(dstRowIndex, dstColIndex);
                     if (verbose) {
                         cout << " originalPoint-{" << originalPoint.X() << ", " << originalPoint.Y() << "}"
-                            << " git status--{"  << rotatedPoint.X()  << ", " << rotatedPoint.Y()  << "}" << endl;
+                             << " rotatedPoint-{"  << rotatedPoint.X()  << ", " << rotatedPoint.Y()  << "}"
+                             << endl;
                         cout << " src-" << srcPos
-                            << " dst-" << dstPos << endl;
+                             << " dst-" << dstPos
+                             << endl;
                     }
                     dstBB.AddPosition(dstPos);
                     bool isRot60Succ = rotatedBy60Deg.SetData(dstPos, Value(srcPos));
@@ -228,8 +217,8 @@ namespace LinAlg {
     Matrix<T, ST> Matrix<T, ST>::CreateTransposed () const
     {
         Matrix<T, ST> transposed(ColSize(), RowSize());
-        for (ST rowIndex = 0; rowIndex < RowUpperLimit(); ++rowIndex) {
-            for (ST colIndex = 0; colIndex < ColUpperLimit(); ++colIndex) {
+        for (ST rowIndex = 0; rowIndex < RowSize(); ++rowIndex) {
+            for (ST colIndex = 0; colIndex < ColSize(); ++colIndex) {
                 Position<ST>    srcPos(rowIndex, colIndex);
                 Position<ST>    dstPos(colIndex, rowIndex);
                 transposed.SetData(dstPos, Value(srcPos));
@@ -242,10 +231,10 @@ namespace LinAlg {
     Matrix<T, ST> Matrix<T, ST>::CreateHorizontallyFlipped () const
     {
         Matrix<T, ST> horizontallyFlipped(RowSize(), ColSize());
-        for (ST rowIndex = 0; rowIndex < RowUpperLimit(); ++rowIndex) {
-            for (ST colIndex = 0; colIndex < ColUpperLimit(); ++colIndex) {
+        for (ST rowIndex = 0; rowIndex < RowSize(); ++rowIndex) {
+            for (ST colIndex = 0; colIndex < ColSize(); ++colIndex) {
                 Position<ST>    srcPos(rowIndex, colIndex);
-                Position<ST>    dstPos(RowUpperLimit() - (rowIndex + 1), colIndex);
+                Position<ST>    dstPos(RowSize() - (rowIndex + 1), colIndex);
                 horizontallyFlipped.SetData(dstPos, Value(srcPos));
             }
         }
@@ -256,10 +245,10 @@ namespace LinAlg {
     Matrix<T, ST> Matrix<T, ST>::CreateVerticallyFlipped () const
     {
         Matrix<T, ST> verticallyFlipped(RowSize(), ColSize());
-        for (ST rowIndex = 0; rowIndex < RowUpperLimit(); ++rowIndex) {
-            for (ST colIndex = 0; colIndex < ColUpperLimit(); ++colIndex) {
+        for (ST rowIndex = 0; rowIndex < RowSize(); ++rowIndex) {
+            for (ST colIndex = 0; colIndex < ColSize(); ++colIndex) {
                 Position<ST>    srcPos(rowIndex, colIndex);
-                Position<ST>    dstPos(rowIndex, ColUpperLimit() - (colIndex + 1));
+                Position<ST>    dstPos(rowIndex, ColSize() - (colIndex + 1));
                 verticallyFlipped.SetData(dstPos, Value(srcPos));
             }
         }
@@ -301,8 +290,8 @@ namespace LinAlg {
     {
         const T     EVI{ mat.m_initialValue };
         const T     EVO{ m_initialValue };
-        const ST    ru{ mat.RowUpperLimit () };
-        const ST    cu{ mat.ColUpperLimit () };
+        const ST    ru{ mat.RowSize () };
+        const ST    cu{ mat.ColSize () };
 
         for (ST row = 0u; row < ru; ++row) {
             for (ST col = 0u; col < cu; ++col) {

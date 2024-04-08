@@ -163,7 +163,15 @@ namespace Nessie {
                         (void)shapeSet.insert(shapeRot60);
                         return shapeRot60;
                     };
-
+ 
+                    auto    AddFiveMoreRotatedShapes = [&](const TableResult& oriShape) -> void
+                        {
+                            auto oriShapeRot060 = AddRotated60(oriShape);
+                            auto oriShapeRot120 = AddRotated60(oriShapeRot060);
+                            auto oriShapeRot180 = AddRotated60(oriShapeRot120);
+                            auto oriShapeRot240 = AddRotated60(oriShapeRot180);
+                            auto oriShapeRot300 = AddRotated60(oriShapeRot240);
+                        };
 
                     bool verbose = true;
                     if (verbose) {
@@ -172,16 +180,15 @@ namespace Nessie {
                              << ((shapeSet.size() > 1) ? " shapes)" : " shape)")
                              << endl;
                     }
+                    AddFiveMoreRotatedShapes(originShape);
+                    auto horiFlipped = originShape.CreateHorizontallyFlipped();
+                    (void)shapeSet.insert(horiFlipped);
+                    AddFiveMoreRotatedShapes(horiFlipped);
 
-                    auto originShapeRot060 = AddRotated60(originShape);
-                    auto originShapeRot120 = AddRotated60(originShapeRot060);
-                    auto originShapeRot180 = AddRotated60(originShapeRot120);
-                    auto originShapeRot240 = AddRotated60(originShapeRot180);
-                    auto originShapeRot300 = AddRotated60(originShapeRot240);
-
-                    // auto horiFlipped = originShape.CreateHorizontallyFlipped();
-                    // auto vertFlipped = originShape.CreateVerticallyFlipped();
-                    // auto bothFlipped = horiFlipped.CreateVerticallyFlipped();
+                    auto vertFlipped = originShape.CreateVerticallyFlipped();
+                    (void)shapeSet.insert(vertFlipped);
+                      
+                    AddFiveMoreRotatedShapes(vertFlipped);
                 } else {
                     auto horiFlipped = originShape.CreateHorizontallyFlipped();
                     auto vertFlipped = originShape.CreateVerticallyFlipped();

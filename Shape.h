@@ -161,9 +161,9 @@ namespace Geom {
     template <typename T, typename U, typename CT>
     Shape<T, U, CT> Shape<T, U, CT>::CreateRotatedBy60Deg () const
     {
-        auto transposed = *this;
-        transposed.m_matrix = m_matrix.CreateRotatedBy60Deg();
-        return transposed;
+        auto rotated = *this;
+        rotated.m_matrix = m_matrix.CreateRotatedBy60Deg();
+        return rotated;
     }
 
     template <typename T, typename U, typename CT>
@@ -269,7 +269,7 @@ namespace Geom {
                 if (shape.ShowZeros() || element) {
                     sos << setw(sw) << U(element);
                 } else {
-                    sos << setw(sw) << " ";
+                    sos << setw(sw) << ".";
                 }
             }
             sos << endl;
