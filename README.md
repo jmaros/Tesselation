@@ -7,7 +7,7 @@ month - day pair, where only that month and day remains visible, and all the oth
 by these shapes. The aim of the program is to find such arrangement of these shapes for any valid
 month - day pair.
 ```
-Table   =  -1 -2 -3 -4 -5 -7
+Table   =  -1 -2 -3 -4 -5 -6
            -7 -8 -9-10-11-12
             1  2  3  4  5  6  7
             8  9 10 11 12 13 14
