@@ -173,7 +173,7 @@ namespace Nessie {
                             auto oriShapeRot300 = AddRotated60(oriShapeRot240);
                         };
 
-                    bool verbose = true;
+                    bool verbose = false;
                     if (verbose) {
                         cout << "Hexagonal Shape Set-" << ++seti
                              << "(" << shapeSet.size()
@@ -417,12 +417,12 @@ namespace Nessie {
     ostream& operator << (ostream       & os,
                           const Tile    & tessy)
     {
-        if (!tessy.GetOptions().Random() &&
-            !tessy.GetOptions().CalculateAll()) {
-            bool bPrev{ tessy.SetTableShapeShowZeros(true) };
-            os << "Table" << tessy.GetTableShape();
-            (void)tessy.SetTableShapeShowZeros(bPrev);
-        }
+        // if (!tessy.GetOptions().Random() &&
+        //     !tessy.GetOptions().CalculateAll()) {
+        //     bool bPrev{ tessy.SetTableShapeShowZeros(true) };
+        //     os << "Table" << tessy.GetTableShape();
+        //     (void)tessy.SetTableShapeShowZeros(bPrev);
+        // }
         os << "Tile Date = " << tessy.GetDate().DateStr() << endl;
         if (tessy.GetOptions().Random()) {
             os << "Random ";

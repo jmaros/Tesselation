@@ -174,7 +174,7 @@ namespace LinAlg {
     Matrix<T, ST> Matrix<T, ST>::CreateRotatedBy60Deg () const
     {
         ST rotSize = (RowSize() + (RowSize() % 2) + ColSize() + (ColSize() % 2));
-        bool verbose = true;
+        bool verbose = false;
         if (verbose) {
             cout << " RowSize() = " << RowSize()
                  << " ColSize() = " << ColSize()

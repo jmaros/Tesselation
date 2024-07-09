@@ -227,6 +227,7 @@ public:
     {
         stringstream ios(ds);
         ios >> m_day;
+        m_dayOfWeek = GetDayOfWeek();
     }
 
 
