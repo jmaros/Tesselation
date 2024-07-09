@@ -173,7 +173,7 @@ namespace LinAlg {
     template <typename T, typename ST>
     Matrix<T, ST> Matrix<T, ST>::CreateRotatedBy60Deg () const
     {
-        ST rotSize = (RowSize() + (RowSize() % 2) + ColSize() + (RowSize() % 2));
+        ST rotSize = (RowSize() + (RowSize() % 2) + ColSize() + (ColSize() % 2));
         bool verbose = true;
         if (verbose) {
             cout << " RowSize() = " << RowSize()
