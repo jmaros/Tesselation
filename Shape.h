@@ -29,13 +29,17 @@ namespace Geom {
         Shape () = delete;
         Shape (CT       numRows,
                CT       numCols,
+               bool     isHexagonal,
                const T  & initialValue ={});
 
-        Shape (initializer_list<initializer_list<T>>    ili);
+        Shape (bool                                     isHexagonal,
+               initializer_list<initializer_list<T>>    ili);
 
     // accessors
         CT                                  NumRows                     ()                  const;
         CT                                  NumCols                     ()                  const;
+
+        inline bool                         IsHexagonal                 ()                  const;
 
         inline bool                         CanAccomodate  (const Position<CT>  & pos,
                                                             const Shape<T, U>   & shape)    const;
@@ -51,7 +55,7 @@ namespace Geom {
         const string                        & GetShapeName              ()                  const;
 
         // operators
-        const LinAlg::Row<T>                & operator []               (CT      index)     const;
+        const LinAlg::Row<T>& operator []               (CT      index)     const;
 
     // modifiers
         inline void     SetShapeName        (const string           & shana,
@@ -72,6 +76,7 @@ namespace Geom {
     // data members
         string                  m_shapeName{ "Shape" };
         LinAlg::Matrix<T, CT>   m_matrix;
+        bool                    m_isHexagonal;
         mutable bool            m_showZeros{};
     };
 
@@ -81,19 +86,23 @@ namespace Geom {
     template <typename T, typename U, typename CT>
     Shape<T, U, CT>::Shape (CT          numRows,
                             CT          numCols,
+                            bool        isHexagonal,
                             const T    & initialValue)
-        : m_shapeName       ("Shape")
-        , m_matrix          (numRows,
-                             numCols,
-                             initialValue)
-        , m_showZeros       ()
+        : m_shapeName   ("Shape")
+        , m_matrix      (numRows,
+                         numCols,
+                         initialValue)
+        , m_isHexagonal (isHexagonal)
+        , m_showZeros   ()
     {
     }
 
     template <typename T, typename U, typename CT>
-    Shape<T, U, CT>::Shape (initializer_list<initializer_list<T>>    ili)
+    Shape<T, U, CT>::Shape (bool isHexagonal,
+                            initializer_list<initializer_list<T>>    ili)
      : m_shapeName      ("Shape")
      , m_matrix         (0u,0u)
+     , m_isHexagonal    (isHexagonal)
      , m_showZeros      ()
     {
         size_t roi{};
@@ -127,6 +136,12 @@ namespace Geom {
     CT Shape<T, U, CT>::NumCols () const
     {
         return m_matrix.ColSize();
+    }
+
+    template <typename T, typename U, typename CT>
+    bool Shape<T, U, CT>::IsHexagonal () const
+    {
+        return m_isHexagonal;
     }
 
     template <typename T, typename U, typename CT>
@@ -259,12 +274,20 @@ namespace Geom {
     {
         constexpr bool IsBool{ std::is_same<T, bool>::value };
         constexpr bool IsChar{ std::is_same<T, char>::value };
-        constexpr size_t sw = (IsBool || IsChar) ? 1 : 4;
+        constexpr size_t sw0 = (IsBool || IsChar) ? 1 : 4;
+        const size_t sw = shape.IsHexagonal() ? 2 * sw0 : sw0;
         stringstream sos;
         sos << shape.GetShapeName() << " = \n";
         string prep{ "          " };
+        bool isEvenRow{};
         for (auto& row : shape.Matrix().GetRows()) {
             sos << prep;
+            if (shape.IsHexagonal()) {
+                if (isEvenRow) {
+                    sos << setw(sw0) << ' ';
+                }
+                isEvenRow = !isEvenRow;
+            }
             for (auto element : row.Elements()) {
                 if (shape.ShowZeros() || element) {
                     sos << setw(sw) << U(element);

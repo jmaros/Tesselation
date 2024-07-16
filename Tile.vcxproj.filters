@@ -70,4 +70,15 @@
     <Text Include="CmakeLists.txt" />
     <Text Include="CMakeCache.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Hexagonal-2024-04-04-shapes.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Munkaterulet6.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="TileParts6.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

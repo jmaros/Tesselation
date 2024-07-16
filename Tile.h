@@ -30,7 +30,7 @@ namespace Nessie {
     using ShapeCollections  = vector<ShapeCollection>;
     using TableResultChars  = Geom::Shape<char>;
 
-        struct SolutionStep {
+    struct SolutionStep {
         explicit SolutionStep (const TableResult& tableResult)
          :  m_indexOfShapeSet   ()
          ,  m_shapeIndexInSet   ()

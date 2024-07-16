@@ -38,94 +38,124 @@ namespace Nessie {
     // The negative numbers are placeholders for the monthes
     // The positive numbers specify the position of the given day on the table
     const TableLayout MainTable = {
-        {  -1,  -2,  -3,  -4,  -5,  -6,   0 },
-        {  -7,  -8,  -9, -10, -11, -12,   0 },
-        {  +1,  +2,  +3,  +4,  +5,  +6,  +7 },
-        {  +8,  +9, +10, +11, +12, +13, +14 },
-        { +15, +16, +17, +18, +19, +20, +21 },
-        { +22, +23, +24, +25, +26, +27, +28 },
-        { +29, +30, +31,   0,   0,   0,   0 }
+        false,
+        {
+            {  -1,  -2,  -3,  -4,  -5,  -6,   0 },
+            {  -7,  -8,  -9, -10, -11, -12,   0 },
+            {  +1,  +2,  +3,  +4,  +5,  +6,  +7 },
+            {  +8,  +9, +10, +11, +12, +13, +14 },
+            { +15, +16, +17, +18, +19, +20, +21 },
+            { +22, +23, +24, +25, +26, +27, +28 },
+            { +29, +30, +31,   0,   0,   0,   0 }
+        }
     };
 
     // The same as before, plus 100 for not used, 101 for Sunday, 102 for Monday, ...., 107 for Saturday
     const TableLayout MainTable6 = {
-        {   0,   0,   0,   0,  -5,   0,  -6,   0, 100,   0,  -7,   0,  -8,   0,   0,   0,   0 },
-        {   0,   0,   0,  -4,   0, 101,   0, 102,   0, 103,   0, 104,   0,  -9,   0,   0,   0 },
-        {   0,   0,  -3,   0, 100,   0, 105,   0, 106,   0, 107,   0, 100,   0, -10,   0,   0 },
-        {   0,  -2,   0,   1,   0,   2,   0,   3,   0,   4,   0,   5,   0,   6,   0, -11,   0 },
-        {  -1,   0,   7,   0,   8,   0,   9,   0,  10,   0,  11,   0,  12,   0,  13,   0, -12 },
-        {   0, 100,   0,  14,   0,  15,   0,  16,   0,  17,   0,  18,   0,  19,   0, 100,   0 },
-        {   0,   0, 100,   0,  20,   0,  21,   0,  22,   0,  23,   0,  24,   0, 100,   0,   0 },
-        {   0,   0,   0, 100,   0,  25,   0,  26,   0,  27,   0,  28,   0, 100,   0,   0,   0 },
-        {   0,   0,   0,   0, 100,   0,  29,   0,  30,   0,  31,   0, 100,   0,   0,   0,   0 },
+        true,
+        {
+            {   0,   0,  -5,  -6, 100,  -7,  -8,   0,   0 },
+              {   0,  -4, 101, 102, 103, 104,  -9,   0,   0 },
+            {   0,  -3, 100, 105, 106, 107, 100, -10,   0 },
+              {  -2,   1,   2,   3,   4,   5,   6, -11,   0 },
+            {  -1,   7,   8,   9,  10,  11,  12,  13, -12 },
+              { 100,  14,  15,  16,  17,  18,  19, 100,   0 },
+            {   0, 100,  20,  21,  22,  23,  24, 100,   0 },
+              {   0, 100,  25,  26,  27,  28, 100,   0,   0 },
+            {   0,   0, 100,  29,  30,  31, 100,   0,   0 },
+        }
     };
 
     const ShapeCollection Shapes = {
+        { false,
+            {{ 1, 0, 1 },
+             { 1, 1, 1 }}},    // sh01
 
-        {{ 1, 0, 1 },
-         { 1, 1, 1 }},      // sh01
+        { false,
+          {{ 1, 1, 1 },
+           { 1, 1, 1 }}},     // sh02
 
-        {{ 1, 1, 1 },
-         { 1, 1, 1 }},      // sh02
+        { false,
+          {{ 1, 1, 1 },
+           { 1, 1, 0 }}},     // sh03
 
-        {{ 1, 1, 1 },
-         { 1, 1, 0 }},      // sh03
+        { false,
+          {{ 1, 0, 0 },
+           { 1, 0, 0 },
+           { 1, 1, 1 }}},     // sh04
 
-        {{ 1, 0, 0 },
-         { 1, 0, 0 },
-         { 1, 1, 1 }},      // sh04
+        { false,
+          {{ 1, 1, 0 },
+           { 0, 1, 0 },
+           { 0, 1, 1 }}},     // sh05
 
-        {{ 1, 1, 0 },
-         { 0, 1, 0 },
-         { 0, 1, 1 }},      // sh05
+        { false,
+          {{ 1, 1, 1, 1 },
+           { 0, 1, 0, 0 }}},  // sh06
 
-        {{ 1, 1, 1, 1 },
-         { 0, 1, 0, 0 }},   // sh06
+        { false,
+          {{ 1, 1, 1, 0 },
+           { 0, 0, 1, 1 }}},  // sh07
 
-        {{ 1, 1, 1, 0 },
-         { 0, 0, 1, 1 }},   // sh07
-
-        {{ 1, 1, 1, 1 },
-         { 1, 0, 0, 0 }}    // sh08
+        { false,
+          {{ 1, 1, 1, 1 },
+           { 1, 0, 0, 0 }}}   // sh08
     };
 
+    // See at: Hexagonal-2024-04-04-shapes.jpg
+    // ' denotes mirrored to horizontal axis
+    // " denotes mirrored to vertical axis
+
+    // Elements of even rows are shifted right by a half column distance
+
     const ShapeCollection Shape6s = {
+        
+        {   true,
+            {{ 1, 1, 1, 1, 1 }}}, // 6sh01 - A
 
-        {{ 1, 0, 1, 0, 1, 0, 1, 0, 1 }},    // sh01
+        {   true,
+            {{ 1, 1, 0 },
+               { 1, 1, 1 }}},     // 6sh02' - B
 
-        {{ 0, 0, 0, 1, 0, 1 },
-         { 1, 0, 1, 0, 1, 0 }},             // sh02
+        {   true,
+            {{ 1, 1, 1, 0 },
+              { 0, 0, 1, 1 }}},   // 6sh03 - C
 
-        {{ 0, 0, 0, 1, 0, 1, 0, 1 },
-         { 1, 0, 1, 0, 0, 0, 0, 0 }},       // sh03
+        {   true,
+            {{ 1, 1, 1, 1 },
+               { 0, 0, 0, 1 }}},  // 6sh04' - D
 
-        {{ 1, 0, 1, 0, 1, 0, 1, 0 },
-         { 0, 0, 0, 0, 0, 0, 0, 1 }},       // sh04
+        {   true,
+            {{ 1, 1, 1, 0 },
+              { 0, 1, 1, 1 }}},   // 6sh05 - E
 
-        {{ 1, 0, 1, 0, 1, 0, 0, 0 },
-         { 0, 0, 0, 1, 0, 1, 0, 1 }},       // sh05
+        {   true,
+            {{ 1, 1, 1 },
+              { 1, 1, 1 }}},      // 6sh06' - F
 
-        {{ 0, 1, 0, 1, 0, 1 },
-         { 1, 0, 1, 0, 1, 0 }},             // sh06
+        {   true,
+            {{ 1, 1, 1 },
+              { 1, 1, 0 }}},      // 6sh07' - G
 
-        {{ 0, 1, 0, 1, 0 },
-         { 1, 0, 1, 0, 1 }},                // sh07
+        {   true,
+            {{ 1, 1, 0, 0 },
+               { 0, 1, 0, 0 },
+             { 0, 0, 1, 1 }}},    // 6sh08' - H
 
-        {{ 1, 0, 0, 0, 0, 0, 0 },
-         { 0, 1, 0, 1, 0, 1, 0 },
-         { 0, 0, 0, 0, 0, 0, 1 }},          // sh08
+        {   true,
+            {{ 1, 1, 1, 0 },
+               { 0, 0, 1, 0 },
+             { 0, 0, 0, 1 }}},    // 6sh09" - I
 
-        {{ 1, 0, 0, 0, 0, 0, 0 },
-         { 0, 1, 0, 0, 0, 0, 0 },
-         { 0, 0, 1, 0, 1, 0, 1 }},          // sh09
+        {   true,
+            {{ 1, 1 },
+               { 1, 0 },
+             { 1, 1 }}},          // 6sh10 - J
 
-        {{ 1, 0, 1 },
-         { 0, 1, 0 },
-         { 1, 0, 1 }},                      // sh10
-
-        {{ 0, 0, 1, 0, 0 },
-         { 0, 1, 0, 1, 0 },
-         { 1, 0, 1, 0, 1 }}                 // sh11
+        {   true,
+            {{ 1, 1, 1 },
+               { 1, 1, 0 },
+             { 0, 1, 0 }}}        // 6sh11 - K
 
     };
 
@@ -140,13 +170,15 @@ namespace Nessie {
      , m_shapes             (shapes)
      , m_options            (options)
      , m_tableShape         (table.NumRows(),
-                             table.NumCols())
+                             table.NumCols(),
+                             options.IsHexagonal())
      , m_monthMap           ()
      , m_dayMap             ()
      , m_dayOfWeekMap       ()
      , m_shapeCollections   ()
      , m_tableResult        (table.NumRows(),
-                             table.NumCols())
+                             table.NumCols(),
+                             options.IsHexagonal())
      , m_solutions          ()
     {
         // fill m_shapesSet so that it will contain all the different shapes
@@ -273,6 +305,7 @@ namespace Nessie {
         stringstream        srs;
         TableResultChars    result(m_tableResult.NumRows(),
                                    m_tableResult.NumCols(),
+                                   m_tableResult.IsHexagonal(),
                                    ' ');
 
         for (auto& solStep : solution) {
@@ -280,6 +313,7 @@ namespace Nessie {
             const TableResult& theShape{ shapes[solStep.m_shapeIndexInSet] };
             TableResultChars chrep(theShape.NumRows(),
                                    theShape.NumCols(),
+                                   theShape.IsHexagonal(),
                                    ' ');
 
             for (size_t r = 0; r < chrep.NumRows(); ++r) {

@@ -191,6 +191,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Hexagonal-2024-04-04-shapes.jpg" />
+    <Image Include="Munkaterulet6.jpg" />
+    <Image Include="TileParts6.jpg" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
