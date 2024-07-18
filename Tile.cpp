@@ -205,7 +205,11 @@ namespace Nessie {
                             auto oriShapeRot300 = AddRotated60(oriShapeRot240);
                         };
 
+#if defined (VERBOSE)
+                    bool verbose = true;
+#else
                     bool verbose = false;
+#endif
                     if (verbose) {
                         cout << "Hexagonal Shape Set-" << ++seti
                              << "(" << shapeSet.size()

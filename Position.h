@@ -89,11 +89,11 @@ ostream& operator << (ostream             & os,
 {
     stringstream sos;
     sos << "Position = (";
-    sos << pos.GetRowIndex();
+    sos << setw(2) << pos.GetRowIndex();
     sos << ", ";
-    sos << pos.GetColIndex();
+    sos << setw(2) << pos.GetColIndex();
     sos << ")";
-    sos << endl;
+    // sos << endl;
     os << sos.str();
     return os;
 }

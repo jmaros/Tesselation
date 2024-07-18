@@ -151,17 +151,25 @@ namespace LinAlg {
     template <typename T, typename ST>
     Matrix<T, ST> Matrix<T, ST>::CreateSubMatrix (const BoundingBox<ST>     & bb) const
     {
-        ST rLow = 0;
-        ST cLow = 0;
-        // Extract non-empty submatrix by using the bounding box of the non-empty elements
-        Matrix<T, ST> result(bb.RowNum() + rLow, bb.ColNum() + cLow, m_initialValue);
-        Position<ST> posOffset(bb.GetMinRow(), bb.GetMinCol());
-        for (ST dstRowIndex = 0; dstRowIndex < bb.RowNum(); ++dstRowIndex) {
-            for (ST dstColIndex = 0; dstColIndex < bb.ColNum(); ++dstColIndex) {
-                Position<ST>    dstPos(dstRowIndex + rLow, dstColIndex + cLow);
+        const ST rLowSrc = bb.GetMinRow();
+        const ST cLowSrc = bb.GetMinCol();
+        const ST rLowDst = bb.GetMinRow() % 2;
+        const ST cLowDst = 0;
+        const ST rLim = bb.RowNum() + rLowDst;
+        const ST cLim = bb.ColNum();
+        const Position<ST> posOffset(rLowSrc - rLowDst, cLowSrc);
+        // Extract non-empty submatrix by using the corrected bounding box of the non-empty elements
+        Matrix<T, ST> result(rLim, cLim, m_initialValue);
+        for (ST dstRowIndex = rLowDst; dstRowIndex < rLim; ++dstRowIndex) {
+            for (ST dstColIndex = cLowDst; dstColIndex < cLim; ++dstColIndex) {
+                Position<ST>    dstPos(dstRowIndex, dstColIndex);
                 Position<ST>    srcPos{ dstPos + posOffset };
                 if (IsLegalPosition(srcPos)) {
                     result.SetData(dstPos, Value(srcPos));
+                } else {
+                    cout << "Error: at Matrix<T, ST>::CreateSubMatrix"
+                            " out of bound src-" << srcPos << " dst-" << dstPos << endl;
+                    return result;
                 }
             }
         }
@@ -170,41 +178,62 @@ namespace LinAlg {
 
     // Extract non-empty submatrix of the rotated matrix
     // by using the bounding box of the non-empty elements
+    // of the matrix representation of hexagonal arrangement,
+    // where all even rows are shifted left by a half column distance
     template <typename T, typename ST>
     Matrix<T, ST> Matrix<T, ST>::CreateRotatedBy60Deg () const
     {
-        ST rotSize = (RowSize() + (RowSize() % 2) + ColSize() + (ColSize() % 2));
+        const ST sumSizes = { RowSize() + ColSize() };
+        const ST rotatedMiddle = { sumSizes + (sumSizes % 2) };
+        const ST rotatedSizeLimit = { 2 * rotatedMiddle };
+
+#if defined (VERBOSE)
+        bool verbose = true;
+#else
         bool verbose = false;
+#endif
+
         if (verbose) {
-            cout << " RowSize() = " << RowSize()
-                 << " ColSize() = " << ColSize()
-                 << " rotSize = " << rotSize << endl;
+            cout << " RowSize() = "        << setw(2) << RowSize()
+                 << " ColSize() = "        << setw(2) << ColSize()
+                 << " rotatedMiddle = "    << setw(2) << rotatedMiddle
+                 << " rotatedSizeLimit = " << setw(2) << rotatedSizeLimit << endl;
         }
-        Matrix<T, ST> rotatedBy60Deg(2 * rotSize, 2 * rotSize, m_initialValue);
+        // Create a big enough matrix to accomodate the  rotatated shape for any rotation angle
+        Matrix<T, ST> rotatedBy60Deg(rotatedSizeLimit, rotatedSizeLimit, m_initialValue);
         BoundingBox<ST> dstBB;
-        double          xFactor{ cos(Ang60InRad) };
-        double          yFactor{ sin(Ang60InRad) };
+        double          xFactor{ 1.0 }; // same as 2.0 * cos(Ang60InRad)
+        double          xOffset{ xFactor * cos(Ang60InRad) };
+        double          yFactor{ xFactor * sin(Ang60InRad) };
         for (ST srcRowIndex = 0; srcRowIndex < RowSize(); ++srcRowIndex) {
             for (ST srcColIndex = 0; srcColIndex < ColSize(); ++srcColIndex) {
                 Position<ST>    srcPos(srcRowIndex, srcColIndex);
                 if (!IsEmptyPosition(srcPos)) {
-                    P3Vector        originalPoint{ srcColIndex * xFactor, srcRowIndex * yFactor };
-                    P3Vector        rotatedPoint { originalPoint.Rotate2D(Ang60InRad) };
-                    ST dstRowIndex = ST((rotatedPoint.Y() / yFactor) + rotSize + 0.5);
-                    ST dstColIndex = ST((rotatedPoint.X() / xFactor) + rotSize + 0.5);
-                    Position<ST>    dstPos(dstRowIndex, dstColIndex);
+                    // Calculate the real coordinates
+                    const double      opx{ srcColIndex * xFactor + (srcRowIndex % 2) * xOffset };
+                    const double      opy{ srcRowIndex * yFactor };
+                    const P3Vector    originalPoint{ opx, opy };
+                    // rotate the represented point by 60 degree
+                    const P3Vector    rotatedPoint { originalPoint.Rotate2D(Ang60InRad) };
+                    const double      dstRowExpression = (rotatedPoint.Y() / yFactor) + rotatedMiddle;
+                    const ST          dstRowIndex = ST(dstRowExpression);
+                    const double      dstColExpression = ((rotatedPoint.X() - (dstRowIndex % 2) * xOffset) / xFactor) + rotatedMiddle;
+                    const ST          dstColIndex = ST(dstColExpression);
+                    // get the matrix indices in the result matrix of the rotated point
+                    Position<ST>    dstPos(dstColIndex, dstRowIndex);
                     if (verbose) {
-                        cout << " originalPoint-{" << originalPoint.X() << ", " << originalPoint.Y() << "}"
-                             << " rotatedPoint-{"  << rotatedPoint.X()  << ", " << rotatedPoint.Y()  << "}"
-                             << endl;
-                        cout << " src-" << srcPos
+                        cout << " originalPoint-{" << setw(8) << originalPoint.X() << ", " << setw(8) << originalPoint.Y() << "}"
+                             << " rotatedPoint-{"  << setw(8) << rotatedPoint.X()  << ", " << setw(8) << rotatedPoint.Y()  << "}"
+                             << " src-" << srcPos
                              << " dst-" << dstPos
+                             << " dstCalcPos = (" << setw(8) << dstRowExpression << ", " << setw(8) << dstColExpression << ")"
                              << endl;
                     }
+                    // calculate the bounding box
                     dstBB.AddPosition(dstPos);
                     bool isRot60Succ = rotatedBy60Deg.SetData(dstPos, Value(srcPos));
                     if (!isRot60Succ) {
-                        cout << "Rotate failed!" << endl;
+                        cout << "Rotate failed for src-" << srcPos  << "!" << endl;
                         return rotatedBy60Deg;
                     }
                 }

@@ -164,7 +164,7 @@ namespace Nessie
                     m_opted.m_askedForHelp = true;
                     break;
                 case 'r':
-                    // verbose
+                    // random
                     m_opted.m_random = true;
                     break;
                 case 's':
