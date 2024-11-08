@@ -206,7 +206,6 @@ namespace Tile
             if (TestTableValue(x1, y - 1) == 0 && !tableHashSet.Contains(ToHashValue(x1, y - 1))) {
                 neighboursList.Add(new Pair<int>(x1, y - 1));
             }
-            x1++;
             if (TestTableValue(x1 + 1, y - 1) == 0 && !tableHashSet.Contains(ToHashValue(x1 + 1, y - 1))) {
                 neighboursList.Add(new Pair<int>(x1 + 1, y - 1));
             }
@@ -227,48 +226,54 @@ namespace Tile
 
         private bool CheckIslands ()
         {
-            HashSet<int> tableHashSet = new HashSet<int>();
+            HashSet<int> tableHashSetCheck = new HashSet<int>();
+            HashSet<int> tableHashSetAdd = new HashSet<int>();
            
 
             for (int y = 0; y < 9; ++y)
             {
                 for (int x = 0; x < 9; ++x)
                 {
-                    if (!tableHashSet.Contains(ToHashValue (x, y)) && TestTableValue(x, y) == 0)
+                    if (!tableHashSetCheck.Contains(ToHashValue (x, y)) && TestTableValue(x, y) == 0)
                     {
                         List<Pair<int>> pairList = new List<Pair<int>> ();
                         List<Pair<int>> neighboursList = new List<Pair<int>>();
 
-                        tableHashSet.Add(ToHashValue(x, y));
+                        tableHashSetCheck.Add(ToHashValue(x, y));
+                        tableHashSetAdd.Add(ToHashValue(x, y));
                         pairList.Add(new Pair<int>(x, y));
 
-                        CheckNeighbours(ref tableHashSet, ref neighboursList, x, y);
+                        CheckNeighbours(ref tableHashSetCheck, ref neighboursList, x, y);
 
                         while (neighboursList.Count > 0) {
 
                             foreach (Pair<int>  pair in neighboursList)
                             {
-                                if (!tableHashSet.Contains(ToHashValue(pair.Value1, pair.Value2))) {
+                                if (!tableHashSetAdd.Contains(ToHashValue(pair.Value1, pair.Value2))) {
                                     pairList.Add(pair);
+                                    tableHashSetAdd.Add(ToHashValue(pair.Value1, pair.Value2));
                                 }
                             }
                             neighboursList.Clear ();
 
-                            foreach (Pair<int> pair in pairList)
+                            //foreach (Pair<int> pair in pairList)
                             {
                                 //tableHashSet
                             }
-                            foreach (Pair<int> pair in neighboursList)
+                            foreach (Pair<int> pair in pairList)
                             {
-                                if (!tableHashSet.Contains (ToHashValue(pair.Value1, pair.Value2))) {
-                                    CheckNeighbours(ref tableHashSet, ref neighboursList, pair.Value1, pair.Value2);
+                                if (!tableHashSetCheck.Contains (ToHashValue(pair.Value1, pair.Value2))) {
+                                    tableHashSetCheck.Add(ToHashValue(pair.Value1, pair.Value2));
+                                    CheckNeighbours(ref tableHashSetCheck, ref neighboursList, pair.Value1, pair.Value2);
+                                    if (neighboursList.Count > 0)
+                                        break;
                                 }
                             }
                         }
                         if (pairList.Count < 5)
                         {
-                            Console.WriteLine($"CheckIslands: {pairList.Count}");
-                            DumpTable();
+                            //Console.WriteLine($"CheckIslands: {x}, {y} = {pairList.Count}");
+                            //DumpTable();
                             return false;
                         }
                     }
@@ -332,7 +337,7 @@ namespace Tile
             foreach (Pair<int>  pair in pairList)
             {
                 SetTable (shapeIndex, pair);
-            }/*
+            }
             if (CheckIslands() == false)
             {
                 foreach (Pair<int> pair in pairList)
@@ -340,7 +345,7 @@ namespace Tile
                     SetTable(0, pair);
                 }
                 return false;
-            }*/
+            }
 
             shapeStatusList.Add(new ShapeStatus(shapeIndex, new Pair<int>(x, y), r));
             // remove later begin
@@ -417,7 +422,7 @@ namespace Tile
             shapeStatusList.RemoveAt(shapeStatusList.Count - 1);
             RemoveShapeFromTable(stepBackStatus.shapeIndex);
 
-            if (stepBackCounter % 1000000 == 0)
+            if (stepBackCounter % 100000 == 0)
             {
                 Console.WriteLine($"StepBack {stepBackCounter}");
                 foreach(ShapeStatus stat in shapeStatusList)
