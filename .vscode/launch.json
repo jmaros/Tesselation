@@ -1,7 +1,0 @@
-{
-    "type": "by-gdb",
-    "request": "launch",
-    "name": "Launch(gdb)",
-    "program": "bin/${fileBasenameNoExtension}.exe",
-    "cwd": "${workspaceRoot}"
-}
