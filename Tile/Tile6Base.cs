@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Tile
 {
-    internal class Tile6
+    internal class Tile6Base
     {
         int[,] table = new int[9, 9];
 
@@ -26,20 +25,22 @@ namespace Tile
 
         List<Pair<int>> pairsInhibit = new List<Pair<int>>();
 
-        List<Pair<int>> pairsMonthList = new List<Pair<int>>();
-        List<Pair<int>> pairsWeekDayList = new List<Pair<int>>();
-        List<Pair<int>> pairsDayList = new List<Pair<int>>();
-
         List<ShapeStatus> shapeStatusList = new List<ShapeStatus>();
 
         bool stepBack = false;
         int stepBackCounter = 0;
-        ShapeStatus stepBackStatus = new ShapeStatus ();
+        ShapeStatus stepBackStatus = new ShapeStatus();
 
-        TimerTest timerTest = new TimerTest ();
-        long elapsedTotal = 0;
+        protected TimerTest timerTest { get; }
+        protected long elapsedTotal;
 
-        private void InitTable (int month, int day, int weekDay)
+        public Tile6Base ()
+        {
+            timerTest = new TimerTest();
+            elapsedTotal = 0;
+        }
+
+        protected void InitTableBase()
         {
             pairsInhibit.Add(new Pair<int>(0, 0));
             pairsInhibit.Add(new Pair<int>(1, 0));
@@ -78,82 +79,14 @@ namespace Tile
             listOfShapes.Add(shape9);
             listOfShapes.Add(shape10);
             listOfShapes.Add(shape11);
-
-            pairsMonthList.Add(new Pair<int>(0, 4)); // 1
-            pairsMonthList.Add(new Pair<int>(0, 3)); // 2
-            pairsMonthList.Add(new Pair<int>(1, 2)); // 3
-            pairsMonthList.Add(new Pair<int>(1, 1)); // 4
-            pairsMonthList.Add(new Pair<int>(2, 0)); // 5
-            pairsMonthList.Add(new Pair<int>(3, 0)); // 6
-            
-            pairsMonthList.Add(new Pair<int>(5, 0)); // 7
-            pairsMonthList.Add(new Pair<int>(6, 0)); // 8
-            pairsMonthList.Add(new Pair<int>(6, 1)); // 9
-            pairsMonthList.Add(new Pair<int>(7, 2)); // 10
-            pairsMonthList.Add(new Pair<int>(7, 3)); // 11
-            pairsMonthList.Add(new Pair<int>(8, 4)); // 12
-
-            pairsWeekDayList.Add(new Pair<int>(2, 1));
-            pairsWeekDayList.Add(new Pair<int>(3, 1));
-            pairsWeekDayList.Add(new Pair<int>(4, 1));
-            pairsWeekDayList.Add(new Pair<int>(5, 1));
-            pairsWeekDayList.Add(new Pair<int>(3, 2));
-            pairsWeekDayList.Add(new Pair<int>(4, 2));
-            pairsWeekDayList.Add(new Pair<int>(5, 2));
-
-            pairsDayList.Add(new Pair<int>(1, 3));
-            pairsDayList.Add(new Pair<int>(2, 3));
-            pairsDayList.Add(new Pair<int>(3, 3));
-            pairsDayList.Add(new Pair<int>(4, 3));
-            pairsDayList.Add(new Pair<int>(5, 3));
-            pairsDayList.Add(new Pair<int>(6, 3));
-
-            pairsDayList.Add(new Pair<int>(1, 4));
-            pairsDayList.Add(new Pair<int>(2, 4));
-            pairsDayList.Add(new Pair<int>(3, 4));
-            pairsDayList.Add(new Pair<int>(4, 4));
-            pairsDayList.Add(new Pair<int>(5, 4));
-            pairsDayList.Add(new Pair<int>(6, 4));
-            pairsDayList.Add(new Pair<int>(7, 4));
-
-            pairsDayList.Add(new Pair<int>(1, 5));
-            pairsDayList.Add(new Pair<int>(2, 5));
-            pairsDayList.Add(new Pair<int>(3, 5));
-            pairsDayList.Add(new Pair<int>(4, 5));
-            pairsDayList.Add(new Pair<int>(5, 5));
-            pairsDayList.Add(new Pair<int>(6, 5));
-
-            pairsDayList.Add(new Pair<int>(2, 6));
-            pairsDayList.Add(new Pair<int>(3, 6));
-            pairsDayList.Add(new Pair<int>(4, 6));
-            pairsDayList.Add(new Pair<int>(5, 6));
-            pairsDayList.Add(new Pair<int>(6, 6));
-
-            pairsDayList.Add(new Pair<int>(2, 7));
-            pairsDayList.Add(new Pair<int>(3, 7));
-            pairsDayList.Add(new Pair<int>(4, 7));
-            pairsDayList.Add(new Pair<int>(5, 7));
-
-            pairsDayList.Add(new Pair<int>(3, 8));
-            pairsDayList.Add(new Pair<int>(4, 8));
-            pairsDayList.Add(new Pair<int>(5, 8));
-
-            var pairMonth = pairsMonthList[month - 1];
-            var pairDay = pairsDayList[day - 1];
-            var pairWeekDay = pairsWeekDayList[weekDay - 1];
-
-            SetTable(0xe, pairMonth);
-            SetTable(0xe, pairDay);
-            SetTable(0xe, pairWeekDay);
-
         }
 
-        private void SetTable (int value, Pair<int> pair)
+        protected void SetTable(int value, Pair<int> pair)
         {
             table[pair.Value2, pair.Value1] = value;
         }
 
-        private void DumpTable()
+        protected void DumpTable()
         {
             Console.WriteLine("Dump table - begin");
             for (int y = 0; y < 9; ++y)
@@ -162,8 +95,9 @@ namespace Tile
                 {
                     if (y % 2 == 0)
                     {
-                        Console.Write($"{table[y,x].ToString("X")}  ");
-                    } else
+                        Console.Write($"{table[y, x].ToString("X")}  ");
+                    }
+                    else
                     {
                         Console.Write($" {table[y, x].ToString("X")} ");
                     }
@@ -173,27 +107,27 @@ namespace Tile
             Console.WriteLine("Dump table - end");
         }
 
-        private bool TestTableIndex (int x, int y)
+        bool TestTableIndex(int x, int y)
         {
             if (x < 0 || y < 0 || x >= 9 || y >= 9)
                 return false;
             return true;
         }
 
-        int TestTableValue (int x, int y)
+        int TestTableValue(int x, int y)
         {
             if (TestTableIndex(x, y))
-                return table[y, x]; 
+                return table[y, x];
             else
                 return -1;
         }
 
-        int ToHashValue (int x, int y)
+        int ToHashValue(int x, int y)
         {
             return x + y * 10;
         }
 
-        private int CheckNeighbours (ref HashSet<int> tableHashSet, ref List<Pair<int>> neighboursList, int x, int y)
+        int CheckNeighbours(ref HashSet<int> tableHashSet, ref List<Pair<int>> neighboursList, int x, int y)
         {
             int x1 = x;
             if (y % 2 == 0)
@@ -203,72 +137,86 @@ namespace Tile
 
             neighboursList.Clear();
 
-            if (TestTableValue(x1, y - 1) == 0 && !tableHashSet.Contains(ToHashValue(x1, y - 1))) {
+            if (TestTableValue(x1, y - 1) == 0 && !tableHashSet.Contains(ToHashValue(x1, y - 1)))
+            {
                 neighboursList.Add(new Pair<int>(x1, y - 1));
             }
-            x1++;
-            if (TestTableValue(x1 + 1, y - 1) == 0 && !tableHashSet.Contains(ToHashValue(x1 + 1, y - 1))) {
+            if (TestTableValue(x1 + 1, y - 1) == 0 && !tableHashSet.Contains(ToHashValue(x1 + 1, y - 1)))
+            {
                 neighboursList.Add(new Pair<int>(x1 + 1, y - 1));
             }
-            if (TestTableValue(x - 1, y) == 0 && !tableHashSet.Contains(ToHashValue(x1 - 1, y))) {
+            if (TestTableValue(x - 1, y) == 0 && !tableHashSet.Contains(ToHashValue(x1 - 1, y)))
+            {
                 neighboursList.Add(new Pair<int>(x - 1, y));
             }
-            if (TestTableValue(x + 1, y) == 0 && !tableHashSet.Contains(ToHashValue(x1 + 1, y))) {
+            if (TestTableValue(x + 1, y) == 0 && !tableHashSet.Contains(ToHashValue(x1 + 1, y)))
+            {
                 neighboursList.Add(new Pair<int>(x + 1, y));
             }
-            if (TestTableValue(x1, y + 1) == 0 && !tableHashSet.Contains(ToHashValue(x1, y + 1))) {
+            if (TestTableValue(x1, y + 1) == 0 && !tableHashSet.Contains(ToHashValue(x1, y + 1)))
+            {
                 neighboursList.Add(new Pair<int>(x1, y + 1));
             }
-            if (TestTableValue(x1 + 1, y + 1) == 0 && !tableHashSet.Contains(ToHashValue(x1 + 1, y + 1))) {
+            if (TestTableValue(x1 + 1, y + 1) == 0 && !tableHashSet.Contains(ToHashValue(x1 + 1, y + 1)))
+            {
                 neighboursList.Add(new Pair<int>(x1 + 1, y + 1));
             }
             return neighboursList.Count;
         }
 
-        private bool CheckIslands ()
+        bool CheckIslands()
         {
-            HashSet<int> tableHashSet = new HashSet<int>();
-           
+            HashSet<int> tableHashSetCheck = new HashSet<int>();
+            HashSet<int> tableHashSetAdd = new HashSet<int>();
+
 
             for (int y = 0; y < 9; ++y)
             {
                 for (int x = 0; x < 9; ++x)
                 {
-                    if (!tableHashSet.Contains(ToHashValue (x, y)) && TestTableValue(x, y) == 0)
+                    if (!tableHashSetCheck.Contains(ToHashValue(x, y)) && TestTableValue(x, y) == 0)
                     {
-                        List<Pair<int>> pairList = new List<Pair<int>> ();
+                        List<Pair<int>> pairList = new List<Pair<int>>();
                         List<Pair<int>> neighboursList = new List<Pair<int>>();
 
-                        tableHashSet.Add(ToHashValue(x, y));
+                        tableHashSetCheck.Add(ToHashValue(x, y));
+                        tableHashSetAdd.Add(ToHashValue(x, y));
                         pairList.Add(new Pair<int>(x, y));
 
-                        CheckNeighbours(ref tableHashSet, ref neighboursList, x, y);
+                        CheckNeighbours(ref tableHashSetCheck, ref neighboursList, x, y);
 
-                        while (neighboursList.Count > 0) {
+                        while (neighboursList.Count > 0)
+                        {
 
-                            foreach (Pair<int>  pair in neighboursList)
+                            foreach (Pair<int> pair in neighboursList)
                             {
-                                if (!tableHashSet.Contains(ToHashValue(pair.Value1, pair.Value2))) {
+                                if (!tableHashSetAdd.Contains(ToHashValue(pair.Value1, pair.Value2)))
+                                {
                                     pairList.Add(pair);
+                                    tableHashSetAdd.Add(ToHashValue(pair.Value1, pair.Value2));
                                 }
                             }
-                            neighboursList.Clear ();
+                            neighboursList.Clear();
 
-                            foreach (Pair<int> pair in pairList)
+                            //foreach (Pair<int> pair in pairList)
                             {
                                 //tableHashSet
                             }
-                            foreach (Pair<int> pair in neighboursList)
+                            foreach (Pair<int> pair in pairList)
                             {
-                                if (!tableHashSet.Contains (ToHashValue(pair.Value1, pair.Value2))) {
-                                    CheckNeighbours(ref tableHashSet, ref neighboursList, pair.Value1, pair.Value2);
+                                if (!tableHashSetCheck.Contains(ToHashValue(pair.Value1, pair.Value2)))
+                                {
+                                    tableHashSetCheck.Add(ToHashValue(pair.Value1, pair.Value2));
+                                    CheckNeighbours(ref tableHashSetCheck, ref neighboursList, pair.Value1, pair.Value2);
+                                    if (neighboursList.Count > 0)
+                                        break;
                                 }
                             }
                         }
                         if (pairList.Count < 5)
                         {
-                            Console.WriteLine($"CheckIslands: {pairList.Count}");
-                            DumpTable();
+                            //Console.WriteLine($"CheckIslands: {x}, {y} = {pairList.Count}");
+                            //DumpTable();
                             return false;
                         }
                     }
@@ -277,11 +225,11 @@ namespace Tile
             return true;
         }
 
-        private bool PlaceShape(int shapeIndex, List<int> shape, int x, int y, int r)
+        bool PlaceShape(int shapeIndex, List<int> shape, int x, int y, int r)
         {
             if (table[y, x] != 0)
                 return false;
-                
+
             bool ret = true;
             List<Pair<int>> pairList = new List<Pair<int>>();
             pairList.Add(new Pair<int>(x, y));
@@ -292,7 +240,7 @@ namespace Tile
                 int x2 = x1;
                 int y2 = y1;
                 int icLoc = (ic + r - 1) % 6;
-                switch(icLoc)
+                switch (icLoc)
                 {
                     case 0:
                         x2 = x1 + 1;
@@ -329,10 +277,10 @@ namespace Tile
                 x1 = x2;
                 y1 = y2;
             }
-            foreach (Pair<int>  pair in pairList)
+            foreach (Pair<int> pair in pairList)
             {
-                SetTable (shapeIndex, pair);
-            }/*
+                SetTable(shapeIndex, pair);
+            }
             if (CheckIslands() == false)
             {
                 foreach (Pair<int> pair in pairList)
@@ -340,7 +288,7 @@ namespace Tile
                     SetTable(0, pair);
                 }
                 return false;
-            }*/
+            }
 
             shapeStatusList.Add(new ShapeStatus(shapeIndex, new Pair<int>(x, y), r));
             // remove later begin
@@ -349,7 +297,7 @@ namespace Tile
             return ret;
         }
 
-        private bool PlaceShape (int shapeIndex, List<int> shape, int x, int y)
+        bool PlaceShape(int shapeIndex, List<int> shape, int x, int y)
         {
             bool ret = false;
             for (int r = 0; r < 6; ++r)
@@ -367,7 +315,7 @@ namespace Tile
             return ret;
         }
 
-        private bool PlaceShape(int shapeIndex, List<int> shape)
+        protected bool PlaceShape(int shapeIndex, List<int> shape)
         {
             bool ret = false;
             for (int y = 0; y < 9; ++y)
@@ -381,7 +329,7 @@ namespace Tile
                     }
                     if (table[y, x] == 0)
                     {
-                        ret = PlaceShape (shapeIndex, shape, x, y);
+                        ret = PlaceShape(shapeIndex, shape, x, y);
                         if (ret)
                             break;
                     }
@@ -392,7 +340,7 @@ namespace Tile
             return ret;
         }
 
-        void RemoveShapeFromTable (int shapeIndex)
+        void RemoveShapeFromTable(int shapeIndex)
         {
             for (int y = 0; y < 9; ++y)
             {
@@ -406,7 +354,7 @@ namespace Tile
             }
         }
 
-        private bool StepBack()
+        bool StepBack()
         {
             bool ret = true;
             if (shapeStatusList.Count == 0)
@@ -417,10 +365,10 @@ namespace Tile
             shapeStatusList.RemoveAt(shapeStatusList.Count - 1);
             RemoveShapeFromTable(stepBackStatus.shapeIndex);
 
-            if (stepBackCounter % 1000000 == 0)
+            if (stepBackCounter % 500000 == 0)
             {
                 Console.WriteLine($"StepBack {stepBackCounter}");
-                foreach(ShapeStatus stat in shapeStatusList)
+                foreach (ShapeStatus stat in shapeStatusList)
                 {
                     Console.WriteLine(stat.ToString());
                 }
@@ -436,10 +384,10 @@ namespace Tile
             return ret;
         }
 
-        private bool PlaceAllShapes ()
+        protected bool PlaceAllShapes()
         {
             bool ret = false;
-            
+
             for (int shapeIndex = 1; shapeIndex <= 11 && shapeIndex > 0; shapeIndex++)
             {
                 List<int> shape = listOfShapes[shapeIndex - 1];
@@ -454,18 +402,5 @@ namespace Tile
             return ret;
         }
 
-        public void Execute()
-        {
-            InitTable(11,8,6);
-            DumpTable();
-            bool result = PlaceAllShapes();
-            Console.WriteLine($"Execute:{result}");
-            long ms = timerTest.Check();
-
-            elapsedTotal += ms;
-            Console.WriteLine($"Timer total: {elapsedTotal}");
-
-            DumpTable();
-        }
     }
 }
