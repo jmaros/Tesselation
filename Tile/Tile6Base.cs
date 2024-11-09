@@ -34,6 +34,14 @@ namespace Tile
         protected TimerTest timerTest { get; }
         protected long elapsedTotal;
 
+        protected bool needFeedBack = false;
+
+        protected int lastX = 0;
+        protected int lastY = 0;
+        protected int lastR = 0;
+
+        protected List<Pair<int>> lastTerritory = new List<Pair<int>>();
+
         public Tile6Base ()
         {
             timerTest = new TimerTest();
@@ -291,6 +299,14 @@ namespace Tile
             }
 
             shapeStatusList.Add(new ShapeStatus(shapeIndex, new Pair<int>(x, y), r));
+
+            if (needFeedBack)
+            {
+                lastX = x;
+                lastY = y;
+                lastR = r;
+                lastTerritory = pairList;
+            }
             // remove later begin
             //DumpTable();
             // remove later end
@@ -384,9 +400,54 @@ namespace Tile
             return ret;
         }
 
+        protected bool PlaceOneShape(int shapeIndex,
+            ref List<ShapePosition> shapePositionList,
+            ref List<List<Pair<int>>> territoryList)
+        {
+            bool ret = false;
+            int x = 0, y = 0, r = 0;
+            HashSet<long> territoryHashSet = new HashSet<long>();
+            for (int i = 0; i < 50 * 6; ++i)
+            {
+                needFeedBack = true;
+                if (shapeIndex < 1 || shapeIndex > listOfShapes.Count)
+                    return false;
+                List<int> shape = listOfShapes[shapeIndex - 1];
+                ret = PlaceShape(shapeIndex, shape);
+                if (ret)
+                {
+                    long hashActual = HashUtility.GenerateHash(lastTerritory);
+                    if (territoryHashSet.Contains(hashActual))
+                    {
+                        //DumpTable();
+                        //Console.WriteLine($"PlaceOneShape index: {shapeIndex}, nr: {shapePositionList.Count} already have it");
+                    }
+                    else
+                    {
+                        territoryHashSet.Add(hashActual);
+                        ShapePosition pos = new ShapePosition(lastR, new Pair<int>(lastX, lastY));
+                        shapePositionList.Add(pos);
+                        territoryList.Add(lastTerritory);
+                        //Console.WriteLine($"PlaceOneShape index: {shapeIndex}, nr: {shapePositionList.Count}");
+                    }
+                }
+                StepBack();
+                if (lastX == x && lastY == y && lastR == r)
+                {
+                    break;
+                }
+                x = lastX;
+                y = lastY;
+                r = lastR;
+            }
+            return ret;
+        }
+
+
         protected bool PlaceAllShapes()
         {
             bool ret = false;
+            needFeedBack = false;
 
             for (int shapeIndex = 1; shapeIndex <= 11 && shapeIndex > 0; shapeIndex++)
             {

@@ -14,6 +14,8 @@ namespace Tile
         List<Pair<int>> pairsWeekDayList = new List<Pair<int>>();
         List<Pair<int>> pairsDayList = new List<Pair<int>>();
 
+        private static Semaphore semaphore = new Semaphore(1, 11);
+
         void InitTable(int month, int day, int weekDay)
         {
             InitTableBase();
@@ -87,8 +89,7 @@ namespace Tile
 
         }
 
-
-        public void Execute()
+        public void ExecuteAllShape()
         {
             InitTable(11,9,7);
             DumpTable();
@@ -98,6 +99,51 @@ namespace Tile
             Console.WriteLine($"Timer total: {elapsedTotalLocal}");
 
             DumpTable();
+        }
+
+        public void MultiTaskCall (int index, ref List<ShapePossiblePosition> sspList)
+        {
+            Console.WriteLine($"MultiTaskCall is:{index}");
+            ShapePossiblePosition spp = new ShapePossiblePosition(index);
+            spp.ExecuteOneShape();
+            semaphore.WaitOne();
+            try
+            {
+                Console.WriteLine($"Task {index} access.");
+                sspList.Add(spp);
+            }
+            finally
+            {
+                // Release the semaphore
+                Console.WriteLine($"Task {index} is leaving.");
+                semaphore.Release();
+            }
+        }
+
+        public void Execute()
+        {
+            TimerTest timerTest = new TimerTest();
+
+            List<ShapePossiblePosition> sppList = new List<ShapePossiblePosition>();
+            Thread[] threads = new Thread[11];
+
+            for (int si = 1; si <= 11; si++)
+            {
+                int currentValue = si;
+                threads[currentValue - 1] = new Thread(() => MultiTaskCall(currentValue, ref sppList));
+                threads[currentValue - 1].Start();
+            }
+
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+
+            Console.WriteLine($"ShapePossiblePosition time:{timerTest.Check()}");
+            foreach (ShapePossiblePosition ssp in sppList)
+            {
+                Console.WriteLine($"ShapePossiblePosition: {ssp.shapeIndex}, {ssp.shapePositionList.Count}");
+            }
         }
     }
 }

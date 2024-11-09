@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Tile
 {
-    internal class ShapePossiblePosition
+    internal class ShapePossiblePosition : Tile6Base
     {
         public int shapeIndex { get; }
-        public List<ShapePosition> shapePositionList { get; }
-        public List<List<Pair<int>>> territoryList { get; }
+        public List<ShapePosition> shapePositionList;
+        public List<List<Pair<int>>> territoryList;
         public ShapePossiblePosition(int shapeIndex)
         {
             shapePositionList = new List<ShapePosition>();
@@ -20,8 +20,20 @@ namespace Tile
 
         public bool Calculate ()
         {
+            InitTableBase();
             return true;
         }
 
+        public void ExecuteOneShape()
+        {
+            InitTableBase();
+            //DumpTable();
+            bool result = PlaceOneShape(shapeIndex, ref shapePositionList, ref territoryList);
+            Console.WriteLine($"Execute:{result}");
+            //long elapsedTotalLocal = elapsedTotal + timerTest.Check();
+            //Console.WriteLine($"Timer total: {elapsedTotalLocal}");
+
+            //DumpTable();
+        }
     }
 }
