@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+//using System.Diagnostics;
+//using System.Linq;
+//using System.Text;
+using System.Threading;
+
 
 namespace Tile
 {
@@ -14,7 +15,7 @@ namespace Tile
         List<Pair<int>> pairsWeekDayList = new List<Pair<int>>();
         List<Pair<int>> pairsDayList = new List<Pair<int>>();
 
-        private static Semaphore semaphore = new Semaphore(1, 11);
+        private static Semaphore semaphore = new Semaphore(1, 11, "Tile6");
 
         void InitTable(int month, int day, int weekDay)
         {
@@ -122,9 +123,9 @@ namespace Tile
 
         public void Execute()
         {
-            TimerTest timerTest = new TimerTest();
+            TimerTest timerTest = new();
 
-            List<ShapePossiblePosition> sppList = new List<ShapePossiblePosition>();
+            List<ShapePossiblePosition> sppList = new();
             Thread[] threads = new Thread[11];
 
             for (int si = 1; si <= 11; si++)
