@@ -22,14 +22,5 @@ namespace Tile
         {
             return $"({Value1}, {Value2})";
         }
-
-        public int Sort (Pair<int> pair1, Pair<int> pair2)
-        {
-            int diff = pair1.Value1 - pair2.Value1;
-            if (diff == 0)
-                diff = pair1.Value2 - pair2.Value2;
-
-            return diff;
-        }
     }
 }

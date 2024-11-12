@@ -13,8 +13,13 @@ namespace Tile
         List<Pair<int>> pairsMonthList = new List<Pair<int>>();
         List<Pair<int>> pairsWeekDayList = new List<Pair<int>>();
         List<Pair<int>> pairsDayList = new List<Pair<int>>();
+        ShapePossiblePosition shapePossiblePosition = new ShapePossiblePosition (0);
+        List<ShapePossiblePosition> shapePossiblePositionList = new List<ShapePossiblePosition>();
 
-        private static Semaphore semaphore = new Semaphore(1, 11);
+        const int ThreadNumber = 11;
+        public int month { get; set; }
+        public int mday { get; set; }
+        public int wday { get; set; }
 
         void InitTable(int month, int day, int weekDay)
         {
@@ -89,9 +94,9 @@ namespace Tile
 
         }
 
-        public void ExecuteAllShape()
+        public void ExecuteAllShape(int monthIn, int mdayIn, int wdayIn)
         {
-            InitTable(11,9,7);
+            InitTable(monthIn, mdayIn, wdayIn);
             DumpTable();
             bool result = PlaceAllShapes();
             Console.WriteLine($"Execute:{result}");
@@ -101,49 +106,152 @@ namespace Tile
             DumpTable();
         }
 
-        public void MultiTaskCall (int index, ref List<ShapePossiblePosition> sspList)
+        public bool CalculateOneShape()
         {
-            Console.WriteLine($"MultiTaskCall is:{index}");
-            ShapePossiblePosition spp = new ShapePossiblePosition(index);
-            spp.ExecuteOneShape();
-            semaphore.WaitOne();
-            try
-            {
-                Console.WriteLine($"Task {index} access.");
-                sspList.Add(spp);
-            }
-            finally
-            {
-                // Release the semaphore
-                Console.WriteLine($"Task {index} is leaving.");
-                semaphore.Release();
-            }
+            InitTableBase();
+            return true;
         }
 
-        public void Execute()
+        public void ExecuteOneShape(int shapeIndex)
+        {
+            //DumpTable();
+
+            //List<ShapePosition> spList = new List<ShapePosition>();
+            //List<List<Pair<int>>> tList = new List<List<Pair<int>>>();
+            List<ShapePosition> spList = shapePossiblePosition.shapePositionList;
+            List<List<Pair<int>>> tList = shapePossiblePosition.territoryList;
+
+            bool result = PlaceOneShape(shapeIndex, ref spList, ref tList);
+            Console.WriteLine($"Execute:{result}");
+
+            //long elapsedTotalLocal = elapsedTotal + timerTest.Check();
+            //Console.WriteLine($"Timer total: {elapsedTotalLocal}");
+
+            //DumpTable();
+            
+        }
+
+
+        public void PossiblePositionCall()
+        {
+            Console.WriteLine($"MultiTaskCall is:{shapePossiblePosition.shapeIndex}");
+            ExecuteOneShape(shapePossiblePosition.shapeIndex);
+        }
+
+        public void CalculatePossiblePosition(Tile6[] tile6Array)
         {
             TimerTest timerTest = new TimerTest();
+            Thread[] threads = new Thread[ThreadNumber];
 
-            List<ShapePossiblePosition> sppList = new List<ShapePossiblePosition>();
-            Thread[] threads = new Thread[11];
-
-            for (int si = 1; si <= 11; si++)
+            
+            for (int shapeIndex = 1; shapeIndex <= 11;)
             {
-                int currentValue = si;
-                threads[currentValue - 1] = new Thread(() => MultiTaskCall(currentValue, ref sppList));
-                threads[currentValue - 1].Start();
-            }
+                for (int tn = 0; tn < ThreadNumber && shapeIndex <= 11; tn++)
+                {
+                    int currentThreadIndex = tn;
+                    int currentSi = shapeIndex;
+                    tile6Array[currentThreadIndex] = new Tile6();
+                    tile6Array[currentThreadIndex].InitTableBase ();
+                    tile6Array[currentThreadIndex].tile6ID = shapeIndex;
+                    tile6Array[currentThreadIndex].shapePossiblePosition = new ShapePossiblePosition(shapeIndex);
+                    threads[currentThreadIndex] = new Thread(() => tile6Array[currentThreadIndex].PossiblePositionCall());
+                    threads[currentThreadIndex].Start();
+                    shapeIndex++;
+                }
+                foreach (var thread in threads)
+                {
+                    thread.Join();
+                }
+                foreach (var tile in tile6Array)
+                {
+                    Console.WriteLine($"ShapePossiblePosition: {tile.shapePossiblePosition.shapeIndex}, {tile.shapePossiblePosition.shapePositionList.Count}");
+                    shapePossiblePositionList.Add(tile.shapePossiblePosition);
+                }
 
-            foreach (var thread in threads)
-            {
-                thread.Join();
             }
 
             Console.WriteLine($"ShapePossiblePosition time:{timerTest.Check()}");
-            foreach (ShapePossiblePosition ssp in sppList)
+        }
+ 
+        public void PlaceAllShapesCall(ref List<ShapePossiblePosition> sppList)
+        {
+            TimerTest timerTest = new TimerTest();
+            //Tile6 tileThread = new Tile6();
+            InitTable(month, mday, wday);
+            //tileThread.DumpTable();
+            bool result = PlaceAllShapes(stepIndex, ref sppList);
+            //Console.WriteLine($"Execute:{result}");
+            if (result)
             {
-                Console.WriteLine($"ShapePossiblePosition: {ssp.shapeIndex}, {ssp.shapePositionList.Count}");
+                Console.WriteLine($"Done step index: {stepIndex}");
+                long elapsedTotalLocal = timerTest.Check();
+                Console.WriteLine($"Timer total: {elapsedTotalLocal}");
+                DumpTable();
             }
+
+        }
+
+        public void Execute(int monthIn, int mdayIn, int wdayIn)
+        {
+            month = monthIn;
+            mday = mdayIn;
+            wday = wdayIn;
+
+            //HashUtility.TestGenerateHashListPair();
+
+            //const int threadNums = ShapeNumber;
+            TimerTest timerTest = new TimerTest();
+            Tile6[] tile6Array = new Tile6[ThreadNumber];
+            CalculatePossiblePosition (tile6Array);
+
+            Thread[] threads = new Thread[ThreadNumber];
+
+            List<ShapePossiblePosition> sppList = new List<ShapePossiblePosition>();
+            sppList = shapePossiblePositionList;
+
+            int stepIndex = 0;
+            do {
+                for (int ti = 0; ti < ThreadNumber; ti++)
+                {
+                    int currentTi = ti;
+                    int currentStepIndex = stepIndex;
+                    tile6Array[currentTi] = new Tile6();
+                    tile6Array[currentTi].stepIndex = currentStepIndex;
+                    tile6Array[currentTi].tile6ID = currentStepIndex;
+                    tile6Array[currentTi].month = month;
+                    tile6Array[currentTi].mday = mday;
+                    tile6Array[currentTi].wday = wday;
+                    threads[currentTi] = new Thread(() => tile6Array[currentTi].PlaceAllShapesCall(ref sppList));
+                    threads[currentTi].Start();
+                    stepIndex++;
+                }
+
+                foreach (var thread in threads)
+                {
+                    thread.Join();
+                }
+                foreach(Tile6 tile in tile6Array)
+                {
+                    Console.WriteLine($"stepIndex: {tile.stepIndex}");
+                    Console.WriteLine($"id: {tile.tile6ID}");
+                    Console.WriteLine($"CntPlaceShape: {tile.GetCntPlaceShape()}");
+                    Console.WriteLine($"SipiListCountMax: {tile.GetSipiListCountMax()}");
+                    tile.DumpTable();
+                }
+
+                {
+                    long ms = timerTest.Check();
+                    elapsedTotal += ms;
+
+                    if (elapsedTotal % 1000 == 0)
+                    {
+                        Console.WriteLine($"stepIndex: {stepIndex}");
+                        Console.WriteLine($"Timer: {elapsedTotal}");
+                    }
+
+                }
+
+            } while ( stepIndex < shapePossiblePositionList[0].territoryList.Count);
         }
     }
 }
