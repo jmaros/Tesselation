@@ -618,11 +618,13 @@ namespace Tile
                             if (sipiList.Count > 2 && sipiListCountMax < sipiList.Count)
                             {
                                 sipiListCountMax = sipiList.Count;
+                                /*
                                 if (sipiListCountMax >= 11)
                                 {
                                     Console.WriteLine($"step:{sipiList[0].Value2}, sipiListCountMax:{sipiListCountMax}");
                                     DumpTable();
                                 }
+                                */
                             }
                         }
                         break;

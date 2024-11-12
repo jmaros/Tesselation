@@ -94,7 +94,7 @@ namespace Tile
         public void ExecuteAllShape(int monthIn, int mdayIn, int wdayIn)
         {
             InitTable(monthIn, mdayIn, wdayIn);
-            DumpTable();
+            //DumpTable();
             bool result = PlaceAllShapes();
             Console.WriteLine($"Execute:{result}");
             long elapsedTotalLocal = elapsedTotal + timerTest.Check();
@@ -227,6 +227,7 @@ namespace Tile
                 {
                     thread.Join();
                 }
+                /*
                 foreach(Tile6 tile in tile6Array)
                 {
                     Console.WriteLine($"stepIndex: {tile.stepIndex}");
@@ -235,7 +236,7 @@ namespace Tile
                     Console.WriteLine($"SipiListCountMax: {tile.GetSipiListCountMax()}");
                     tile.DumpTable();
                 }
-
+                */
                 {
                     long ms = timerTest.Check();
                     elapsedTotal += ms;
