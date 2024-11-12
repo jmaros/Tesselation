@@ -173,11 +173,11 @@ namespace Tile
             {
                 neighboursList.Add(new Pair<int>(x1 + 1, y - 1));
             }
-            if (TestTableValue(x - 1, y) == 0 && !tableHashSet.Contains(ToHashValue(x1 - 1, y)))
+            if (TestTableValue(x - 1, y) == 0 && !tableHashSet.Contains(ToHashValue(x - 1, y)))
             {
                 neighboursList.Add(new Pair<int>(x - 1, y));
             }
-            if (TestTableValue(x + 1, y) == 0 && !tableHashSet.Contains(ToHashValue(x1 + 1, y)))
+            if (TestTableValue(x + 1, y) == 0 && !tableHashSet.Contains(ToHashValue(x + 1, y)))
             {
                 neighboursList.Add(new Pair<int>(x + 1, y));
             }
@@ -424,7 +424,7 @@ namespace Tile
             bool ret = false;
             int x = 0, y = 0, r = 0;
             HashSet<long> territoryHashSet = new HashSet<long>();
-            for (int i = 0; i < 50 * 6; ++i)
+            for (int i = 0; i < 200 * 6; ++i)
             {
                 needFeedBack = true;
                 if (shapeIndex < 1 || shapeIndex > listOfShapes.Count)
