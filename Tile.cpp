@@ -202,7 +202,8 @@ namespace Nessie {
                     (void)shapeSet.insert(bothFlipped.CreateTransposed());
                 }
                 ShapeCollection shapeCollection;
-                for (auto& uniqueShape : shapeSet) {
+                shapeCollection.reserve(shapeSet.size());
+                for (const auto& uniqueShape : shapeSet) {
                     shapeCollection.push_back(uniqueShape);
                 }
                 m_shapeCollections.push_back(shapeCollection);
@@ -350,20 +351,25 @@ namespace Nessie {
     }
 
     // modifiers
-    bool Tile::Solve (Riddle     &riddle)
+    // Pseudocode plan for speeding up Tile::Solve (Riddle &riddle):
+    // 1. Avoid unnecessary copies of TableResult (use references or pointers where possible).
+    // 2. Use early exit as soon as a solution is found if not calculating all solutions.
+    // 3. Minimize repeated lookups and function calls inside tight loops.
+    // 4. Consider iterating only over valid positions (cells that can actually fit a shape).
+    // 5. Optionally, use a vector of available positions to avoid scanning the whole table each time.
+
+    bool Tile::Solve(Riddle &riddle)
     {
         SolutionStep* actualStepPtr = riddle.GetSolutionStepPtr();
-
         if (actualStepPtr == nullptr) {
             cout << "Unexpected failure!" << endl;
             return false;
         }
 
-        SolutionStep & actualStep = *actualStepPtr;
+        SolutionStep &actualStep = *actualStepPtr;
         size_t actualLevel = riddle.GetLevel();
 
-        if (riddle.GetLevel() == 0) {
-            // prepare the first step
+        if (actualLevel == 0) {
             if (m_options.Random()) {
                 RandomShuffle(m_shapeCollections);
                 for (auto& sc : m_shapeCollections) {
@@ -371,28 +377,40 @@ namespace Nessie {
                 }
             }
         }
-        TableResult savedTableResult = actualStep.m_tableResult;
-        for (auto row = 0u; row < m_tableResult.NumRows(); ++row) {
-            for (auto col = 0u; col < m_tableResult.NumCols(); ++col) {
-                // Set all the possible positions
-                auto    ioss{ actualStep.m_indexOfShapeSet };
-                auto    & currentShapeSet{ m_shapeCollections[ioss] };
-                for (size_t shIdxIS = 0; shIdxIS < currentShapeSet.size(); ++shIdxIS) {
-                    // Try to use the current shape's all possible rotations
+
+        // Avoid copying TableResult unless necessary
+        TableResult& tableResult = actualStep.m_tableResult;
+        TableResult savedTableResult = tableResult; // Only copy once per call
+
+        const size_t numRows = m_tableResult.NumRows();
+        const size_t numCols = m_tableResult.NumCols();
+        const auto ioss = actualStep.m_indexOfShapeSet;
+        auto& currentShapeSet = m_shapeCollections[ioss];
+        const size_t shapeSetSize = currentShapeSet.size();
+
+        // Precompute valid positions for this shape set (optional, for further speedup)
+        // std::vector<Position<size_t>> validPositions;
+        // for (size_t row = 0; row < numRows; ++row)
+        //     for (size_t col = 0; col < numCols; ++col)
+        //         validPositions.emplace_back(row, col);
+
+        for (size_t row = 0; row < numRows; ++row) {
+            for (size_t col = 0; col < numCols; ++col) {
+                Position<size_t>& pos = actualStep.m_position;
+                pos.SetPosition(row, col);
+                for (size_t shIdxIS = 0; shIdxIS < shapeSetSize; ++shIdxIS) {
                     actualStep.m_shapeIndexInSet = shIdxIS;
                     const auto& currentShape = currentShapeSet[shIdxIS];
-                    Position<size_t>& pos{ actualStep.m_position };
-                    pos.SetPosition(row, col);
-                    if (actualStep.m_tableResult.CanAccomodate(pos, currentShape)) {
-                        actualStep.m_tableResult.Accomodate(pos, currentShape);
-#if defined (VERBOSE)
-                        cout << riddle.GetLevel() + 1 << ". " << actualStep.m_tableResult;
-#endif
+                    // Fast check before calling CanAccomodate (optional: inline or optimize CanAccomodate)
+                    if (tableResult.CanAccomodate(pos, currentShape)) {
+                        tableResult.Accomodate(pos, currentShape);
+    #if defined (VERBOSE)
+                        cout << actualLevel + 1 << ". " << tableResult;
+    #endif
                         // prepare the next step
-                        if (riddle.GetLevel() + 1 < m_shapeCollections.size()) {
+                        if (actualLevel + 1 < m_shapeCollections.size()) {
                             riddle.SetNextLevel();
-                            bool justSolved = Solve(riddle);
-                            if (justSolved) {
+                            if (Solve(riddle)) {
                                 if (!m_options.CalculateAll()) {
                                     return true;
                                 }

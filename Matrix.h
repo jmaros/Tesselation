@@ -111,21 +111,25 @@ namespace LinAlg {
         return isEmpty;
     }
 
+    // Optimized CanAccomodate: minimize function calls, use references where possible.
     template <typename T, typename ST>
     inline bool Matrix<T, ST>::CanAccomodate (const Position<ST>    & pos,
                                               const Matrix<T, ST>   & mat) const
     {
-        const T     EVI{mat.m_initialValue};
-        const T     EVO{ m_initialValue };
-        const ST    ru{mat.RowSize ()};
-        const ST    cu{mat.ColSize ()};
+        const T& EVI = mat.m_initialValue;
+        const T& EVO = m_initialValue;
+        const ST ru = mat.RowSize();
+        const ST cu = mat.ColSize();
 
         for (ST row = 0; row < ru; ++row) {
-            for (ST col = 0; col < cu; ++col) {
-                Position<ST> inPos(row, col);
-                Position<ST> ouPos{pos + inPos};
-                if (Value(ouPos) != EVO && mat.Value(inPos) != EVI) {
-                    return false;
+            const Row<T>& matRow = mat.m_rows[row];
+			Position<ST> ouPos{ pos.GetRowIndex() + row, 0 };
+			for (ST col = 0; col < cu; ++col) {
+                if (matRow.Value(col) != EVI) {
+					ouPos.SetColIndex(pos.GetColIndex() + col);
+                    if (Value(ouPos) != EVO) {
+                        return false;
+                    }
                 }
             }
         }
