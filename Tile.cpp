@@ -33,13 +33,25 @@ sed -i 's/\r
 #include "ElapsedTime.h"
 
 namespace Nessie {
-    
-    // The zeros representing the excluded parts
-    // The negative numbers are placeholders for the monthes
+	// Months (eccoded as -1 .. -12)
+	constexpr int8_t Jan{  -1 };
+	constexpr int8_t Feb{  -2 };
+	constexpr int8_t Mar{  -3 };
+	constexpr int8_t Apr{  -4 };
+	constexpr int8_t Maj{  -5 };
+	constexpr int8_t Jun{  -6 };
+	constexpr int8_t Jul{  -7 };
+	constexpr int8_t Aug{  -8 };
+	constexpr int8_t Sep{  -9 };
+	constexpr int8_t Okt{ -10 };
+	constexpr int8_t Nov{ -11 };
+	constexpr int8_t Dec{ -12 };
+	// The zeros representing the excluded parts, where you cannot place any shape
+	// The Jan .. Dec constants are placeholders for the months (-1 .. -12)
     // The positive numbers specify the position of the given day on the table
     const TableLayout MainTable = {
-        {  -1,  -2,  -3,  -4,  -5,  -6,   0 },
-        {  -7,  -8,  -9, -10, -11, -12,   0 },
+        { Jan, Feb, Mar, Apr, Maj, Jun,   0 },
+        { Jul, Aug, Sep, Okt, Nov, Dec,   0 },
         {  +1,  +2,  +3,  +4,  +5,  +6,  +7 },
         {  +8,  +9, +10, +11, +12, +13, +14 },
         { +15, +16, +17, +18, +19, +20, +21 },
@@ -49,11 +61,11 @@ namespace Nessie {
 
     // The same as before, plus 100 for not used, 101 for Sunday, 102 for Monday, ...., 107 for Saturday
     const TableLayout MainTable6 = {
-        {   0,   0,   0,   0,  -5,   0,  -6,   0, 100,   0,  -7,   0,  -8,   0,   0,   0,   0 },
-        {   0,   0,   0,  -4,   0, 101,   0, 102,   0, 103,   0, 104,   0,  -9,   0,   0,   0 },
-        {   0,   0,  -3,   0, 100,   0, 105,   0, 106,   0, 107,   0, 100,   0, -10,   0,   0 },
-        {   0,  -2,   0,   1,   0,   2,   0,   3,   0,   4,   0,   5,   0,   6,   0, -11,   0 },
-        {  -1,   0,   7,   0,   8,   0,   9,   0,  10,   0,  11,   0,  12,   0,  13,   0, -12 },
+        {   0,   0,   0,   0, Maj,   0, Jun,   0, 100,   0, Jul,   0, Aug,   0,   0,   0,   0 },
+        {   0,   0,   0, Apr,   0, 101,   0, 102,   0, 103,   0, 104,   0, Sep,   0,   0,   0 },
+        {   0,   0, Mar,   0, 100,   0, 105,   0, 106,   0, 107,   0, 100,   0, Okt,   0,   0 },
+        {   0, Feb,   0,   1,   0,   2,   0,   3,   0,   4,   0,   5,   0,   6,   0, Nov,   0 },
+        { Jan,   0,   7,   0,   8,   0,   9,   0,  10,   0,  11,   0,  12,   0,  13,   0, Dec },
         {   0, 100,   0,  14,   0,  15,   0,  16,   0,  17,   0,  18,   0,  19,   0, 100,   0 },
         {   0,   0, 100,   0,  20,   0,  21,   0,  22,   0,  23,   0,  24,   0, 100,   0,   0 },
         {   0,   0,   0, 100,   0,  25,   0,  26,   0,  27,   0,  28,   0, 100,   0,   0,   0 },
