@@ -64,10 +64,5 @@
     <None Include="README.md" />
     <None Include="test.sh" />
     <None Include="test.bat" />
-    <None Include="Makefile" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="CmakeLists.txt" />
-    <Text Include="CMakeCache.txt" />
   </ItemGroup>
 </Project>

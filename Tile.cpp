@@ -46,6 +46,16 @@ namespace Nessie {
 	constexpr int8_t Okt{ -10 };
 	constexpr int8_t Nov{ -11 };
 	constexpr int8_t Dec{ -12 };
+
+	// The days of the week (101 for Sunday, 102 for Monday, ...., 107 for Saturday)
+	constexpr int8_t Sun{ 101 };
+	constexpr int8_t Mon{ 102 };
+	constexpr int8_t Tue{ 103 };
+	constexpr int8_t Wed{ 104 };
+	constexpr int8_t Thu{ 105 };
+	constexpr int8_t Fri{ 106 };
+	constexpr int8_t Sat{ 107 };
+
 	// The zeros representing the excluded parts, where you cannot place any shape
 	// The Jan .. Dec constants are placeholders for the months (-1 .. -12)
     // The positive numbers specify the position of the given day on the table
@@ -62,8 +72,8 @@ namespace Nessie {
     // The same as before, plus 100 for not used, 101 for Sunday, 102 for Monday, ...., 107 for Saturday
     const TableLayout MainTable6 = {
         {   0,   0,   0,   0, Maj,   0, Jun,   0, 100,   0, Jul,   0, Aug,   0,   0,   0,   0 },
-        {   0,   0,   0, Apr,   0, 101,   0, 102,   0, 103,   0, 104,   0, Sep,   0,   0,   0 },
-        {   0,   0, Mar,   0, 100,   0, 105,   0, 106,   0, 107,   0, 100,   0, Okt,   0,   0 },
+        {   0,   0,   0, Apr,   0, Sun,   0, Mon,   0, Tue,   0, Wed,   0, Sep,   0,   0,   0 },
+        {   0,   0, Mar,   0, 100,   0, Thu,   0, Fri,   0, Sat,   0, 100,   0, Okt,   0,   0 },
         {   0, Feb,   0,   1,   0,   2,   0,   3,   0,   4,   0,   5,   0,   6,   0, Nov,   0 },
         { Jan,   0,   7,   0,   8,   0,   9,   0,  10,   0,  11,   0,  12,   0,  13,   0, Dec },
         {   0, 100,   0,  14,   0,  15,   0,  16,   0,  17,   0,  18,   0,  19,   0, 100,   0 },
