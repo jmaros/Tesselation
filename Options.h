@@ -93,7 +93,13 @@ namespace Nessie {
                         auto scit = sco.find(optionChar);
                         if (scit == sco.end()) {
                             // has argument
-                            argStr = m_argv[++idx];
+                            if (idx + 1 < m_argv.size()) {
+                                argStr = m_argv[++idx];
+                            } else {
+                                argStr = "missing long argument";
+                                Invalidate();
+                                break;
+                            }
                         }
 
                         m_argMap[optionChar] = make_pair(++idax, argStr);
@@ -120,7 +126,14 @@ namespace Nessie {
                             argStr = latestArg.substr(idc);
                             if (argStr.empty()) {
                                 // the parameter is in a separate argument
-                                argStr = m_argv[++idx];
+                                if (idx + 1 < m_argv.size()) {
+                                    argStr = m_argv[++idx];
+                                } else {
+                                    argStr = "missing short argument";
+                                    Invalidate();
+                                    break;
+                                }
+
                             }
                             m_argMap[optionChar] = make_pair(++idax, argStr);
                             break;
