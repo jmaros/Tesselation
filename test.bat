@@ -31,8 +31,9 @@ GOTO Extension
 @SET fqn=%fd%%fp%%fn%
 @if "%CD%\"=="%~dp1" SET fqn=%fn%
 @if not exist "%fqn%%fx%" GOTO Missing
-@SET cv=c++11
+@SET cv=c++23
 @SET optargs=
+@SET optlibs=
 @SET appargs=
 @SET separator= 
 @SET opt=-O2
@@ -62,6 +63,8 @@ GOTO Extension
 @IF "%1"=="c++17"       GOTO Std
 @IF "%1"=="c++20"       GOTO Std
 @IF "%1"=="c++23"       GOTO Std
+@IF "%1"=="-l"          GOTO AddLib
+@IF "%1"=="-L"          GOTO AddLibDir
 @SET optargs=%optargs%%separator%%1
 @SET separator= 
 @GOTO Loop
@@ -75,6 +78,11 @@ GOTO Extension
 @SET opt=-O0
 @SET dln=-g2
 @SET deb=gdb
+@GOTO Loop
+:AddLib
+:AddLibDir
+@SET optlibs=%optlibs% %1 %2
+@SHIFT
 @GOTO Loop
 :Debug
 @SET opt=
