@@ -31,7 +31,7 @@ GOTO Extension
 @SET fqn=%fd%%fp%%fn%
 @if "%CD%\"=="%~dp1" SET fqn=%fn%
 @if not exist "%fqn%%fx%" GOTO Missing
-@SET cv=c++23
+@SET cv=c++20
 @SET optargs=
 @SET optlibs=
 @SET appargs=
@@ -100,7 +100,7 @@ GOTO Extension
 @SET cv=%1
 @GOTO Loop
 :Compleeted
-g++ -std=%cv% %opt% %dln% -Wall -Wextra -Wpedantic -Werror -time %optargs% %fqn%%fx% -o bin\%fn% && %deb% .\bin\%fn%%appargs%
+g++ -std=%cv% %opt% %dln% -Wall -Wextra -Wpedantic -Werror -time %optargs% %fqn%%fx% %optlibs% -o bin\%fn% && %deb% .\bin\%fn%%appargs%
 @GOTO :EOF
 :Usage
 @ECHO Usage:
@@ -112,7 +112,10 @@ g++ -std=%cv% %opt% %dln% -Wall -Wextra -Wpedantic -Werror -time %optargs% %fqn%
 @ECHO You can specify the language version by typing [-std=]c++11, c++14, c++17, c++20 or c++23.
 @ECHO You can specify the optimization level by typing -O0, -O1, -O2, or -O3.
 @ECHO You can specify the debug level by typing -g -g0 -g1, -g2, -g3 or gdb.
-@ECHO You can specify any artuments for your application after typing -args.
+@ECHO You can specify libraries to be linked for the linker by typing -l Libfilename
+@ECHO You can specify library-search-folders for the linker by typing -L LibDir
+@ECHO You can specify any arguments for your application after typing -args.
+@ECHO You can redirect the output to a log file: "test tile > testile.log 2>&1"
 @GOTO :EOF
 :Extension
 @echo "File extension must be .cpp or .cxx, the default is .cpp!"
