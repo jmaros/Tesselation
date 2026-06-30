@@ -1,5 +1,6 @@
-#! /bin/bash
-# Test, that is compile and run a c++11 program
+#!/bin/bash
+# (could sometime be /usr/bin/bash after the exclamation sign!)
+# Test, that is compile and run a c++20 program
 # *********************************************
 # *            _                              *
 # *           | | __ _ _ __   ___  ___        *
@@ -30,6 +31,8 @@ if [ "$1" == "" -o "$1" == "/?" -o "${1%%-*}" == "" -o "$1" == "--help" ]; then
   echo $  - language version by typing [-std=]c++11, c++14, ... c++23.
   echo $  - optimization level by typing -O0, -O1, -O2, or -O3.
   echo $  - debug level        by typing -g -g0 -g1, -g2, -g3, or gdb.
+  echo $  - libraries to be linked for the linker by typing -l Libfilename
+  echo $  - library-search-folders for the linker by typing -L LibDir
   echo $
 elif [ -f "$1" -o -f "$1.cpp" ]; then
   # Use filepath for file name, and remove the first parameter from the argument list:
@@ -55,8 +58,10 @@ elif [ -f "$1" -o -f "$1.cpp" ]; then
   if [ -f $pfn$ext ]; then
     if [ ! -d "bin" ]; then mkdir -p bin; fi
 
-    Language=c++11
+    Language=c++20
     Args=""
+    Libs=""
+    Libc=
 	AppArgs=
     Opt=-O2
     Dln=
@@ -67,6 +72,11 @@ elif [ -f "$1" -o -f "$1.cpp" ]; then
       if [ -n "$AppArgs" ]; then
         # collect the rermaining part for passing to the executable
         AppArgs=$(echo "$AppArgs" "$Arg")
+        continue
+      elif [ -n "$Libc" ]; then
+        # collect the rermaining part of the Library param
+        Libs=$(echo "$Libs" "$Libc" "$Arg")
+        Libc=
         continue
       elif [ $Arg == -args ]; then
         # handle the -args option, initiate the collection
@@ -101,6 +111,8 @@ elif [ -f "$1" -o -f "$1.cpp" ]; then
         Deb=gdb
       elif [[ $Arg == -O3 || $Arg == -O2 || $Arg == -O1 || $Arg == -O0 ]]; then
         Opt=$Arg
+      elif [[ $Arg == -l || $Arg == -L ]]; then
+        Libc=$Arg
       else
         Args=$(echo "$Args" "$Arg")
       fi
@@ -109,10 +121,10 @@ elif [ -f "$1" -o -f "$1.cpp" ]; then
     if [ -n "$Args" ]; then
       echo Additional options specified: "$Args"
     fi
-    echo g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror "$Args" "$pfn$ext" -o "bin/$tn" \&\&  $Deb "./bin/$tn$AppArgs"
-    g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror $Args $pfn$ext -o bin/$tn && $Deb ./bin/$tn$AppArgs
+    echo g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror "$Args" "$pfn$ext" $Libs -o "bin/$tn" \&\&  $Deb "./bin/$tn$AppArgs"
+    g++ -std=$Language $Opt $Dln -Wall -Wextra -Wpedantic -Werror $Args $pfn$ext $Libs -o bin/$tn && $Deb ./bin/$tn$AppArgs
   else
-      echo \"$pfn$ext file doesn\'t exist!\"
+    echo \"$pfn$ext file doesn\'t exist!\"
   fi
 else
   if [ "${1##*.}" == "$1" ]; then
